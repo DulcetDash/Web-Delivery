@@ -1,0 +1,71 @@
+@font-face {
+  font-family: "MoveBold";
+  src: local("MoveBold"), url(./fonts/MoveBold.otf);
+}
+@font-face {
+  font-family: "MoveMedium";
+  src: local("MoveMedium"), url(./fonts/MoveMedium.otf);
+}
+@font-face {
+  font-family: "MoveRegular";
+  src: local("MoveRegular"), url(./fonts/MoveRegular.ttf);
+}
+@font-face {
+  font-family: "MoveLight";
+  src: local("MoveLight"), url(./fonts/MoveLight.ttf);
+}
+@font-face {
+  font-family: "MoveTextBold";
+  src: local("MoveTextBold"), url(./fonts/UberMoveTextBold.otf);
+}
+@font-face {
+  font-family: "MoveTextMedium";
+  src: local("UberMoveTextMedium"), url(./fonts/UberMoveTextMedium.otf);
+}
+@font-face {
+  font-family: "MoveTextRegular";
+  src: local("UberMoveTextRegular"), url(./fonts/UberMoveTextRegular.otf);
+}
+@font-face {
+  font-family: "MoveTextLight";
+  src: local("UberMoveTextLight"), url(./fonts/UberMoveTextLight.otf);
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,197 @@
+body {
+  font-family: "MoveTextRegular", sans-serif;
+}
+
+.headerContainerSecond {
+  border: 1px solid black;
+  height: 550px;
+  margin-top: 10%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-right: 12%;
+  padding-left: 11%;
+  background-color: #d0d0d0;
+}
+
+.formContainer {
+  font-family: "MoveTextRegular", sans-serif;
+  position: relative;
+  border: 1px solid #d0d0d0;
+  width: 350px;
+  background-color: #fff;
+  height: 690px;
+  bottom: 80px;
+  padding: 15px;
+  padding-left: 25px;
+  padding-right: 25px;
+  border-radius: 3px;
+}
+
+.headerTitleContainer {
+  /* border: 1px solid black; */
+  font-family: "MoveBold", sans-serif;
+  padding-top: 10%;
+  font-size: 38px;
+  max-width: 330px;
+}
+
+.mainTitle {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 20px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  /* border: 1px solid black; */
+  width: 98.5%;
+}
+
+.loginSignupOption {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: 17px;
+  color: #0e8491;
+  cursor: pointer;
+}
+
+.formBasicInput {
+  font-family: "MoveTextRegular", sans-serif;
+  /* border: none; */
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  font-size: 16px;
+  padding: 10px;
+  width: 325px;
+  margin-bottom: 15px;
+}
+
+.formBasicSubmitBttn {
+  font-family: "MoveTextRegular", sans-serif;
+  border: none;
+  border: 1px solid #000;
+  border-radius: 3px;
+  font-size: 19px;
+  padding: 10px;
+  width: 99.4%;
+  margin-top: 30px;
+  height: 50px;
+  background-color: #000;
+  color: #fff;
+  font-family: "MoveTextBold", sans-serif;
+  cursor: pointer;
+}
+
+.termsReview {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.bodyContainer {
+  /* border: 1px solid red; */
+  height: 500px;
+  margin-top: 10%;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-top: 7%;
+  margin-bottom: 5%;
+}
+
+.optionsMaiNContainer {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-direction: row;
+  height: 250px;
+  justify-content: space-between;
+}
+
+.optionNode {
+  /* border: 1px solid red; */
+  flex: 1;
+  max-width: 300px;
+}
+
+.imageOptionInsider {
+  border: 1px solid black;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+  background-color: #d0d0d0;
+}
+
+.titleInsideOption {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: 20px;
+}
+
+.descriptionInsideOption {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.mainTitleBody {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 25px;
+  margin-bottom: 65px;
+}
+
+.footer {
+  /* border: 1px solid black; */
+  height: 150px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 10%;
+  background-color: #f0f0f0;
+}
+
+.copyrightText {
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.errorContainer {
+  /* border: 1px solid black; */
+  margin-top: 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.textWarning {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.textLoading {
+  margin-top: 65px;
+  text-align: center;
+  font-size: 15px;
+}
+
+.backButtonOnFail {
+  font-family: "MoveTextBold", sans-serif;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 60px;
+  cursor: pointer;
+}
+
+.PhoneInputInput {
+  border-color: red;
+}
+
+.formBasicInput > input {
+  border: 1px solid #fff;
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 16px;
+}
+
+.formBasicInput > input:focus {
+  border: 1px solid #fff;
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 16px;
+}

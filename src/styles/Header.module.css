@@ -1,0 +1,72 @@
+@font-face {
+  font-family: "MoveBold";
+  src: local("MoveBold"), url(../fonts/MoveBold.otf);
+}
+@font-face {
+  font-family: "MoveMedium";
+  src: local("MoveMedium"), url(../fonts/MoveMedium.otf);
+}
+@font-face {
+  font-family: "MoveRegular";
+  src: local("MoveRegular"), url(../fonts/MoveRegular.ttf);
+}
+@font-face {
+  font-family: "MoveLight";
+  src: local("MoveLight"), url(../fonts/MoveLight.ttf);
+}
+@font-face {
+  font-family: "MoveTextBold";
+  src: local("MoveTextBold"), url(../fonts/UberMoveTextBold.otf);
+}
+@font-face {
+  font-family: "MoveTextMedium";
+  src: local("UberMoveTextMedium"), url(../fonts/UberMoveTextMedium.otf);
+}
+@font-face {
+  font-family: "MoveTextRegular";
+  src: local("UberMoveTextRegular"), url(../fonts/UberMoveTextRegular.otf);
+}
+@font-face {
+  font-family: "MoveTextLight";
+  src: local("UberMoveTextLight"), url(../fonts/UberMoveTextLight.otf);
+}
+
+.headerBar {
+  font-family: "MoveTextMedium", sans-serif;
+  /* border: 1px solid black; */
+  /* background-color: red; */
+  display: flex;
+  align-items: center;
+  padding-left: 10%;
+  padding-right: 10%;
+  height: 55px;
+}
+.headerBar > div {
+  /* border: 1px solid black; */
+}
+
+.logo {
+  /* border: 1px solid black; */
+  width: 90px;
+  height: 40px;
+  margin-right: 20px;
+}
+
+.logoImg {
+  object-fit: contain;
+  width: 100px;
+  height: 50px;
+}
+
+.headerMenuName {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: medium;
+  margin-right: 3.5vmin;
+}
+
+.loginSignupContainer {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
