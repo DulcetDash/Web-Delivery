@@ -1,0 +1,190 @@
+.mainContainer {
+  /* border: 1px solid black; */
+  background-color: #fff;
+}
+
+.mainTitle {
+  /* border: 1px solid red; */
+  margin-top: 5%;
+  text-align: center;
+  font-family: "MoveBold", sans-serif;
+  font-size: 37px;
+}
+
+.subMainTitle {
+  /* border: 1px solid black; */
+  text-align: center;
+  font-size: 20px;
+  font-family: "MoveTextMedium", sans-serif;
+  margin-top: 1%;
+}
+
+.plansContainer {
+  /* border: 1px solid red; */
+  margin-top: 5%;
+  padding-left: 5%;
+  padding-right: 5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+/* Plan node */
+.recommendedBadge {
+  border: 1px solid #096ed4;
+  position: "absolute";
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #096ed4;
+  color: #fff;
+  padding: 7px;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  font-family: "MoveTextMedium", sans-serif;
+  text-align: center;
+  height: 20px;
+}
+
+.recommendedBadgeEMPTY {
+  border: 1px solid transparent;
+  position: "absolute";
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  color: #fff;
+  padding: 7px;
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  font-family: "MoveTextMedium", sans-serif;
+  text-align: center;
+  height: 20px;
+}
+
+.planNode {
+  border: 1px solid #f0f0f0;
+  flex: 1;
+  max-width: 300px;
+  padding: 15px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  border-radius: 7px;
+  -webkit-box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.14);
+  box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.14);
+}
+
+.planName {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 25px;
+  /* border: 1px solid red; */
+  text-align: center;
+}
+
+.subExplanation {
+  /* border: 1px solid black; */
+  margin: auto;
+  text-align: center;
+  font-size: 15px;
+  color: #646d74;
+  font-family: "MoveTextMedium", sans-serif;
+  margin-top: 10px;
+  margin-bottom: 35px;
+  width: 90%;
+}
+
+.feeContainer {
+  /* border: 1px solid black; */
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.feeTrue {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: 27px;
+}
+
+.subExplanationPrice {
+  font-size: 13px;
+  margin: auto;
+  color: #646d74;
+  margin-bottom: 30px;
+  width: 80%;
+  text-align: center;
+  /* border: 1px solid black; */
+  height: 45px;
+}
+
+.planICON {
+  /* border: 1px solid black; */
+  margin: auto;
+  width: 100px;
+  height: 80px;
+  background-color: #d0d0d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+.getStartedButton {
+  font-family: "MoveTextMedium", sans-serif;
+  border: none;
+  margin: auto;
+  border: 1px solid #000;
+  border-radius: 3px;
+  font-size: 19px;
+  padding: 10px;
+  width: 80%;
+  margin-top: 30px;
+  height: 30px;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.titleFeaturesList {
+  margin-bottom: 10px;
+}
+
+.featureNode {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-direction: row;
+  font-size: 17px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.icoFeatureLeft {
+  color: #3bb674;
+  width: 20px;
+  height: 20px;
+  margin-right: 3px;
+}
+
+/* Footer */
+
+.footer {
+  /* border: 1px solid black; */
+  margin-top: 15%;
+  height: 150px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 10%;
+  background-color: #f0f0f0;
+}
+
+.copyrightText {
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+}

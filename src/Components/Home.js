@@ -23,11 +23,13 @@ class Home extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.redirectBasedOnState();
+
     this.SOCKET_CORE = SOCKET_CORE;
 
     this.state = {
       shouldShowLogin: false, //If to render the login form
-      shouldShowSMSAuth: true, //Whether or not to show the SMS checking
+      shouldShowSMSAuth: false, //Whether or not to show the SMS checking
       isLoading: false, //If it's in a loading state
       hasErrorHappened: false, //If an error happened while loading
       isLoadingResendSMS: false, //Whether the resend sms is working or not.
@@ -58,7 +60,42 @@ class Home extends React.PureComponent {
     };
   }
 
+  /**
+   * ! Redirect pages based on state
+   */
+  redirectBasedOnState() {
+    if (
+      this.props.App.userData.loginData === null ||
+      this.props.App.userData.loginData === undefined ||
+      this.props.App.userData.loginData.company_fp === undefined ||
+      this.props.App.userData.loginData.company_fp === null
+    ) {
+      //stay
+    } else if (
+      this.props.App.userData.loginData.account.confirmations
+        .isPhoneConfirmed === false
+    ) {
+      //Leave like that
+    } else if (
+      this.props.App.userData.loginData.company_fp !== undefined &&
+      this.props.App.userData.loginData.account.confirmations.isPhoneConfirmed
+    ) {
+      //Move to plans
+      window.location.href = "/plans";
+    } //Stay
+    else {
+    }
+  }
+
+  //! Deprecated?
+  componentWillMount() {
+    this.redirectBasedOnState();
+  }
+
   componentDidMount() {
+    this.redirectBasedOnState();
+
+    console.log(this.props.App);
     let globalObject = this;
 
     //Handle socket Events
@@ -131,17 +168,19 @@ class Home extends React.PureComponent {
                 response.metadata.account.confirmations.isPhoneConfirmed ===
                   false
               ) {
+                globalObject.resendConfirmationSMSAgain();
                 //Phone not yet verified
                 globalObject.setState({
                   shouldShowSMSAuth: true,
+                  hasErrorHappened: false,
                 });
               }
               //? Move forward
               else {
-                alert("Move forward");
                 globalObject.setState({
                   isLoading: true,
                 });
+                window.location.href = "/plans";
               }
             }
             //An error occured
@@ -193,7 +232,7 @@ class Home extends React.PureComponent {
       "validatePhoneNumberDeliveryWeb_io-response",
       function (response) {
         console.log(response);
-        globalObject.setState({ isLoadingResendSMS: false });
+        globalObject.setState({ isLoading: false });
 
         if (
           response !== undefined &&
@@ -206,7 +245,7 @@ class Home extends React.PureComponent {
             //Do noting for now as well
             globalObject.props.UpdateLoggingData(response.metadata);
             //? Move forward
-            alert("Move forward");
+            window.location.href = "/plans";
           } //An error occured
           else {
             //Do nothing for now
@@ -224,6 +263,42 @@ class Home extends React.PureComponent {
                 hasErrorHappened: true,
               });
             }
+          }
+        }
+      }
+    );
+
+    //Handle updating the phone number on mistake
+    this.SOCKET_CORE.on(
+      "updatePhoneNumberDeliveryWeb_io-response",
+      function (response) {
+        console.log(response);
+        globalObject.setState({ isLoading: false });
+
+        if (
+          response !== undefined &&
+          response !== null &&
+          response.response !== undefined &&
+          response.response !== null
+        ) {
+          if (/successfully_updated/i.test(response.response)) {
+            //Success
+            //Do noting for now as well
+            globalObject.props.UpdateLoggingData(response.metadata);
+            //? Send new code and back to SMS auth
+            globalObject.resendConfirmationSMSAgain();
+            globalObject.setState({
+              hasErrorHappened: false,
+              shouldShowSMSAuth: true,
+            });
+          } //An error occured
+          else {
+            //Do nothing for now
+            globalObject.setState({
+              error_text_reported: `An unexpected error occured, please try again later. Or if it
+            persists please refresh this page and give it a try again.`,
+              hasErrorHappened: true,
+            });
           }
         }
       }
@@ -491,10 +566,10 @@ class Home extends React.PureComponent {
    */
   resendConfirmationSMSAgain() {
     //!DEBUG
-    this.props.App.userData.loginData = {};
-    this.props.App.userData.loginData.company_fp =
-      "27f3650a56a80a080d5326783161c2275bd4ea9a98f0b0e8d59f020f491d94cb062d4e827cfdd3397db70673a2d18a9b39696f0761f24ef540f59f059afb669d";
-    this.props.App.userData.loginData.phone = "264856997167";
+    // this.props.App.userData.loginData = {};
+    // this.props.App.userData.loginData.company_fp =
+    //   "27f3650a56a80a080d5326783161c2275bd4ea9a98f0b0e8d59f020f491d94cb062d4e827cfdd3397db70673a2d18a9b39696f0761f24ef540f59f059afb669d";
+    // this.props.App.userData.loginData.phone = "264856997167";
     //!----
 
     if (
@@ -555,6 +630,12 @@ class Home extends React.PureComponent {
    * responsible for validating the otp
    */
   validateOtp() {
+    //!DEBUG
+    // this.props.App.userData.loginData = {};
+    // this.props.App.userData.loginData.company_fp =
+    //   "27f3650a56a80a080d5326783161c2275bd4ea9a98f0b0e8d59f020f491d94cb062d4e827cfdd3397db70673a2d18a9b39696f0761f24ef540f59f059afb669d";
+    // this.props.App.userData.loginData.phone = "264856997167";
+    //!----
     try {
       if (this.state.otp !== undefined && this.state.otp.length > 0) {
         //Not empty
@@ -565,6 +646,12 @@ class Home extends React.PureComponent {
           this.props.App.userData.loginData.company_fp !== undefined
         ) {
           this.setState({ isLoading: true });
+          console.log({
+            op: "validatePhoneNumber",
+            otp: this.state.otp,
+            company_fp: this.props.App.userData.loginData.company_fp,
+            phone: this.props.App.userData.loginData.phone,
+          });
           this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
             op: "validatePhoneNumber",
             otp: this.state.otp,
@@ -578,6 +665,39 @@ class Home extends React.PureComponent {
       } //Empty otp field
       else {
         this.setState({ otp_error_color: "red" });
+      }
+    } catch (error) {
+      console.log(error);
+      this.swicthContextForms();
+    }
+  }
+
+  /**
+   * responsible for updating the changed phone number if valid
+   */
+  updatePhoneNumber() {
+    try {
+      if (
+        this.props.App.userData.loginData !== null &&
+        this.props.App.userData.loginData.phone !== undefined &&
+        this.props.App.userData.loginData.phone !== null &&
+        this.props.App.userData.loginData.company_fp !== undefined
+      ) {
+        if (isValidPhoneNumber(this.state.phone)) {
+          //Valid phone
+          this.setState({ isLoading: true });
+          this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+            op: "updatePhoneNumber",
+            company_fp: this.props.App.userData.loginData.company_fp,
+            phone: this.state.phone,
+          });
+        } //Invalid phone
+        else {
+          this.setState({ phone_error_color: "red" });
+        }
+      } //Invalid account data
+      else {
+        this.swicthContextForms();
       }
     } catch (error) {
       console.log(error);
@@ -631,7 +751,7 @@ class Home extends React.PureComponent {
                 <input
                   type="submit"
                   value="Update phone number"
-                  onClick={() => this.executeProperStateAction()}
+                  onClick={() => this.updatePhoneNumber()}
                   className={classes.formBasicSubmitBttn}
                 />
                 <br />
@@ -709,7 +829,7 @@ class Home extends React.PureComponent {
                   </div>
                 ) : (
                   <Countdown
-                    date={Date.now() + 5000}
+                    date={Date.now() + 75000}
                     renderer={this.renderer}
                   />
                 )}
@@ -996,7 +1116,7 @@ class Home extends React.PureComponent {
                   onClick={() =>
                     this.state.shouldShowSMSAuth === false
                       ? this.swicthContextForms()
-                      : this.setState({ hasErrorHappened: false })
+                      : this.setState({ hasErrorHappened: false, otp: "" })
                   }
                 >
                   <AiOutlineLeft /> Back

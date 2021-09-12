@@ -40,9 +40,29 @@
   padding-left: 10%;
   padding-right: 10%;
   height: 55px;
+  flex-direction: row;
 }
 .headerBar > div {
   /* border: 1px solid black; */
+}
+
+.customButtonRightContainer {
+  /* border: 1px solid black; */
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.trueCustButtonHeader {
+  border: 1px solid #646d74;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-family: "MoveTextMedium", sans-serif;
+  padding: 7px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .logo {
