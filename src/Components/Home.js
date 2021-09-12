@@ -32,6 +32,7 @@ class Home extends React.PureComponent {
       hasErrorHappened: false, //If an error happened while loading
       isLoadingResendSMS: false, //Whether the resend sms is working or not.
       shouldShowAccountCreated: false, //Whether or not to show when the account is created
+      shouldShowChangePhoneNumber: false, //Whether to show the changing phone number window
       firstname: "",
       lastname: "",
       email: "",
@@ -40,6 +41,7 @@ class Home extends React.PureComponent {
       industry: "",
       password: "",
       password_confirm: "",
+      otp: "",
       //...
       firstname_error_color: "#d0d0d0", //white or red when error
       lastname_error_color: "#d0d0d0",
@@ -49,6 +51,7 @@ class Home extends React.PureComponent {
       industry_error_color: "#d0d0d0",
       password_error_color: "#d0d0d0",
       password_confirm_error_color: "#d0d0d0",
+      otp_error_color: "#d0d0d0",
       //...
       error_text_reported: `An unexpected error occured, please try again later. Or if it
       persists please refresh this page and give it a try again.`,
@@ -184,6 +187,47 @@ class Home extends React.PureComponent {
         }
       }
     );
+
+    //Handle validating phone number via OTP SMS
+    this.SOCKET_CORE.on(
+      "validatePhoneNumberDeliveryWeb_io-response",
+      function (response) {
+        console.log(response);
+        globalObject.setState({ isLoadingResendSMS: false });
+
+        if (
+          response !== undefined &&
+          response !== null &&
+          response.response !== undefined &&
+          response.response !== null
+        ) {
+          if (/successfully_validated/i.test(response.response)) {
+            //Success
+            //Do noting for now as well
+            globalObject.props.UpdateLoggingData(response.metadata);
+            //? Move forward
+            alert("Move forward");
+          } //An error occured
+          else {
+            //Do nothing for now
+            if (/invalid_code/i.test(response.response)) {
+              //Wrong code
+              globalObject.setState({
+                error_text_reported: `Sorry the code that you've entered is not correct, please check through your SMS to get the valid 6-digits code sent from us, or press "Back" and send the code again, thank you.`,
+                hasErrorHappened: true,
+              });
+            } //Some other unexpected error
+            else {
+              globalObject.setState({
+                error_text_reported: `An unexpected error occured, please try again later. Or if it
+              persists please refresh this page and give it a try again.`,
+                hasErrorHappened: true,
+              });
+            }
+          }
+        }
+      }
+    );
   }
 
   /**
@@ -310,6 +354,7 @@ class Home extends React.PureComponent {
       industry_error_color: "#d0d0d0",
       password_error_color: "#d0d0d0",
       password_confirm_error_color: "#d0d0d0",
+      otp_error_color: "#d0d0d0",
       error_text_reported: `An unexpected error occured, please try again later. Or if it
       persists please refresh this page and give it a try again.`,
     });
@@ -330,6 +375,7 @@ class Home extends React.PureComponent {
       industry: "",
       password: "",
       password_confirm: "",
+      otp: "",
       firstname_error_color: "#d0d0d0", //white or red when error
       lastname_error_color: "#d0d0d0",
       email_error_color: "#d0d0d0",
@@ -345,6 +391,7 @@ class Home extends React.PureComponent {
       error_text_reported: `An unexpected error occured, please try again later. Or if it
       persists please refresh this page and give it a try again.`,
       shouldShowAccountCreated: false, //Whether or not to show when the account is created
+      shouldShowChangePhoneNumber: false, //Whether to show the changing phone number window
     });
   }
 
@@ -409,6 +456,7 @@ class Home extends React.PureComponent {
       error_text_reported: `An unexpected error occured, please try again later. Or if it
       persists please refresh this page and give it a try again.`,
       shouldShowAccountCreated: false, //Whether or not to show when the account is created
+      shouldShowChangePhoneNumber: false, //Whether to show the changing phone number window
     });
     //Show the SMS auth if has all the necessary data, else move back
     setTimeout(function () {
@@ -503,6 +551,40 @@ class Home extends React.PureComponent {
     }
   };
 
+  /**
+   * responsible for validating the otp
+   */
+  validateOtp() {
+    try {
+      if (this.state.otp !== undefined && this.state.otp.length > 0) {
+        //Not empty
+        if (
+          this.props.App.userData.loginData !== null &&
+          this.props.App.userData.loginData.phone !== undefined &&
+          this.props.App.userData.loginData.phone !== null &&
+          this.props.App.userData.loginData.company_fp !== undefined
+        ) {
+          this.setState({ isLoading: true });
+          this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+            op: "validatePhoneNumber",
+            otp: this.state.otp,
+            company_fp: this.props.App.userData.loginData.company_fp,
+            phone: this.props.App.userData.loginData.phone,
+          });
+        } //Invalid account data
+        else {
+          this.swicthContextForms();
+        }
+      } //Empty otp field
+      else {
+        this.setState({ otp_error_color: "red" });
+      }
+    } catch (error) {
+      console.log(error);
+      this.swicthContextForms();
+    }
+  }
+
   render() {
     return (
       <div>
@@ -523,7 +605,47 @@ class Home extends React.PureComponent {
                   : 690,
             }}
           >
-            {this.state.shouldShowAccountCreated ? (
+            {this.state.shouldShowChangePhoneNumber &&
+            this.state.hasErrorHappened === false ? (
+              <div className={classes.signupForm}>
+                <div className={classes.mainTitle}>
+                  <div>Change your phone number</div>
+                </div>
+                <PhoneInput
+                  defaultCountry="NA"
+                  international
+                  withCountryCallingCode
+                  countryCallingCodeEditable={false}
+                  placeholder="Enter phone number"
+                  value={this.state.phone}
+                  onChange={(value) => this.setState({ phone: value })}
+                  className={classes.formBasicInput}
+                  autocomplete="new-password"
+                  style={{ borderColor: this.state.phone_error_color }}
+                />
+                <br />
+                <div className={classes.termsReview}>
+                  You will be <strong>receiving SMS</strong> from us only
+                  related to the activities from your account.
+                </div>
+                <input
+                  type="submit"
+                  value="Update phone number"
+                  onClick={() => this.executeProperStateAction()}
+                  className={classes.formBasicSubmitBttn}
+                />
+                <br />
+                <div
+                  className={classes.backButtonOnFail}
+                  onClick={() => {
+                    this.setState({ shouldShowChangePhoneNumber: false });
+                  }}
+                >
+                  <AiOutlineLeft /> Back
+                </div>
+              </div>
+            ) : this.state.shouldShowAccountCreated &&
+              this.state.hasErrorHappened === false ? (
               <div className={classes.errorContainer}>
                 <div>
                   <AiFillShop
@@ -542,7 +664,8 @@ class Home extends React.PureComponent {
                   Next <AiOutlineRight />
                 </div>
               </div>
-            ) : this.state.shouldShowSMSAuth ? (
+            ) : this.state.shouldShowSMSAuth &&
+              this.state.hasErrorHappened === false ? (
               <div className={classes.signupForm}>
                 <div className={classes.mainTitle}>
                   <div>Confirm your phone number</div>
@@ -550,14 +673,12 @@ class Home extends React.PureComponent {
                 <input
                   type="text"
                   placeholder="Enter the 6-digits code"
-                  value={this.state.email}
+                  value={this.state.otp}
                   onChange={(event) =>
-                    this.setState({ email: event.target.value })
+                    this.setState({ otp: event.target.value })
                   }
-                  onFocus={() =>
-                    this.setState({ email_error_color: "#d0d0d0" })
-                  }
-                  style={{ borderColor: this.state.email_error_color }}
+                  onFocus={() => this.setState({ otp_error_color: "#d0d0d0" })}
+                  style={{ borderColor: this.state.otp_error_color }}
                   className={classes.formBasicInput}
                   spellCheck={false}
                   autocomplete="new-password"
@@ -595,7 +716,7 @@ class Home extends React.PureComponent {
                 <input
                   type="submit"
                   value="Next"
-                  onClick={() => this.executeProperStateAction()}
+                  onClick={() => this.validateOtp()}
                   className={classes.formBasicSubmitBttn}
                 />
                 <br />
@@ -607,6 +728,9 @@ class Home extends React.PureComponent {
                     marginTop: 30,
                     cursor: "pointer",
                   }}
+                  onClick={() =>
+                    this.setState({ shouldShowChangePhoneNumber: true })
+                  }
                 >
                   Wrong number?
                 </div>
@@ -869,7 +993,11 @@ class Home extends React.PureComponent {
                 </div>
                 <div
                   className={classes.backButtonOnFail}
-                  onClick={() => this.swicthContextForms()}
+                  onClick={() =>
+                    this.state.shouldShowSMSAuth === false
+                      ? this.swicthContextForms()
+                      : this.setState({ hasErrorHappened: false })
+                  }
                 >
                   <AiOutlineLeft /> Back
                 </div>
@@ -882,13 +1010,13 @@ class Home extends React.PureComponent {
 
         {/* Body */}
         <div className={classes.bodyContainer}>
-          <div className={classes.mainTitleBody}>Drive on our schedule</div>
+          <div className={classes.mainTitleBody}>On demand delivery</div>
           <div className={classes.optionsMaiNContainer}>
             <div className={classes.optionNode}>
               <div className={classes.imageOptionInsider}>
                 <image alt="img" src="" />
               </div>
-              <div className={classes.titleInsideOption}>Flexible income</div>
+              <div className={classes.titleInsideOption}>Flexible pricing</div>
               <div className={classes.descriptionInsideOption}>Description</div>
             </div>
             {/* 2 */}
@@ -896,7 +1024,7 @@ class Home extends React.PureComponent {
               <div className={classes.imageOptionInsider}>
                 <image alt="img" src="" />
               </div>
-              <div className={classes.titleInsideOption}>Choose your times</div>
+              <div className={classes.titleInsideOption}>Request anytime</div>
               <div className={classes.descriptionInsideOption}>Description</div>
             </div>
             {/* 3 */}
