@@ -12,6 +12,9 @@ import { parse, stringify } from "flatted";
 
 import Home from "./Components/Home";
 import PresentPlans from "./Components/Screens/PresentPlans";
+import Delivery from "./Components/Screens/Delivery";
+import Sidebar from "./Components/Sidebar/Sidebar";
+import HeaderStd from "./Components/HeaderStd/HeaderStd";
 
 export const transformCircular = createTransform(
   (inboundState, key) => stringify(inboundState),
@@ -34,10 +37,29 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <Switch>
-          <Route path="/" exact component={Home} />
-          <Route path="/plans" component={PresentPlans} />
-        </Switch>
+        <div
+          style={{
+            backgroundColor: "#f3f3f3",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            height: "100vh",
+          }}
+        >
+          <HeaderStd />
+          <div className="mainParentNode">
+            <div className="sidebar">
+              <Sidebar />
+            </div>
+            <div className="globalDisplayContent">
+              <Switch>
+                <Route path="/" exact component={Home} />
+                <Route path="/plans" component={PresentPlans} />
+                <Route path="/Delivery" component={Delivery} />
+              </Switch>
+            </div>
+          </div>
+        </div>
       </PersistGate>
     </Provider>
   );

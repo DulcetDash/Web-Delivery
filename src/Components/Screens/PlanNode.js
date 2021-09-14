@@ -6,7 +6,7 @@ const PlanNode = ({
   description = "Description",
   price = "Price",
   paymentPeriod = "per what?",
-  icon = "starter",
+  icon = "image",
   buttonTitle = "Get started now",
   priceSmallBreakdown = "breakdown of the price",
   featuresList = [
@@ -16,6 +16,7 @@ const PlanNode = ({
   ],
   marginRight = 0,
   isRecommended = false,
+  isActive = false,
 }) => {
   return (
     <div style={{ marginRight: marginRight }}>
@@ -46,7 +47,15 @@ const PlanNode = ({
         </div>
         <div className={classes.subExplanationPrice}>{priceSmallBreakdown}</div>
         <div className={classes.planICON}>{icon}</div>
-        <div className={classes.getStartedButton}>{buttonTitle}</div>
+        <div
+          className={
+            isActive
+              ? classes.getStartedButton
+              : classes.getStartedButtonInactive
+          }
+        >
+          {buttonTitle}
+        </div>
         <div className={classes.featuresList}>
           <div className={classes.titleFeaturesList}>Free access to</div>
           <div className={classes.featuresTrueMother}>

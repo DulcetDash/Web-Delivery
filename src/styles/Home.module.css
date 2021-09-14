@@ -181,7 +181,7 @@ body {
 }
 
 .PhoneInputInput {
-  border-color: red;
+  /* border-color: red; */
 }
 
 .formBasicInput > input {

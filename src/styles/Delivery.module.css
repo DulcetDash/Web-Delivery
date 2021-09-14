@@ -1,0 +1,16 @@
+.mainContainer {
+  background-color: #f3f3f3;
+  height: 100%;
+  padding: 25px;
+}
+
+.mainScreenTitle {
+  /* border: 1px solid black; */
+  font-family: "MoveBold", sans-serif;
+  font-size: 25px;
+}
+
+.contentContainer {
+  border: 1px solid red;
+  margin-top: 20px;
+}

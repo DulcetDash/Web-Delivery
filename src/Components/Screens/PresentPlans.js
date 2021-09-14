@@ -33,15 +33,17 @@ class PresentPlans extends React.PureComponent {
             price={"N$100"}
             paymentPeriod={"month"}
             marginRight={20}
+            isActive
           />
           <PlanNode
             planName={"Intermediate"}
-            description={"Grow you business with minimal setup"}
+            description={"Grow your business with minimal setup"}
             price={"N$2500"}
             priceSmallBreakdown={"50 deliveries for about N$50 per delivery."}
             paymentPeriod={"month"}
             marginRight={20}
             isRecommended
+            isActive
           />
           <PlanNode
             planName={"Pro"}
