@@ -136,7 +136,10 @@ class DeliveryNode extends React.Component {
           key={index.toString()}
           className={classes.higherOrderPrimitiveContainer}
         >
-          <div className={classes.dropOffPrimitiveContainer}>
+          <div
+            className={classes.dropOffPrimitiveContainer}
+            style={{ display: "flex", flexDirection: "column" }}
+          >
             <input
               key={index.toString()}
               type="text"
@@ -144,6 +147,30 @@ class DeliveryNode extends React.Component {
                 this.state.dropOff_destination.length > 1 ? ` ${index + 1}` : ""
               }`}
               className={classes.formBasicInput}
+              onFocus={() => {
+                this.setState({ focusedInput: index });
+              }}
+              value={
+                this.state.dropOff_destination[index] !== undefined &&
+                this.state.dropOff_destination[index] !== null &&
+                this.state.dropOff_destination[index].data !== null &&
+                this.state.dropOff_destination[index].data !== undefined &&
+                this.state.dropOff_destination[index].data.locationData !== null
+                  ? this.state.dropOff_destination[index].data.locationData
+                      .location_name
+                  : ""
+              }
+              onChange={(event) => {
+                //? Update the input field
+                let oldState = this.state.dropOff_destination;
+                oldState[index].data["locationData"] = {
+                  location_name: event.target.value,
+                };
+                //?---
+                this.setState({ dropOff_destination: oldState });
+                //?----
+                this._searchForThisQuery(event.target.value, 0);
+              }}
             />
             {index > 0 ? (
               <FiTrash2
@@ -151,6 +178,20 @@ class DeliveryNode extends React.Component {
                 className={classes.removeDropOffIco}
                 title="Remove"
               />
+            ) : null}
+
+            {/* Search */}
+            {this.state.focusedInput === index ? (
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  bottom: 63,
+                  left: 3,
+                }}
+              >
+                {this.renderSearchBar()}
+              </div>
             ) : null}
           </div>
           <div className={classes.receiverDetails}>
@@ -679,7 +720,9 @@ class DeliveryNode extends React.Component {
                     }}
                   />
                   {/* Search */}
-                  {this.renderSearchBar()}
+                  {this.state.focusedInput === -1
+                    ? this.renderSearchBar()
+                    : null}
                 </div>
                 {/* Drop locations */}
                 {this.renderDestinationinput()}
