@@ -141,12 +141,11 @@
 
 .formBasicInputClassics {
   font-family: "MoveTextRegular", sans-serif;
-  /* border: none; */
   border: 1px solid #d0d0d0;
   border-radius: 3px;
   font-size: 16px;
   padding: 10px;
-  width: 325px;
+  width: 100%;
   margin-bottom: 15px;
 }
 
@@ -282,4 +281,53 @@
   display: flex;
   flex-direction: row;
   margin-bottom: 20px;
+}
+
+/* Search */
+.pickupLocationPrimitiveContainer {
+  /* border: 1px solid black; */
+}
+
+.searchPrimitiveContainer {
+  border: 1px solid #d0d0d0;
+  position: absolute;
+  top: 48px;
+  width: 98%;
+  background-color: #fff;
+  min-height: 70px;
+  z-index: 200000;
+  -webkit-box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.14);
+  box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.14);
+  /* padding-top: 10px; */
+}
+
+.searchSingleItem {
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  flex-direction: row;
+  padding-left: 10px;
+  padding-right: 15px;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  cursor: pointer;
+}
+.searchSingleItem:hover {
+  background-color: #f3f3f3;
+}
+
+.searchedInfosTextContainer {
+  /* border: 1px solid black; */
+  margin-left: 5px;
+  flex: 1;
+}
+
+.locationNameSearched {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: 15px;
+}
+
+.detailsLocationSearched {
+  font-size: 14px;
+  margin-top: 5px;
+  color: #686767bb;
 }

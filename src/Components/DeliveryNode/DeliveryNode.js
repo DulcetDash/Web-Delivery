@@ -25,6 +25,9 @@ import Typography from "@material-ui/core/Typography";
 import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import ReactMapGL from "react-map-gl";
+import SOCKET_CORE from "../../Helper/managerNode";
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import Loader from "react-loader-spinner";
 
 class DeliveryNode extends React.Component {
   constructor(props) {
@@ -35,15 +38,70 @@ class DeliveryNode extends React.Component {
     this.props.App.userData.loginData.plans["delivery_limit"] = 2;
     //! ----------
 
+    this.SOCKET_CORE = SOCKET_CORE;
+
     this.state = {
       //Will contain all the drop off destination data as they also increase
+      pickup_destination: null,
       dropOff_destination: [
         {
           id: 1,
           data: null,
         },
       ],
+      //Will hold all the search results and display them accordingly
+      focusedInput: 0, //The input in which the search should look at
+      shouldShowSearch: true, //? Whether or not to show the search
+      loaderStateSearch: true, //?Whether to render the loader or not
+      search_querySearch: "", //! Objective search var
+      searchResults: [],
     };
+  }
+
+  componentDidMount() {
+    let globalObject = this;
+
+    //Handle socket events
+    this.SOCKET_CORE.on("getLocations-response", function (response) {
+      console.log(response);
+      //...
+      if (
+        response !== false &&
+        response.result !== undefined &&
+        response.result !== false
+      ) {
+        if (globalObject.state.search_querySearch.length !== 0) {
+          globalObject.setState({
+            searchResults: response.result.result,
+            loaderStateSearch: false,
+            shouldShowSearch: true,
+            // search_querySearch: "",
+          });
+        } //No queries to be processed
+        else {
+          globalObject.setState({
+            searchResults: [],
+            loaderStateSearch: false,
+            shouldShowSearch: false,
+            // search_querySearch: "",
+          });
+        }
+      } else {
+        //If the search results contained previous results, leave that
+        if (globalObject.state.searchResults.length > 0) {
+          globalObject.setState({
+            loaderStateSearch: false,
+            shouldShowSearch: true,
+          }); //? Stop the animation loader
+        } else {
+          globalObject.setState({
+            loaderStateSearch: false,
+            shouldShowSearch: false,
+            // search_querySearch: "",
+          }); //? Stop the animation loader
+        }
+      }
+    });
   }
 
   /***
@@ -63,6 +121,7 @@ class DeliveryNode extends React.Component {
                 receiver_name: "",
                 receiver_phone: "",
               },
+              locationData: null, //Will store up all the location data
             }
           : this.state.dropOff_destination[index].data;
 
@@ -73,7 +132,10 @@ class DeliveryNode extends React.Component {
       let receiverPhone = localData.data.receiverInfos.receiver_phone;
       //? -----
       return (
-        <div className={classes.higherOrderPrimitiveContainer}>
+        <div
+          key={index.toString()}
+          className={classes.higherOrderPrimitiveContainer}
+        >
           <div className={classes.dropOffPrimitiveContainer}>
             <input
               key={index.toString()}
@@ -402,7 +464,173 @@ class DeliveryNode extends React.Component {
     }
   }
 
+  /**
+   * Render Search results
+   */
+  renderSearchResults() {
+    if (
+      (this.state.searchResults.length > 0 ||
+        this.state.searchResults.length > 0) &&
+      this.state.shouldShowSearch
+    ) {
+      //Has some results
+      return this.state.searchResults.map((location, index) => {
+        return (
+          <div
+            key={index.toString()}
+            className={classes.searchSingleItem}
+            style={{
+              borderBottomColor:
+                index + 1 === this.state.searchResults.length
+                  ? "#fff"
+                  : "#d0d0d0",
+            }}
+            onClick={() => {
+              if (this.state.focusedInput === -1) {
+                //!Input location
+                this.state.pickup_destination.data.locationData = location;
+                //...Clear the search data
+                this.setState({
+                  searchResults: [],
+                  search_querySearch: "",
+                  shouldShowSearch: false,
+                });
+              } //? Drop off locations
+              else {
+                this.state.dropOff_destination[
+                  this.state.focusedInput
+                ].data.locationData = location;
+                //...Clear the search data
+                this.setState({
+                  searchResults: [],
+                  search_querySearch: "",
+                  shouldShowSearch: false,
+                });
+              }
+            }}
+          >
+            <AiFillEnvironment />
+            <div className={classes.searchedInfosTextContainer}>
+              <div className={classes.locationNameSearched}>
+                {location.location_name}
+              </div>
+              <div className={classes.detailsLocationSearched}>
+                {`${
+                  location.street !== undefined &&
+                  location.street !== false &&
+                  location.street !== null
+                    ? `${
+                        location.street.length > 20
+                          ? `${location.street.substring(0, 20)}.`
+                          : location.street
+                      }, `
+                    : ""
+                }${
+                  location.suburb !== undefined &&
+                  location.suburb !== false &&
+                  location.suburb !== null
+                    ? `${location.suburb}, `
+                    : ""
+                }${location.city}`}
+              </div>
+            </div>
+          </div>
+        );
+      });
+    } else {
+      return <></>;
+    }
+  }
+
+  renderSearchBar() {
+    if (
+      this.state.search_querySearch.length > 0 &&
+      this.state.shouldShowSearch
+    ) {
+      return (
+        <div className={classes.searchPrimitiveContainer}>
+          {this.state.loaderStateSearch === false ? (
+            this.renderSearchResults()
+          ) : (
+            <div
+              style={{
+                margin: "auto",
+                marginTop: "5%",
+                width: "100%",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Loader
+                type="TailSpin"
+                color="#000"
+                height={20}
+                width={20}
+                timeout={300000000} //3 secs
+              />
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      return <></>;
+    }
+  }
+
+  /**
+   * @func _searchForThisQuery()
+   * @param {*} query
+   * Responsible for launching the server request for a specific query props.App typed by the user.
+   */
+  _searchForThisQuery(query, inputFieldIndex) {
+    this.search_time_requested = new Date();
+    this.state.search_querySearch = query.trim();
+
+    if (query.length > 0) {
+      if (this.state.search_querySearch.length !== 0) {
+        //Has some query
+        //Alright
+        let requestPackage = {};
+        requestPackage.user_fp = this.props.App.userData.loginData.company_fp;
+        requestPackage.query = this.state.search_querySearch;
+        requestPackage.city = "Windhoek"; //Default city to windhoek
+        requestPackage.country = "Namibia"; //Default country to Namibia
+        //Submit to API
+        this.setState({ loaderStateSearch: true, shouldShowSearch: true });
+        this.SOCKET_CORE.emit("getLocations", requestPackage);
+      } //NO queries to process
+      else {
+        this.setState({ loaderStateSearch: false, searchResults: [] });
+      }
+    } //Empty search
+    else {
+      this.setState({ loaderStateSearch: false, searchResults: [] });
+    }
+  }
+
   render() {
+    //Initialize the input data
+    this.state.pickup_destination =
+      this.state.pickup_destination !== null
+        ? this.state.pickup_destination
+        : {};
+    this.state.pickup_destination["data"] =
+      this.state.pickup_destination === null ||
+      this.state.pickup_destination.data === null ||
+      this.state.pickup_destination.data === undefined
+        ? {
+            name_error_color: "#d0d0d0",
+            phone_error_color: "#d0d0d0",
+            receiverInfos: {
+              receiver_name: "",
+              receiver_phone: "",
+            },
+            locationData: null, //Will store up all the location data
+          }
+        : this.state.pickup_destination.data;
+
     return (
       <div className={classes.deliverNode}>
         <div className={classes.inputDataContainer}>
@@ -418,12 +646,42 @@ class DeliveryNode extends React.Component {
                 />
               </div>
               <div className={classes.locationsInputsContainer}>
-                <input
-                  type="text"
-                  placeholder="Enter pickup location"
-                  className={classes.formBasicInput}
-                />
-                <br />
+                {/* Pickup location */}
+                <div className={classes.pickupLocationPrimitiveContainer}>
+                  <input
+                    type="text"
+                    placeholder="Enter pickup location"
+                    className={classes.formBasicInput}
+                    onFocus={() => {
+                      //Update focused input index
+                      this.setState({ focusedInput: -1 });
+                    }}
+                    value={
+                      this.state.pickup_destination !== undefined &&
+                      this.state.pickup_destination !== null &&
+                      this.state.pickup_destination.data !== null &&
+                      this.state.pickup_destination.data !== undefined &&
+                      this.state.pickup_destination.data.locationData !== null
+                        ? this.state.pickup_destination.data.locationData
+                            .location_name
+                        : ""
+                    }
+                    onChange={(event) => {
+                      //? Update the input field
+                      let oldState = this.state.pickup_destination;
+                      oldState.data["locationData"] = {
+                        location_name: event.target.value,
+                      };
+                      //?---
+                      this.setState({ pickup_destination: oldState });
+                      //?----
+                      this._searchForThisQuery(event.target.value, 0);
+                    }}
+                  />
+                  {/* Search */}
+                  {this.renderSearchBar()}
+                </div>
+                {/* Drop locations */}
                 {this.renderDestinationinput()}
               </div>
             </div>
@@ -482,7 +740,7 @@ class DeliveryNode extends React.Component {
             </div>
             <div className={classes.elGlobalTripIfos}>
               <div className={classes.globalInfosPrimitiveContainer}>
-                <AiFillEnvironment className={classes.icoGlobalTripsIfos2} />
+                <FiMapPin className={classes.icoGlobalTripsIfos2} />
               </div>
               The receivers can track their deliveries.
             </div>
