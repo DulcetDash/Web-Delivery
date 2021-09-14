@@ -8,8 +8,16 @@ import {
   AiTwotoneCalculator,
   AiFillPlusCircle,
   AiTwotoneDelete,
+  AiTwotoneProject,
+  AiFillEnvironment,
 } from "react-icons/ai";
-import { FiTrash2, FiChevronDown, FiUser, FiPhone } from "react-icons/fi";
+import {
+  FiTrash2,
+  FiChevronDown,
+  FiUser,
+  FiPhone,
+  FiMapPin,
+} from "react-icons/fi";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
@@ -397,61 +405,98 @@ class DeliveryNode extends React.Component {
       <div className={classes.deliverNode}>
         <div className={classes.inputDataContainer}>
           {/* Line esthetique */}
-          <div className={classes.primitiveContainer}>
-            <div className={classes.lineSideDeco}>
-              <AiTwotoneCheckCircle className={classes.decoShapes} />
-              <div className={classes.lineAssocDeco}></div>
-              <AiTwotoneCalculator
-                className={classes.decoShapes}
-                style={{ color: "#096ED4" }}
-              />
+          <div style={{ padding: "10px", paddingTop: "20px" }}>
+            <div className={classes.primitiveContainer}>
+              <div className={classes.lineSideDeco}>
+                <AiTwotoneCheckCircle className={classes.decoShapes} />
+                <div className={classes.lineAssocDeco}></div>
+                <AiTwotoneCalculator
+                  className={classes.decoShapes}
+                  style={{ color: "#096ED4" }}
+                />
+              </div>
+              <div className={classes.locationsInputsContainer}>
+                <input
+                  type="text"
+                  placeholder="Enter pickup location"
+                  className={classes.formBasicInput}
+                />
+                <br />
+                {this.renderDestinationinput()}
+              </div>
             </div>
-            <div className={classes.locationsInputsContainer}>
-              <input
-                type="text"
-                placeholder="Enter pickup location"
-                className={classes.formBasicInput}
-              />
-              <br />
-              {this.renderDestinationinput()}
-            </div>
-          </div>
 
-          {this.props.App.userData.loginData.plans.delivery_limit !==
-          undefined ? (
-            <div
-              className={classes.addMoreDropOffBtn}
-              style={{
-                opacity:
+            {this.props.App.userData.loginData.plans.delivery_limit !==
+            undefined ? (
+              <div
+                className={classes.addMoreDropOffBtn}
+                style={{
+                  opacity:
+                    this.state.dropOff_destination.length <
+                    parseInt(
+                      this.props.App.userData.loginData.plans.delivery_limit
+                    )
+                      ? 1
+                      : 0.3,
+                }}
+                onClick={() =>
                   this.state.dropOff_destination.length <
                   parseInt(
                     this.props.App.userData.loginData.plans.delivery_limit
                   )
-                    ? 1
-                    : 0.3,
-              }}
-              onClick={() =>
-                this.state.dropOff_destination.length <
-                parseInt(this.props.App.userData.loginData.plans.delivery_limit)
-                  ? this.addAdditionalDestination()
-                  : {}
-              }
-            >
-              <AiFillPlusCircle
-                style={{
-                  color: "#0e8491",
-                  marginRight: 5,
-                  position: "relative",
-                  bottom: 1,
-                }}
-              />
-              Add additional drop off
+                    ? this.addAdditionalDestination()
+                    : {}
+                }
+              >
+                <AiFillPlusCircle
+                  style={{
+                    color: "#0e8491",
+                    marginRight: 5,
+                    position: "relative",
+                    bottom: 1,
+                  }}
+                />
+                Add additional drop off
+              </div>
+            ) : null}
+          </div>
+          <div className={classes.gloalTripInfos}>
+            <div className={classes.elGlobalTripIfos}>
+              <div className={classes.globalInfosPrimitiveContainer}>
+                <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
+              </div>
+              Will cost in total N$50.
             </div>
-          ) : null}
-          <div>global trip related infos</div>
+            <div className={classes.elGlobalTripIfos}>
+              <div className={classes.globalInfosPrimitiveContainer}>
+                <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
+              </div>
+              Will take about 7min to be delivered.
+            </div>
+            <div className={classes.elGlobalTripIfos}>
+              <div className={classes.globalInfosPrimitiveContainer}>
+                <AiFillEnvironment className={classes.icoGlobalTripsIfos2} />
+              </div>
+              The receivers can track their deliveries.
+            </div>
+          </div>
           <div className={classes.requestBtnContainer}>
-            <input type="submit" value="Request now" />
-            <input type="submit" value="Schedule for later" />
+            <input
+              type="submit"
+              value="Request now"
+              className={classes.formBasicSubmitBttnClassics}
+              style={{ marginRight: 25 }}
+            />
+            <input
+              type="submit"
+              value="Schedule for later"
+              className={classes.formBasicSubmitBttnClassics}
+              style={{
+                backgroundColor: "#d0d0d0",
+                color: "black",
+                borderColor: "#d0d0d0",
+              }}
+            />
           </div>
         </div>
         <div className={classes.mapContainer}>
