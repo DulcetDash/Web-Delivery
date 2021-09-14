@@ -207,3 +207,34 @@
   justify-content: space-between;
   width: 90%;
 }
+
+.updateReceiverInsideContainer {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.makeSameContainer {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 25px;
+}
+
+.textSideMakeSameContainer {
+  /* border: 1px solid black; */
+  margin-left: 2px;
+}
+
+.mainTitleMakeSameContainer {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: 14px;
+}
+
+.descrMakeSameContainer {
+  font-family: "MoveTextLight", sans-serif;
+  font-size: 14px;
+  margin-top: 3px;
+}

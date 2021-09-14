@@ -48,6 +48,7 @@ class DeliveryNode extends React.Component {
         this.state.dropOff_destination[index].data === null
           ? {
               expandedAccordion: false,
+              useSameAs1: false, //If to use the same receiver's values as for drop off 1
               name_error_color: "#d0d0d0",
               phone_error_color: "#d0d0d0",
               receiverInfos: {
@@ -169,6 +170,69 @@ class DeliveryNode extends React.Component {
                 </AccordionSummary>
                 <AccordionDetails>
                   <div>
+                    {/* Make same button - avoid first drop off */}
+                    {index > 0 &&
+                    this.state.dropOff_destination[0].data.receiverInfos
+                      .receiver_name.length > 0 &&
+                    isValidPhoneNumber(
+                      this.state.dropOff_destination[0].data.receiverInfos
+                        .receiver_phone
+                    ) ? (
+                      <div className={classes.makeSameContainer}>
+                        <input
+                          type="checkbox"
+                          onChange={(event) => {
+                            let newValue = event.target.checked;
+                            let currentState = this.state.dropOff_destination;
+                            //...
+                            if (
+                              newValue &&
+                              currentState[0].data.receiverInfos.receiver_name
+                                .length > 0 &&
+                              isValidPhoneNumber(
+                                currentState[0].data.receiverInfos
+                                  .receiver_phone
+                              )
+                            ) {
+                              //Valid receiver 1 infos - update
+                              currentState[
+                                index
+                              ].data.receiverInfos.receiver_name =
+                                currentState[0].data.receiverInfos.receiver_name;
+                              currentState[
+                                index
+                              ].data.receiverInfos.receiver_phone =
+                                currentState[0].data.receiverInfos.receiver_phone;
+                              //...
+                              this.setState({
+                                dropOff_destination: currentState,
+                              });
+                            } //Remove as same
+                            else {
+                              currentState[
+                                index
+                              ].data.receiverInfos.receiver_name = "";
+                              currentState[
+                                index
+                              ].data.receiverInfos.receiver_phone = "";
+                              //...
+                              this.setState({
+                                dropOff_destination: currentState,
+                              });
+                            }
+                          }}
+                        />
+                        <div className={classes.textSideMakeSameContainer}>
+                          <div className={classes.mainTitleMakeSameContainer}>
+                            Make same as 1
+                          </div>
+                          <div className={classes.descrMakeSameContainer}>
+                            Make this receiver the same as for the drop off 1.
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                    {/* Rest */}
                     <input
                       type="text"
                       placeholder="Receiver's name"
@@ -235,49 +299,51 @@ class DeliveryNode extends React.Component {
                     />
                     <br />
                     {/* Update */}
-                    <div
-                      className={
-                        classes.formBasicSubmitBttnClassicsReceiverInfos
-                      }
-                      onClick={() => {
-                        //Check that every variables is in order
-                        if (
-                          this.state.dropOff_destination[index].data
-                            .receiverInfos.receiver_name !== undefined &&
-                          this.state.dropOff_destination[
-                            index
-                          ].data.receiverInfos.receiver_name.trim().length > 0
-                        ) {
-                          //Good
+                    <div className={classes.updateReceiverInsideContainer}>
+                      <div
+                        className={
+                          classes.formBasicSubmitBttnClassicsReceiverInfos
+                        }
+                        onClick={() => {
+                          //Check that every variables is in order
                           if (
-                            isValidPhoneNumber(
-                              this.state.dropOff_destination[index].data
-                                .receiverInfos.receiver_phone
-                            )
+                            this.state.dropOff_destination[index].data
+                              .receiverInfos.receiver_name !== undefined &&
+                            this.state.dropOff_destination[
+                              index
+                            ].data.receiverInfos.receiver_name.trim().length > 0
                           ) {
-                            //All good
-                            //? Close accordion
-                            let oldState = this.state.dropOff_destination;
-                            oldState[index].data.expandedAccordion = false; //Updated
-                            //...
-                            this.setState({ dropOff_destination: oldState });
-                          } //Invalid phone
+                            //Good
+                            if (
+                              isValidPhoneNumber(
+                                this.state.dropOff_destination[index].data
+                                  .receiverInfos.receiver_phone
+                              )
+                            ) {
+                              //All good
+                              //? Close accordion
+                              let oldState = this.state.dropOff_destination;
+                              oldState[index].data.expandedAccordion = false; //Updated
+                              //...
+                              this.setState({ dropOff_destination: oldState });
+                            } //Invalid phone
+                            else {
+                              let oldState = this.state.dropOff_destination;
+                              oldState[index].data.phone_error_color = "red"; //Updated
+                              //...
+                              this.setState({ dropOff_destination: oldState });
+                            }
+                          } //Receiver name missing
                           else {
                             let oldState = this.state.dropOff_destination;
-                            oldState[index].data.phone_error_color = "red"; //Updated
+                            oldState[index].data.name_error_color = "red"; //Updated
                             //...
                             this.setState({ dropOff_destination: oldState });
                           }
-                        } //Receiver name missing
-                        else {
-                          let oldState = this.state.dropOff_destination;
-                          oldState[index].data.name_error_color = "red"; //Updated
-                          //...
-                          this.setState({ dropOff_destination: oldState });
-                        }
-                      }}
-                    >
-                      Save
+                        }}
+                      >
+                        Save
+                      </div>
                     </div>
                   </div>
                 </AccordionDetails>
