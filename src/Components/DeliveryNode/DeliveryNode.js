@@ -78,7 +78,9 @@ class DeliveryNode extends React.Component {
             <input
               key={index.toString()}
               type="text"
-              placeholder={"Enter drop off location " + (index + 1)}
+              placeholder={`Enter drop off location${
+                this.state.dropOff_destination.length > 1 ? ` ${index + 1}` : ""
+              }`}
               className={classes.formBasicInput}
             />
             {index > 0 ? (
@@ -465,13 +467,18 @@ class DeliveryNode extends React.Component {
               <div className={classes.globalInfosPrimitiveContainer}>
                 <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
               </div>
-              Will cost in total N$50.
+              Will cost in total{" "}
+              <strong style={{ width: 40, textAlign: "center" }}>N$50</strong>.
             </div>
             <div className={classes.elGlobalTripIfos}>
               <div className={classes.globalInfosPrimitiveContainer}>
                 <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
               </div>
-              Will take about 7min to be delivered.
+              Will take about
+              <strong style={{ width: 40, textAlign: "center" }}>
+                7min
+              </strong>{" "}
+              to be delivered.
             </div>
             <div className={classes.elGlobalTripIfos}>
               <div className={classes.globalInfosPrimitiveContainer}>
