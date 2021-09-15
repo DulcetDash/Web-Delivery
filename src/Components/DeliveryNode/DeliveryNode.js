@@ -10,6 +10,7 @@ import {
   AiTwotoneDelete,
   AiTwotoneProject,
   AiFillEnvironment,
+  AiFillTag,
 } from "react-icons/ai";
 import {
   FiTrash2,
@@ -55,6 +56,8 @@ class DeliveryNode extends React.Component {
       loaderStateSearch: true, //?Whether to render the loader or not
       search_querySearch: "", //! Objective search var
       searchResults: [],
+      shoudAllowRequest: false, //Whether or not to allow trips based on the data validity: inputs & fare estimation
+      fareETAEstimations: {}, //Will hold all the fare and ETA dynaimcally generation on user actions
     };
   }
 
@@ -102,6 +105,45 @@ class DeliveryNode extends React.Component {
         }
       }
     });
+
+    /**
+     * GET FARE ESTIMATION LIST FOR ALL THE RELEVANTS RIDES
+     * @event: getPricingForRideorDelivery
+     * ? Responsible for getting the list of fare estimates based on the user-selected parameters
+     * ? from the pricing service.
+     * ! If invalid fare received, try again - leave that to the initiated interval persister.
+     */
+    this.SOCKET_CORE.on(
+      "getPricingForRideorDelivery-response",
+      function (response) {
+        console.log(response);
+        if (response !== false && response.response === undefined) {
+          //Estimates computed
+          //Convert to object
+          if (typeof response === String) {
+            try {
+              response = JSON.parse(response);
+              //globalObject.props.App.pricingVariables.didPricingReceivedFromServer = true; //!Stop the estimates fetcher
+            } catch (error) {
+              response = response;
+            }
+          } //Try to parse
+          else {
+            try {
+              response = JSON.parse(response);
+              //globalObject.props.App.pricingVariables.didPricingReceivedFromServer = true; //!Stop the estimates fetcher
+            } catch (error) {
+              response = response;
+            }
+          }
+        }
+        //! No valid estimates due to a problem, try again
+        else {
+          //? Force the estimates try again.
+          //globalObject.getFareEstimation();
+        }
+      }
+    );
   }
 
   /***
@@ -506,6 +548,83 @@ class DeliveryNode extends React.Component {
   }
 
   /**
+   * Responsible for evaluating and computing the fares based on valid data.
+   */
+  getFareEstimationOnValidData() {
+    //Check if all the pickup and drop off are valid
+    let areDataValid = false; //False by default
+    //? Check the pickup location
+    areDataValid =
+      this.state.pickup_destination.data.locationData === null ||
+      this.state.pickup_destination.data.locationData === undefined ||
+      this.state.pickup_destination.data.locationData.coordinates ===
+        undefined ||
+      this.state.pickup_destination.data.locationData.coordinates === null
+        ? false
+        : true;
+    //? Check the drop off location
+    let invalidDropOff = this.state.dropOff_destination.filter((location) => {
+      return (
+        location.data.locationData === null ||
+        location.data.locationData === undefined ||
+        location.data.locationData.coordinates === undefined ||
+        location.data.locationData.coordinates === null
+      );
+    });
+    //...add in the data for the drop off
+    areDataValid = areDataValid && (invalidDropOff.length > 0 ? false : true);
+
+    console.log(`Are data valid : ${areDataValid}`);
+    if (areDataValid) {
+      //? Get the fare
+      // {
+      //     location_id: 651035941,
+      //     location_name: "Sesriem Street",
+      //     coordinates: [17.1025078, -22.6212097],
+      //     averageGeo: -11.037478099999998,
+      //     city: "Windhoek",
+      //     street: false,
+      //     state: "Khomas Region",
+      //     country: "Namibia",
+      //     query: "Ses",
+      //   }
+
+      let deliveryPricingInputDataRaw = {
+        user_fingerprint: this.props.App.userData.loginData.company_fp,
+        connectType: "ConnectUs",
+        country: "Namibia",
+        isAllGoingToSameDestination: false,
+        isGoingUntilHome: false,
+        naturePickup: "PrivateLocation",
+        passengersNo: 1,
+        rideType: "DELIVERY",
+        timeScheduled: "now",
+        pickupData: this.state.pickup_destination.data.locationData,
+        destinationData: {
+          passenger1Destination: false,
+          passenger2Destination: false,
+          passenger3Destination: false,
+          passenger4Destination: false,
+        },
+      };
+      //Complete the destination data
+      this.state.dropOff_destination.map((location, index) => {
+        let keyIndex = `passenger${index + 1}Destination`;
+        //...
+        deliveryPricingInputDataRaw.destinationData[keyIndex] =
+          location.data.locationData;
+      });
+      //...
+      console.log(deliveryPricingInputDataRaw);
+      //..ask
+      this.SOCKET_CORE.emit(
+        "getPricingForRideorDelivery",
+        deliveryPricingInputDataRaw
+      );
+    }
+  }
+
+  /**
    * Render Search results
    */
   renderSearchResults() {
@@ -530,6 +649,8 @@ class DeliveryNode extends React.Component {
               if (this.state.focusedInput === -1) {
                 //!Input location
                 this.state.pickup_destination.data.locationData = location;
+                //Call the fare estimator
+                this.getFareEstimationOnValidData();
                 //...Clear the search data
                 this.setState({
                   searchResults: [],
@@ -541,6 +662,8 @@ class DeliveryNode extends React.Component {
                 this.state.dropOff_destination[
                   this.state.focusedInput
                 ].data.locationData = location;
+                //Call the fare estimator
+                this.getFareEstimationOnValidData();
                 //...Clear the search data
                 this.setState({
                   searchResults: [],
@@ -639,7 +762,13 @@ class DeliveryNode extends React.Component {
         requestPackage.city = "Windhoek"; //Default city to windhoek
         requestPackage.country = "Namibia"; //Default country to Namibia
         //Submit to API
-        this.setState({ loaderStateSearch: true, shouldShowSearch: true });
+        //! Disable the ability to request temporarily as well
+        this.setState({
+          loaderStateSearch: true,
+          shouldShowSearch: true,
+          shoudAllowRequest: false,
+        });
+        console.log("Locked request");
         this.SOCKET_CORE.emit("getLocations", requestPackage);
       } //NO queries to process
       else {
@@ -718,6 +847,7 @@ class DeliveryNode extends React.Component {
                       //?----
                       this._searchForThisQuery(event.target.value, 0);
                     }}
+                    style={{ position: "relative", left: "3px" }}
                   />
                   {/* Search */}
                   {this.state.focusedInput === -1
@@ -781,30 +911,48 @@ class DeliveryNode extends React.Component {
               </strong>{" "}
               to be delivered.
             </div>
-            <div className={classes.elGlobalTripIfos}>
+          </div>
+          <div className={classes.requestBtnContainer}>
+            <div className={classes.elGlobalTripIfos2} style={{ fontSize: 13 }}>
               <div className={classes.globalInfosPrimitiveContainer}>
-                <FiMapPin className={classes.icoGlobalTripsIfos2} />
+                <AiFillTag className={classes.icoGlobalTripsIfos2} />
               </div>
               The receivers can track their deliveries.
             </div>
-          </div>
-          <div className={classes.requestBtnContainer}>
-            <input
-              type="submit"
-              value="Request now"
-              className={classes.formBasicSubmitBttnClassics}
-              style={{ marginRight: 25 }}
-            />
-            <input
-              type="submit"
-              value="Schedule for later"
-              className={classes.formBasicSubmitBttnClassics}
-              style={{
-                backgroundColor: "#d0d0d0",
-                color: "black",
-                borderColor: "#d0d0d0",
-              }}
-            />
+            <div
+              style={{ display: "flex", flexDirection: "row", marginTop: 20 }}
+            >
+              <input
+                type="submit"
+                value="Request now"
+                className={classes.formBasicSubmitBttnClassics}
+                style={{
+                  marginRight: 25,
+                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                }}
+                onClick={() =>
+                  this.state.shoudAllowRequest === false
+                    ? {}
+                    : console.log("Request for delivery")
+                }
+              />
+              <input
+                type="submit"
+                value="Schedule for later"
+                className={classes.formBasicSubmitBttnClassics}
+                style={{
+                  backgroundColor: "#d0d0d0",
+                  color: "black",
+                  borderColor: "#d0d0d0",
+                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                }}
+                onClick={() =>
+                  this.state.shoudAllowRequest === false
+                    ? {}
+                    : console.log("Request for Scheduled delivery")
+                }
+              />
+            </div>
           </div>
         </div>
         <div className={classes.mapContainer}>

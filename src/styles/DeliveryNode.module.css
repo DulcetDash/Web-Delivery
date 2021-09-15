@@ -1,5 +1,5 @@
 .deliverNode {
-  border: 1px solid blue;
+  /* border: 1px solid blue; */
   display: flex;
   flex-direction: row;
   min-height: 400px;
@@ -270,6 +270,16 @@
   margin-bottom: 5px;
 }
 
+.elGlobalTripIfos2 {
+  /* border: 1px solid black; */
+  font-family: "MoveTextLight", sans-serif;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
 .globalInfosPrimitiveContainer {
   /* border: 1px solid black; */
   width: 10px;
@@ -280,7 +290,7 @@
   /* border: 1px solid black; */
   padding: 10px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   margin-bottom: 20px;
 }
 
