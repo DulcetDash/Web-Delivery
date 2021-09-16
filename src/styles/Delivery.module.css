@@ -1,6 +1,6 @@
 .mainContainer {
   background-color: #f3f3f3;
-  height: 100%;
+  height: 90%;
   padding: 25px;
 }
 
@@ -13,4 +13,37 @@
 .contentContainer {
   /* border: 1px solid red; */
   margin-top: 20px;
+}
+
+.formBasicButton {
+  font-family: "MoveTextRegular", sans-serif;
+  border: 1px solid #096ed4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  padding: 10px;
+  height: 20px;
+  background-color: #096ed4;
+  color: #fff;
+  font-family: "MoveTextBold", sans-serif;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.mainTitleNotice {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 17px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.mainMessageNotice {
+  /* border: 1px solid black; */
+  width: 50%;
+  text-align: center;
+  margin-bottom: 40px;
 }

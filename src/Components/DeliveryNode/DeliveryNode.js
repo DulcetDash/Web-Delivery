@@ -22,13 +22,41 @@ import {
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Typography from "@material-ui/core/Typography";
 import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import ReactMapGL from "react-map-gl";
+import ReactMapGL, {
+  GeolocateControl,
+  Marker,
+  WebMercatorViewport,
+} from "react-map-gl";
 import SOCKET_CORE from "../../Helper/managerNode";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
+import PolylineOverlay from "../../Helper/PolylineOverlay";
+
+const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
+  c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
+  C20.1,15.8,20.2,15.8,20.2,15.7z`;
+
+const SIZE = 20;
+
+const applyToArray = (func, array) => func.apply(Math, array);
+const getBoundsForPoints = (points) => {
+  // Calculate corner values of bounds
+  const pointsLong = points.map((point) => point.longitude);
+  const pointsLat = points.map((point) => point.latitude);
+  const cornersLongLat = [
+    [applyToArray(Math.min, pointsLong), applyToArray(Math.min, pointsLat)],
+    [applyToArray(Math.max, pointsLong), applyToArray(Math.max, pointsLat)],
+  ];
+  // Use WebMercatorViewport to get center longitude/latitude and zoom
+  const viewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+  }).fitBounds(cornersLongLat, { padding: 200 }); // Can also use option: offset: [0, -100]
+  const { longitude, latitude, zoom } = viewport;
+  return { longitude, latitude, zoom };
+};
 
 class DeliveryNode extends React.Component {
   constructor(props) {
@@ -58,6 +86,13 @@ class DeliveryNode extends React.Component {
       searchResults: [],
       shoudAllowRequest: false, //Whether or not to allow trips based on the data validity: inputs & fare estimation
       fareETAEstimations: {}, //Will hold all the fare and ETA dynaimcally generation on user actions
+      isLoadingForFare: false, //Whether or not the fare is being computed
+      //....
+      latitude: -22.575694, //User latitude
+      longitude: 17.083251, //User longitude
+      zoom: 13, //Map zoom
+      //...
+      customFitboundsCoords: {}, //Will contain the lat, long and zoom
     };
   }
 
@@ -66,7 +101,6 @@ class DeliveryNode extends React.Component {
 
     //Handle socket events
     this.SOCKET_CORE.on("getLocations-response", function (response) {
-      console.log(response);
       //...
       if (
         response !== false &&
@@ -116,24 +150,49 @@ class DeliveryNode extends React.Component {
     this.SOCKET_CORE.on(
       "getPricingForRideorDelivery-response",
       function (response) {
-        console.log(response);
         if (response !== false && response.response === undefined) {
           //Estimates computed
           //Convert to object
           if (typeof response === String) {
             try {
               response = JSON.parse(response);
-              //globalObject.props.App.pricingVariables.didPricingReceivedFromServer = true; //!Stop the estimates fetcher
+              let previousFareData = globalObject.state.fareETAEstimations;
+              previousFareData["fareData"] = response;
+              //...
+              globalObject.setState({
+                isLoadingForFare: false,
+                fareETAEstimations: previousFareData,
+              });
             } catch (error) {
               response = response;
+              let previousFareData = globalObject.state.fareETAEstimations;
+              previousFareData["fareData"] = response;
+              //...
+              globalObject.setState({
+                isLoadingForFare: false,
+                fareETAEstimations: previousFareData,
+              });
             }
           } //Try to parse
           else {
             try {
               response = JSON.parse(response);
-              //globalObject.props.App.pricingVariables.didPricingReceivedFromServer = true; //!Stop the estimates fetcher
+              let previousFareData = globalObject.state.fareETAEstimations;
+              previousFareData["fareData"] = response;
+              //...
+              globalObject.setState({
+                isLoadingForFare: false,
+                fareETAEstimations: previousFareData,
+              });
             } catch (error) {
               response = response;
+              let previousFareData = globalObject.state.fareETAEstimations;
+              previousFareData["fareData"] = response;
+              //...
+              globalObject.setState({
+                isLoadingForFare: false,
+                fareETAEstimations: previousFareData,
+              });
             }
           }
         }
@@ -141,6 +200,10 @@ class DeliveryNode extends React.Component {
         else {
           //? Force the estimates try again.
           //globalObject.getFareEstimation();
+          globalObject.setState({
+            isLoadingForFare: false,
+            fareETAEstimations: {},
+          });
         }
       }
     );
@@ -574,21 +637,8 @@ class DeliveryNode extends React.Component {
     //...add in the data for the drop off
     areDataValid = areDataValid && (invalidDropOff.length > 0 ? false : true);
 
-    console.log(`Are data valid : ${areDataValid}`);
     if (areDataValid) {
       //? Get the fare
-      // {
-      //     location_id: 651035941,
-      //     location_name: "Sesriem Street",
-      //     coordinates: [17.1025078, -22.6212097],
-      //     averageGeo: -11.037478099999998,
-      //     city: "Windhoek",
-      //     street: false,
-      //     state: "Khomas Region",
-      //     country: "Namibia",
-      //     query: "Ses",
-      //   }
-
       let deliveryPricingInputDataRaw = {
         user_fingerprint: this.props.App.userData.loginData.company_fp,
         connectType: "ConnectUs",
@@ -596,7 +646,7 @@ class DeliveryNode extends React.Component {
         isAllGoingToSameDestination: false,
         isGoingUntilHome: false,
         naturePickup: "PrivateLocation",
-        passengersNo: 1,
+        passengersNo: this.state.dropOff_destination.length,
         rideType: "DELIVERY",
         timeScheduled: "now",
         pickupData: this.state.pickup_destination.data.locationData,
@@ -615,7 +665,8 @@ class DeliveryNode extends React.Component {
           location.data.locationData;
       });
       //...
-      console.log(deliveryPricingInputDataRaw);
+      //? Activate the fare loader
+      this.setState({ isLoadingForFare: true });
       //..ask
       this.SOCKET_CORE.emit(
         "getPricingForRideorDelivery",
@@ -671,6 +722,8 @@ class DeliveryNode extends React.Component {
                   shouldShowSearch: false,
                 });
               }
+              //? Call recenter map estimator
+              this.recenterMapEstimator();
             }}
           >
             <AiFillEnvironment />
@@ -767,8 +820,9 @@ class DeliveryNode extends React.Component {
           loaderStateSearch: true,
           shouldShowSearch: true,
           shoudAllowRequest: false,
+          fareETAEstimations: {},
         });
-        console.log("Locked request");
+
         this.SOCKET_CORE.emit("getLocations", requestPackage);
       } //NO queries to process
       else {
@@ -777,6 +831,130 @@ class DeliveryNode extends React.Component {
     } //Empty search
     else {
       this.setState({ loaderStateSearch: false, searchResults: [] });
+    }
+  }
+
+  /**
+   * Render pickup marker
+   */
+  renderPickupMarker() {
+    if (
+      this.state.pickup_destination !== null &&
+      this.state.pickup_destination.data !== undefined &&
+      this.state.pickup_destination.data.locationData !== null &&
+      this.state.pickup_destination.data.locationData.coordinates !== undefined
+    ) {
+      return (
+        <Marker
+          latitude={
+            this.state.pickup_destination.data.locationData.coordinates[0]
+          }
+          longitude={
+            this.state.pickup_destination.data.locationData.coordinates[1]
+          }
+          offsetLeft={-20}
+          offsetTop={-10}
+        >
+          <svg
+            height={25}
+            viewBox="0 0 24 24"
+            style={{
+              cursor: "pointer",
+              fill: "#096ED4",
+              stroke: "none",
+              transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
+            }}
+          >
+            <path d={ICON} />
+          </svg>
+        </Marker>
+      );
+    } else {
+      return <></>;
+    }
+  }
+
+  /**
+   * Render drop off marker
+   */
+  renderDropoffMarker() {
+    return this.state.dropOff_destination.map((location) => {
+      if (
+        location.data !== undefined &&
+        location.data.locationData !== null &&
+        location.data.locationData.coordinates !== undefined
+      ) {
+        return (
+          <Marker
+            latitude={location.data.locationData.coordinates[0]}
+            longitude={location.data.locationData.coordinates[1]}
+            offsetLeft={-20}
+            offsetTop={-10}
+          >
+            <svg
+              height={25}
+              viewBox="0 0 24 24"
+              style={{
+                cursor: "pointer",
+                fill: "red",
+                stroke: "none",
+                transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
+              }}
+            >
+              <path d={ICON} />
+            </svg>
+          </Marker>
+        );
+      } else {
+        return <></>;
+      }
+    });
+  }
+
+  /**
+   * Responsible for determining of the map should be recentered or rezoomed to fit all the coords as bounds
+   */
+  recenterMapEstimator() {
+    let pickupPoint =
+      this.state.pickup_destination !== null &&
+      this.state.pickup_destination.data !== undefined &&
+      this.state.pickup_destination.data.locationData !== null &&
+      this.state.pickup_destination.data.locationData.coordinates !== undefined
+        ? {
+            latitude:
+              this.state.pickup_destination.data.locationData.coordinates[0],
+            longitude:
+              this.state.pickup_destination.data.locationData.coordinates[1],
+          }
+        : false;
+
+    let dropOffPoints = this.state.dropOff_destination.map((location) => {
+      return location.data !== undefined &&
+        location.data.locationData !== null &&
+        location.data.locationData.coordinates !== undefined
+        ? {
+            latitude: location.data.locationData.coordinates[0],
+            longitude: location.data.locationData.coordinates[1],
+          }
+        : false;
+    });
+    //...
+    let areValidForFitBounds =
+      dropOffPoints.filter((el) => el !== false).length > 0 &&
+      pickupPoint !== false;
+    //...
+    console.log(pickupPoint);
+    console.log(dropOffPoints);
+    console.log(`Are valid for bounds: ${areValidForFitBounds}`);
+
+    if (areValidForFitBounds) {
+      dropOffPoints.push(pickupPoint);
+      //..
+      let pointsBundle = dropOffPoints;
+      console.log(getBoundsForPoints(pointsBundle));
+      this.setState({
+        customFitboundsCoords: getBoundsForPoints(pointsBundle),
+      });
     }
   }
 
@@ -895,21 +1073,58 @@ class DeliveryNode extends React.Component {
           </div>
           <div className={classes.gloalTripInfos}>
             <div className={classes.elGlobalTripIfos}>
-              <div className={classes.globalInfosPrimitiveContainer}>
-                <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
-              </div>
-              Will cost in total{" "}
-              <strong style={{ width: 40, textAlign: "center" }}>N$50</strong>.
+              {this.state.fareETAEstimations.fareData !== undefined &&
+              this.state.isLoadingForFare === false ? (
+                <>
+                  <div className={classes.globalInfosPrimitiveContainer}>
+                    <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
+                  </div>
+                  Estimated fare{" "}
+                  <strong style={{ position: "relative", marginLeft: 5 }}>
+                    {this.state.fareETAEstimations.fareData.map((fare) => {
+                      if (/carDelivery/i.test(fare.car_type)) {
+                        return `N$${fare.base_fare}`;
+                      }
+                    })}
+                  </strong>
+                  .
+                </>
+              ) : this.state.isLoadingForFare ? (
+                <div
+                  style={{
+                    // border: "1px solid black",
+                    display: "flex",
+                    flexDirection: "row",
+                    marginBottom: 5,
+                  }}
+                >
+                  <Loader
+                    type="TailSpin"
+                    color="#000"
+                    height={15}
+                    width={15}
+                    timeout={300000000} //3 secs
+                  />
+                  <span
+                    style={{
+                      position: "relative",
+                      marginLeft: 4,
+                      color: "#0e8491",
+                    }}
+                  >
+                    Estimating your fare...
+                  </span>
+                </div>
+              ) : null}
             </div>
             <div className={classes.elGlobalTripIfos}>
               <div className={classes.globalInfosPrimitiveContainer}>
                 <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
               </div>
-              Will take about
-              <strong style={{ width: 40, textAlign: "center" }}>
+              ETA
+              <strong style={{ position: "relative", marginLeft: 5 }}>
                 7min
-              </strong>{" "}
-              to be delivered.
+              </strong>
             </div>
           </div>
           <div className={classes.requestBtnContainer}>
@@ -959,14 +1174,91 @@ class DeliveryNode extends React.Component {
           <ReactMapGL
             width={"100%"}
             height={"100%"}
-            latitude={-22.575694}
-            longitude={17.083251}
-            zoom={13}
+            latitude={
+              this.state.customFitboundsCoords.latitude !== undefined &&
+              this.state.customFitboundsCoords.longitude !== undefined
+                ? this.state.customFitboundsCoords.latitude
+                : this.state.pickup_destination !== null &&
+                  this.state.pickup_destination.data !== undefined &&
+                  this.state.pickup_destination.data.locationData !== null &&
+                  this.state.pickup_destination.data.locationData
+                    .coordinates !== undefined
+                ? this.state.pickup_destination.data.locationData.coordinates[0]
+                : this.state.latitude
+            }
+            longitude={
+              this.state.customFitboundsCoords.latitude !== undefined &&
+              this.state.customFitboundsCoords.longitude !== undefined
+                ? this.state.customFitboundsCoords.longitude
+                : this.state.pickup_destination !== null &&
+                  this.state.pickup_destination.data !== undefined &&
+                  this.state.pickup_destination.data.locationData !== null &&
+                  this.state.pickup_destination.data.locationData
+                    .coordinates !== undefined
+                ? this.state.pickup_destination.data.locationData.coordinates[1]
+                : this.state.longitude
+            }
+            zoom={
+              this.state.customFitboundsCoords.latitude !== undefined &&
+              this.state.customFitboundsCoords.longitude !== undefined &&
+              this.state.customFitboundsCoords.zoom
+                ? this.state.customFitboundsCoords.zoom
+                : this.state.zoom
+            }
             mapStyle={"mapbox://styles/mapbox/streets-v11"}
             mapboxApiAccessToken={
               "pk.eyJ1IjoiZG9taW5pcXVla3R0IiwiYSI6ImNrYXg0M3gyNDAybDgyem81cjZuMXp4dzcifQ.PpW6VnORUHYSYqNCD9n6Yg"
             }
-          />
+            onViewportChange={(newArgs) => {
+              //   console.log(newArgs);
+              this.setState({
+                zoom: newArgs.zoom,
+              });
+            }}
+            onViewStateChange={(newArgs) => {
+              //   console.log(newArgs);
+            }}
+            asyncRender={true}
+            dragPan={true}
+            scrollZoom={true}
+          >
+            <GeolocateControl
+              style={{
+                top: 15,
+                left: 15,
+              }}
+              positionOptions={{ enableHighAccuracy: true }}
+              trackUserLocation={true}
+              showAccuracyCircle={false}
+              auto
+              onGeolocate={(position) => {
+                if (
+                  position.coords !== undefined &&
+                  position.coords !== null &&
+                  position.coords.latitude !== undefined &&
+                  position.coords.longitude !== undefined
+                ) {
+                  this.setState({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                  });
+                }
+              }}
+            />
+            {this.renderPickupMarker()}
+            {this.renderDropoffMarker()}
+            <PolylineOverlay
+              points={[
+                [-22.5654531, 17.0809507],
+                [-22.5685244, 17.0818734],
+                [-22.5692575, 17.0821095],
+                // [17.0819807, -22.5714965],
+                // [17.0816159, -22.5725665],
+                // [17.081058, -22.5738742],
+                // [17.0808434, -22.5747658],
+              ]}
+            />
+          </ReactMapGL>
         </div>
       </div>
     );
