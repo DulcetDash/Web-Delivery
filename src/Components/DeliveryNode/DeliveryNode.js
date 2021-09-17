@@ -41,7 +41,8 @@ const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,
 const SIZE = 20;
 
 const applyToArray = (func, array) => func.apply(Math, array);
-const getBoundsForPoints = (points) => {
+const getBoundsForPoints = (points, mapPrimitiveDimensionsObj) => {
+  console.log(mapPrimitiveDimensionsObj);
   // Calculate corner values of bounds
   const pointsLong = points.map((point) => point.longitude);
   const pointsLat = points.map((point) => point.latitude);
@@ -51,9 +52,9 @@ const getBoundsForPoints = (points) => {
   ];
   // Use WebMercatorViewport to get center longitude/latitude and zoom
   const viewport = new WebMercatorViewport({
-    width: 800,
-    height: 600,
-  }).fitBounds(cornersLongLat, { padding: 200 }); // Can also use option: offset: [0, -100]
+    width: mapPrimitiveDimensionsObj.width,
+    height: mapPrimitiveDimensionsObj.height,
+  }).fitBounds(cornersLongLat, { padding: 50 }); // Can also use option: offset: [0, -100]
   const { longitude, latitude, zoom } = viewport;
   return { longitude, latitude, zoom };
 };
@@ -164,6 +165,7 @@ class DeliveryNode extends React.Component {
               globalObject.setState({
                 isLoadingForFare: false,
                 fareETAEstimations: previousFareData,
+                shoudAllowRequest: true,
               });
             } catch (error) {
               response = response;
@@ -173,6 +175,7 @@ class DeliveryNode extends React.Component {
               globalObject.setState({
                 isLoadingForFare: false,
                 fareETAEstimations: previousFareData,
+                shoudAllowRequest: true,
               });
             }
           } //Try to parse
@@ -185,6 +188,7 @@ class DeliveryNode extends React.Component {
               globalObject.setState({
                 isLoadingForFare: false,
                 fareETAEstimations: previousFareData,
+                shoudAllowRequest: true,
               });
             } catch (error) {
               response = response;
@@ -194,6 +198,7 @@ class DeliveryNode extends React.Component {
               globalObject.setState({
                 isLoadingForFare: false,
                 fareETAEstimations: previousFareData,
+                shoudAllowRequest: true,
               });
             }
           }
@@ -205,6 +210,7 @@ class DeliveryNode extends React.Component {
           globalObject.setState({
             isLoadingForFare: false,
             fareETAEstimations: {},
+            shoudAllowRequest: false,
           });
         }
       }
@@ -216,7 +222,6 @@ class DeliveryNode extends React.Component {
     this.SOCKET_CORE.on(
       "getRoute_to_destinationSnapshot-response",
       function (response) {
-        console.log(response);
         let previousSnapshots = globalObject.state.snapshotsToDestination;
         previousSnapshots.push(response);
         //Remove all zero distances
@@ -604,7 +609,10 @@ class DeliveryNode extends React.Component {
   removeGivenDropOffLocation(index) {
     let currentArr = this.state.dropOff_destination;
     currentArr.splice(index, 1);
-    this.setState({ dropOff_destination: currentArr });
+    this.setState({
+      dropOff_destination: currentArr,
+      shoudAllowRequest: false,
+    });
     //? Get the new prices
     this.getFareEstimationOnValidData();
     //? Call recenter map estimator
@@ -629,7 +637,10 @@ class DeliveryNode extends React.Component {
       //..
       let currentArr = this.state.dropOff_destination;
       currentArr.push(dropOffModel);
-      this.setState({ dropOff_destination: currentArr });
+      this.setState({
+        dropOff_destination: currentArr,
+        shoudAllowRequest: false,
+      });
       this.forceUpdate();
     } //Limit reached
     else {
@@ -693,7 +704,11 @@ class DeliveryNode extends React.Component {
       });
       //...
       //? Activate the fare loader
-      this.setState({ isLoadingForFare: true });
+      this.setState({
+        isLoadingForFare: true,
+        fareETAEstimations: {},
+        shoudAllowRequest: false,
+      });
       //..ask
       this.SOCKET_CORE.emit(
         "getPricingForRideorDelivery",
@@ -941,8 +956,6 @@ class DeliveryNode extends React.Component {
    * Responsible for determining of the map should be recentered or rezoomed to fit all the coords as bounds
    */
   recenterMapEstimator() {
-    let globalObject = this;
-
     let pickupPoint =
       this.state.pickup_destination !== null &&
       this.state.pickup_destination.data !== undefined &&
@@ -979,16 +992,19 @@ class DeliveryNode extends React.Component {
       let pointsBundle = dropOffPoints;
       pointsBundle.push(pickupPoint);
       //..
-      console.log(getBoundsForPoints(pointsBundle));
       this.setState({
-        customFitboundsCoords: getBoundsForPoints(pointsBundle),
+        customFitboundsCoords: getBoundsForPoints(
+          pointsBundle,
+          this.refs.mapPrimitiveContainer.getBoundingClientRect()
+        ),
         snapshotsToDestination: [],
+        isLoadingEta: true,
       });
+      this.forceUpdate();
 
       //! Compute the route and ETA
       dropOffPoints = dropOffPoints.filter((el) => el !== false);
       //...
-      globalObject.setState({ isLoadingEta: true });
       let parentPromises = dropOffPoints.map((dropOff) => {
         return new Promise((resCompute) => {
           let tmpBundleSnapShot = {
@@ -1027,6 +1043,37 @@ class DeliveryNode extends React.Component {
       return this.state.snapshotsToDestination.map((snap) => {
         return <PolylineOverlay points={snap.routePoints} />;
       });
+    } else {
+      return <></>;
+    }
+  }
+
+  /**
+   * Compute the total ETA time and render a unified time
+   */
+  renderUnifiedETATime() {
+    if (this.state.snapshotsToDestination.length > 0) {
+      let unifiedTimeSec = 0;
+      this.state.snapshotsToDestination.map((snap) => {
+        let time = parseInt(snap.eta.split(" ")[0].trim());
+        //...
+        if (/min/i.test(snap.eta)) {
+          //Minutes
+          unifiedTimeSec += time * 60;
+        } else if (/sec/i.test(snap.eta)) {
+          //Seconds
+          unifiedTimeSec += time;
+        }
+      });
+      //...
+      if (unifiedTimeSec >= 60) {
+        //Put in min
+        unifiedTimeSec = `${Math.round(unifiedTimeSec / 60)} min`;
+        return unifiedTimeSec;
+      } else {
+        unifiedTimeSec = `${Math.round(unifiedTimeSec)} sec`;
+        return unifiedTimeSec;
+      }
     } else {
       return <></>;
     }
@@ -1225,7 +1272,7 @@ class DeliveryNode extends React.Component {
                   </div>
                   ETA
                   <strong style={{ position: "relative", marginLeft: 5 }}>
-                    7min
+                    {this.renderUnifiedETATime()}
                   </strong>
                 </>
               ) : (
@@ -1281,7 +1328,7 @@ class DeliveryNode extends React.Component {
             </div>
           </div>
         </div>
-        <div className={classes.mapContainer}>
+        <div className={classes.mapContainer} ref="mapPrimitiveContainer">
           <ReactMapGL
             width={"100%"}
             height={"100%"}
@@ -1356,9 +1403,9 @@ class DeliveryNode extends React.Component {
                 }
               }}
             />
+            {this.renderClusteredPolyline()}
             {this.renderPickupMarker()}
             {this.renderDropoffMarker()}
-            {this.renderClusteredPolyline()}
             {/* <PolylineOverlay
               points={[
                 [17.0809507, -22.5654531],
