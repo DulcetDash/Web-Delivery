@@ -175,7 +175,7 @@
   border: 1px solid #000;
   border-radius: 2px;
   font-size: 15px;
-  height: 50px;
+  height: 57px;
   background-color: #000;
   color: #fff;
   font-family: "MoveTextBold", sans-serif;
@@ -345,4 +345,13 @@
   font-size: 14px;
   margin-top: 5px;
   color: #686767bb;
+}
+
+.input {
+  background-color: red;
+}
+
+.dateExtrDeliveryBtn {
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 15px;
 }

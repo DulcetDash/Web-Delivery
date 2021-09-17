@@ -19,6 +19,7 @@ import {
   FiPhone,
   FiMapPin,
 } from "react-icons/fi";
+import { MdAccessTime } from "react-icons/md";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
@@ -33,6 +34,16 @@ import SOCKET_CORE from "../../Helper/managerNode";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 import PolylineOverlay from "../../Helper/PolylineOverlay";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import DateAdapter from "@mui/lab/AdapterMoment";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import TimePicker from "@mui/lab/TimePicker";
+import DateTimePicker from "@mui/lab/DateTimePicker";
+import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import MobileDatePicker from "@mui/lab/MobileDatePicker";
+import StaticDateTimePicker from "@mui/lab/StaticDateTimePicker";
 
 const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
   c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
@@ -96,6 +107,9 @@ class DeliveryNode extends React.Component {
       customFitboundsCoords: {}, //Will contain the lat, long and zoom
       snapshotsToDestination: [], //Will contain the route information to the destinations
       isLoadingEta: false, //Whether or not the eta is being loaded
+      scheduledTime: new Date(), //The time scheduled
+      isScheduledTrip: false, //Whether or not the request is scheduled
+      showDateTimePicker: false, //Whether or not the show the date time picker
     };
   }
 
@@ -1295,36 +1309,126 @@ class DeliveryNode extends React.Component {
             <div
               style={{ display: "flex", flexDirection: "row", marginTop: 20 }}
             >
-              <input
+              {/* <input
                 type="submit"
-                value="Request now"
+                value="Request for delivery"
                 className={classes.formBasicSubmitBttnClassics}
                 style={{
                   marginRight: 25,
-                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                  opacity: !this.state.shoudAllowRequest ? 1 : 0.2,
+                  width: "80%",
+                  fontSize: 17,
                 }}
                 onClick={() =>
                   this.state.shoudAllowRequest === false
                     ? {}
                     : console.log("Request for delivery")
                 }
-              />
-              <input
-                type="submit"
-                value="Schedule for later"
+              /> */}
+              <div
+                className={classes.formBasicSubmitBttnClassics}
+                style={{
+                  marginRight: 25,
+                  opacity: !this.state.shoudAllowRequest ? 1 : 0.2,
+                  width: "80%",
+                  fontSize: 17,
+                  flexDirection: "column",
+                }}
+                onClick={() =>
+                  this.state.shoudAllowRequest === false
+                    ? {}
+                    : console.log("Request for delivery")
+                }
+              >
+                Request for delivery
+                {this.state.isScheduledTrip ? (
+                  <div className={classes.dateExtrDeliveryBtn}>
+                    {`${
+                      this.state.scheduledTime.toDateString().split(" ")[0]
+                    }, ${this.state.scheduledTime
+                      .toLocaleDateString()
+                      .replaceAll("/", "-")} at ${
+                      this.state.scheduledTime
+                        .toLocaleString()
+                        .split(", ")[1]
+                        .split(":")[0]
+                    }:${
+                      this.state.scheduledTime
+                        .toLocaleString()
+                        .split(", ")[1]
+                        .split(":")[1]
+                    }`}
+                  </div>
+                ) : (
+                  <></>
+                )}
+              </div>
+
+              <div
                 className={classes.formBasicSubmitBttnClassics}
                 style={{
                   backgroundColor: "#d0d0d0",
                   color: "black",
                   borderColor: "#d0d0d0",
-                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                  opacity: !this.state.shoudAllowRequest ? 1 : 0.2,
+                  width: 70,
+                  zIndex: 100000,
                 }}
                 onClick={() =>
-                  this.state.shoudAllowRequest === false
+                  !this.state.shoudAllowRequest === false
                     ? {}
-                    : console.log("Request for Scheduled delivery")
+                    : this.state.showDateTimePicker
+                    ? {}
+                    : this.setState({ showDateTimePicker: true })
                 }
-              />
+              >
+                {this.state.showDateTimePicker ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      boxShadow: "0px 0px 15px 1px rgba(0, 0, 0, 0.14)",
+                      marginBottom: 150,
+                    }}
+                  >
+                    <LocalizationProvider dateAdapter={DateAdapter}>
+                      <StaticDateTimePicker
+                        displayStaticWrapperAs="mobile"
+                        toolbarTitle={"Select the delivery date"}
+                        value={this.state.scheduledTime}
+                        onChange={(newValue) => {
+                          console.log(newValue._d);
+                          this.setState({
+                            scheduledTime: new Date(newValue._d),
+                          });
+                        }}
+                        ampmInClock={false}
+                        ampm={false}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                    </LocalizationProvider>
+                    <div
+                      className={classes.formBasicSubmitBttnClassics}
+                      style={{
+                        width: "99.45%",
+                        backgroundColor: "#096ED4",
+                        borderColor: "#096ED4",
+                        borderRadius: 0,
+                      }}
+                      onClick={() => {
+                        this.setState({
+                          showDateTimePicker: false,
+                          isScheduledTrip: true,
+                        });
+                      }}
+                    >
+                      Set delivery date
+                    </div>
+                  </div>
+                ) : (
+                  <MdAccessTime style={{ width: 30, height: 30 }} />
+                )}
+              </div>
             </div>
           </div>
         </div>
