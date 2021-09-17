@@ -93,6 +93,8 @@ class DeliveryNode extends React.Component {
       zoom: 13, //Map zoom
       //...
       customFitboundsCoords: {}, //Will contain the lat, long and zoom
+      snapshotsToDestination: [], //Will contain the route information to the destinations
+      isLoadingEta: false, //Whether or not the eta is being loaded
     };
   }
 
@@ -205,6 +207,28 @@ class DeliveryNode extends React.Component {
             fareETAEstimations: {},
           });
         }
+      }
+    );
+
+    /**
+     * GET ROUTE SNAPSHOTS RESPONSES
+     */
+    this.SOCKET_CORE.on(
+      "getRoute_to_destinationSnapshot-response",
+      function (response) {
+        console.log(response);
+        let previousSnapshots = globalObject.state.snapshotsToDestination;
+        previousSnapshots.push(response);
+        //Remove all zero distances
+        previousSnapshots = previousSnapshots.filter((snap) => {
+          return snap.distance !== 0 && snap.eta !== "0 sec away";
+        });
+        //...
+        console.log(previousSnapshots);
+        globalObject.setState({
+          snapshotsToDestination: previousSnapshots,
+          isLoadingEta: false,
+        });
       }
     );
   }
@@ -581,7 +605,10 @@ class DeliveryNode extends React.Component {
     let currentArr = this.state.dropOff_destination;
     currentArr.splice(index, 1);
     this.setState({ dropOff_destination: currentArr });
-    this.forceUpdate();
+    //? Get the new prices
+    this.getFareEstimationOnValidData();
+    //? Call recenter map estimator
+    this.recenterMapEstimator();
   }
 
   /**
@@ -862,7 +889,6 @@ class DeliveryNode extends React.Component {
               cursor: "pointer",
               fill: "#096ED4",
               stroke: "none",
-              transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
             }}
           >
             <path d={ICON} />
@@ -898,7 +924,7 @@ class DeliveryNode extends React.Component {
                 cursor: "pointer",
                 fill: "red",
                 stroke: "none",
-                transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
+                zIndex: 1000,
               }}
             >
               <path d={ICON} />
@@ -915,6 +941,8 @@ class DeliveryNode extends React.Component {
    * Responsible for determining of the map should be recentered or rezoomed to fit all the coords as bounds
    */
   recenterMapEstimator() {
+    let globalObject = this;
+
     let pickupPoint =
       this.state.pickup_destination !== null &&
       this.state.pickup_destination.data !== undefined &&
@@ -940,21 +968,67 @@ class DeliveryNode extends React.Component {
     });
     //...
     let areValidForFitBounds =
-      dropOffPoints.filter((el) => el !== false).length > 0 &&
-      pickupPoint !== false;
+      dropOffPoints.filter((el) => el !== false).length ===
+        this.state.dropOff_destination.length && pickupPoint !== false;
     //...
-    console.log(pickupPoint);
-    console.log(dropOffPoints);
+    // console.log(pickupPoint);
+    // console.log(dropOffPoints);
     console.log(`Are valid for bounds: ${areValidForFitBounds}`);
 
     if (areValidForFitBounds) {
-      dropOffPoints.push(pickupPoint);
-      //..
       let pointsBundle = dropOffPoints;
+      pointsBundle.push(pickupPoint);
+      //..
       console.log(getBoundsForPoints(pointsBundle));
       this.setState({
         customFitboundsCoords: getBoundsForPoints(pointsBundle),
+        snapshotsToDestination: [],
       });
+
+      //! Compute the route and ETA
+      dropOffPoints = dropOffPoints.filter((el) => el !== false);
+      //...
+      globalObject.setState({ isLoadingEta: true });
+      let parentPromises = dropOffPoints.map((dropOff) => {
+        return new Promise((resCompute) => {
+          let tmpBundleSnapShot = {
+            org_latitude: pickupPoint.latitude,
+            org_longitude: pickupPoint.longitude,
+            dest_latitude: dropOff.latitude,
+            dest_longitude: dropOff.longitude,
+            user_fingerprint: this.props.App.userData.loginData.company_fp,
+          };
+          //...
+          //   console.log(tmpBundleSnapShot);
+          this.SOCKET_CORE.emit(
+            "getRoute_to_destinationSnapshot",
+            tmpBundleSnapShot
+          );
+          //..
+          resCompute(true);
+        });
+      });
+      ///...
+      Promise.all(parentPromises)
+        .then((result) => {
+          console.log(result);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }
+
+  /**
+   * Responsible for rendering the polyline if all the destinations have been set
+   */
+  renderClusteredPolyline() {
+    if (this.state.snapshotsToDestination.length > 0) {
+      return this.state.snapshotsToDestination.map((snap) => {
+        return <PolylineOverlay points={snap.routePoints} />;
+      });
+    } else {
+      return <></>;
     }
   }
 
@@ -1118,13 +1192,50 @@ class DeliveryNode extends React.Component {
               ) : null}
             </div>
             <div className={classes.elGlobalTripIfos}>
-              <div className={classes.globalInfosPrimitiveContainer}>
-                <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
-              </div>
-              ETA
-              <strong style={{ position: "relative", marginLeft: 5 }}>
-                7min
-              </strong>
+              {this.state.isLoadingEta ? (
+                <div
+                  style={{
+                    // border: "1px solid black",
+                    display: "flex",
+                    flexDirection: "row",
+                    marginBottom: 5,
+                  }}
+                >
+                  <Loader
+                    type="TailSpin"
+                    color="#000"
+                    height={15}
+                    width={15}
+                    timeout={300000000} //3 secs
+                  />
+                  <span
+                    style={{
+                      position: "relative",
+                      marginLeft: 4,
+                      color: "#0e8491",
+                    }}
+                  >
+                    Estimating your ETA...
+                  </span>
+                </div>
+              ) : this.state.snapshotsToDestination.length > 0 ? (
+                <>
+                  <div className={classes.globalInfosPrimitiveContainer}>
+                    <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
+                  </div>
+                  ETA
+                  <strong style={{ position: "relative", marginLeft: 5 }}>
+                    7min
+                  </strong>
+                </>
+              ) : (
+                <>
+                  <div className={classes.globalInfosPrimitiveContainer}>
+                    <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
+                  </div>
+                  Please fill in all the locations.
+                </>
+              )}
             </div>
           </div>
           <div className={classes.requestBtnContainer}>
@@ -1247,17 +1358,18 @@ class DeliveryNode extends React.Component {
             />
             {this.renderPickupMarker()}
             {this.renderDropoffMarker()}
-            <PolylineOverlay
+            {this.renderClusteredPolyline()}
+            {/* <PolylineOverlay
               points={[
-                [-22.5654531, 17.0809507],
-                [-22.5685244, 17.0818734],
-                [-22.5692575, 17.0821095],
-                // [17.0819807, -22.5714965],
-                // [17.0816159, -22.5725665],
-                // [17.081058, -22.5738742],
-                // [17.0808434, -22.5747658],
+                [17.0809507, -22.5654531],
+                [17.0818734, -22.5685244],
+                [17.0821095, -22.5692575],
+                [17.0819807, -22.5714965],
+                [17.0816159, -22.5725665],
+                [17.081058, -22.5738742],
+                [17.0808434, -22.5747658],
               ]}
-            />
+            /> */}
           </ReactMapGL>
         </div>
       </div>
