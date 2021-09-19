@@ -3,10 +3,8 @@ import { ProSidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { BrowserRouter as Router, Link, Redirect } from "react-router-dom"; // Ke
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import // UpdateSuccessfullLoginDetails,
-// UpdateLatestAccessPatternsAndSuspInfos,
-// LogOut,
-"../../Redux/HomeActionsCreators";
+import { UpdateCurrentLocationMetadat } from "../../Redux/HomeActionsCreators";
+import SOCKET_CORE from "../../Helper/managerNode";
 import "react-pro-sidebar/dist/css/styles.css";
 import "./sidebar.scss";
 import {
@@ -29,19 +27,20 @@ import {
   ImPieChart,
   ImShare2,
 } from "react-icons/im";
-import { icons } from "react-icons/lib";
 
 const iconStyle = {
-  width: 30,
-  height: 15,
+  width: 35,
+  height: 20,
   position: "relative",
-  top: "2px",
+  top: "4px",
   color: "#01101f",
 };
 
 class Sidebar extends React.PureComponent {
   constructor(props) {
     super(props);
+
+    this.SOCKET_CORE = SOCKET_CORE;
 
     this.intervalPersister = null;
   }
@@ -121,9 +120,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
-      // UpdateSuccessfullLoginDetails,
-      // UpdateLatestAccessPatternsAndSuspInfos,
-      // LogOut,
+      UpdateCurrentLocationMetadat,
     },
     dispatch
   );

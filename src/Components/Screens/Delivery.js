@@ -1,8 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-// import { UpdateLoggingData } from "../Redux/HomeActionsCreators";
+import { UpdateCurrentLocationMetadat } from "../../Redux/HomeActionsCreators";
 import classes from "../../styles/Delivery.module.css";
+import SOCKET_CORE from "../../Helper/managerNode";
 import DeliveryNode from "../DeliveryNode/DeliveryNode";
 import { geolocated } from "react-geolocated";
 import { AiTwotoneEnvironment, AiTwotoneSetting } from "react-icons/ai";
@@ -11,13 +12,34 @@ class Delivery extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.SOCKET_CORE = SOCKET_CORE;
+
     this.state = {
       geolocationState: "granted",
+      didGetTHeCurrentLocation: false,
     };
   }
 
   componentDidMount() {
+    let globalObject = this;
+
     this.handlePermission();
+
+    this.getCurrentLocationFrequently();
+
+    //HANDLE SOCKET EVENTS
+    /**
+     * GET GEOCODED USER LOCATION
+     * @event: geocode-this-point
+     * Get the location of the user, parameter of interest: street name
+     */
+    this.SOCKET_CORE.on("geocode-this-point-response", function (response) {
+      // console.log(response);
+      if (response !== undefined && response !== false) {
+        globalObject.props.UpdateCurrentLocationMetadat(response);
+        globalObject.setState({ didGetTHeCurrentLocation: true });
+      }
+    });
   }
 
   componentWillMount() {
@@ -47,6 +69,45 @@ class Delivery extends React.PureComponent {
           globalObject.setState({ geolocationState: "denied" });
         }
       });
+  }
+
+  /**
+   * Get the current location of the user
+   */
+  getCurrentLocationFrequently() {
+    let globalObject = this;
+
+    this.intervalPersister = setInterval(function () {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (
+            position !== undefined &&
+            position !== null &&
+            position.coords !== undefined &&
+            position.coords !== null &&
+            position.coords.latitude !== undefined &&
+            position.coords.latitude !== null
+          ) {
+            //?Update the global app state as well as the local state
+            globalObject.props.App.latitude = position.coords.latitude;
+            globalObject.props.App.longitude = position.coords.longitude;
+            //?----
+
+            globalObject.SOCKET_CORE.emit("geocode-this-point", {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              user_fingerprint:
+                globalObject.props.App.userData.loginData.company_fp,
+            });
+          }
+        },
+        () => {},
+        {
+          enableHighAccuracy: true,
+          maximumAge: 2000,
+        }
+      );
+    }, 1000);
   }
 
   render() {
@@ -99,10 +160,18 @@ class Delivery extends React.PureComponent {
           </div>
         ) : (
           <>
-            <div className={classes.mainScreenTitle}>Make your delivery</div>
-            <div className={classes.contentContainer}>
-              <DeliveryNode />
-            </div>
+            {this.state.didGetTHeCurrentLocation ? (
+              <>
+                <div className={classes.mainScreenTitle}>
+                  Make your delivery
+                </div>
+                <div className={classes.contentContainer}>
+                  <DeliveryNode />
+                </div>
+              </>
+            ) : (
+              <div>Getting the current location</div>
+            )}
           </>
         )}
       </div>
@@ -118,7 +187,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
-      // UpdateLoggingData,
+      UpdateCurrentLocationMetadat,
     },
     dispatch
   );

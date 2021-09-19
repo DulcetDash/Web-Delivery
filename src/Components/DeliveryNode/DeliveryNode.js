@@ -7,7 +7,6 @@ import {
   AiTwotoneCheckCircle,
   AiTwotoneCalculator,
   AiFillPlusCircle,
-  AiTwotoneDelete,
   AiTwotoneProject,
   AiFillEnvironment,
   AiFillTag,
@@ -19,7 +18,7 @@ import {
   FiPhone,
   FiMapPin,
 } from "react-icons/fi";
-import { MdAccessTime } from "react-icons/md";
+import { MdAccessTime, MdDeleteSweep, MdNearMe } from "react-icons/md";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
@@ -34,15 +33,9 @@ import SOCKET_CORE from "../../Helper/managerNode";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 import PolylineOverlay from "../../Helper/PolylineOverlay";
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Box from "@mui/material/Box";
 import DateAdapter from "@mui/lab/AdapterMoment";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import TimePicker from "@mui/lab/TimePicker";
-import DateTimePicker from "@mui/lab/DateTimePicker";
-import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
-import MobileDatePicker from "@mui/lab/MobileDatePicker";
 import StaticDateTimePicker from "@mui/lab/StaticDateTimePicker";
 
 const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
@@ -110,14 +103,20 @@ class DeliveryNode extends React.Component {
       scheduledTime: new Date(), //The time scheduled
       isScheduledTrip: false, //Whether or not the request is scheduled
       showDateTimePicker: false, //Whether or not the show the date time picker
+      hasCustomPickupLocation: false, //If false will take the current pickup location data
     };
   }
 
   componentDidMount() {
     let globalObject = this;
 
+    //! Update current location to the current one by default --------------
+    this.resetCurrentPickupLocationToThis();
+    //! ---------------------------------------------------------------------
+
     //Handle socket events
     this.SOCKET_CORE.on("getLocations-response", function (response) {
+      console.log(response);
       //...
       if (
         response !== false &&
@@ -250,6 +249,43 @@ class DeliveryNode extends React.Component {
         });
       }
     );
+  }
+
+  /**
+   * Reset current pickup location to the default one
+   */
+  resetCurrentPickupLocationToThis() {
+    let pickupLocation =
+      this.props.App.userCurrentLocationMetaData !== undefined &&
+      this.props.App.userCurrentLocationMetaData.city !== undefined
+        ? {
+            data: {
+              locationData: {
+                averageGeo: 0,
+                city: this.props.App.userCurrentLocationMetaData.city,
+                coordinates: [
+                  this.props.App.latitude,
+                  this.props.App.longitude,
+                ],
+                country: this.props.App.userCurrentLocationMetaData.country,
+                indexSearch: 0,
+                location_id: this.props.App.userCurrentLocationMetaData.osm_id,
+                location_name:
+                  this.props.App.userCurrentLocationMetaData.street,
+                query: "current_location_auto",
+                state: this.props.App.userCurrentLocationMetaData.state.replace(
+                  " Region",
+                  ""
+                ),
+                street: this.props.App.userCurrentLocationMetaData.street,
+                suburb: false,
+              },
+            },
+          }
+        : null;
+    //...
+    console.log(pickupLocation);
+    this.setState({ pickup_destination: pickupLocation });
   }
 
   /***
@@ -763,6 +799,7 @@ class DeliveryNode extends React.Component {
                   searchResults: [],
                   search_querySearch: "",
                   shouldShowSearch: false,
+                  hasCustomPickupLocation: true,
                 });
               } //? Drop off locations
               else {
@@ -861,6 +898,13 @@ class DeliveryNode extends React.Component {
     this.search_time_requested = new Date();
     this.state.search_querySearch = query.trim();
 
+    //! Disable default pickup location - activate custom one
+    if (inputFieldIndex === -1) {
+      if (this.state.hasCustomPickupLocation === false) {
+        this.setState({ hasCustomPickupLocation: true });
+      }
+    }
+    //! -----
     if (query.length > 0) {
       if (this.state.search_querySearch.length !== 0) {
         //Has some query
@@ -898,7 +942,9 @@ class DeliveryNode extends React.Component {
       this.state.pickup_destination !== null &&
       this.state.pickup_destination.data !== undefined &&
       this.state.pickup_destination.data.locationData !== null &&
-      this.state.pickup_destination.data.locationData.coordinates !== undefined
+      this.state.pickup_destination.data.locationData.coordinates !==
+        undefined &&
+      this.state.hasCustomPickupLocation
     ) {
       return (
         <Marker
@@ -970,11 +1016,18 @@ class DeliveryNode extends React.Component {
    * Responsible for determining of the map should be recentered or rezoomed to fit all the coords as bounds
    */
   recenterMapEstimator() {
+    //! Take the current location if nothing was customized
     let pickupPoint =
-      this.state.pickup_destination !== null &&
-      this.state.pickup_destination.data !== undefined &&
-      this.state.pickup_destination.data.locationData !== null &&
-      this.state.pickup_destination.data.locationData.coordinates !== undefined
+      this.state.hasCustomPickupLocation === false
+        ? {
+            latitude: this.props.App.latitude,
+            longitude: this.props.App.longitude,
+          }
+        : this.state.pickup_destination !== null &&
+          this.state.pickup_destination.data !== undefined &&
+          this.state.pickup_destination.data.locationData !== null &&
+          this.state.pickup_destination.data.locationData.coordinates !==
+            undefined
         ? {
             latitude:
               this.state.pickup_destination.data.locationData.coordinates[0],
@@ -1093,6 +1146,75 @@ class DeliveryNode extends React.Component {
     }
   }
 
+  /**
+   * Responsible for making the request
+   */
+  makeDeliveryRequest() {
+    //...Get fare
+    let tmpFare = 0;
+    this.state.fareETAEstimations.fareData.map((fare) => {
+      if (/carDelivery/i.test(fare.car_type)) {
+        tmpFare = fare.base_fare;
+      }
+    });
+    console.log(this.state.pickup_destination);
+    //Package all the data
+    let RIDE_OR_DELIVERY_BOOKING_DATA = {
+      user_fingerprint: this.props.App.userData.loginData.company_fp,
+      connectType: "ConnectUs",
+      country: this.props.App.userCurrentLocationMetaData.country,
+      isAllGoingToSameDestination: false, //If all the passengers are going to the same destination
+      isGoingUntilHome: false, //! Will double the fares for the Economy - Set to false for the DELIVERY
+      naturePickup: "PrivateLocation", //Force PrivateLocation type if nothing found or delivery request,  -Nature of the pickup location (privateLOcation,etc)
+      passengersNo: this.state.dropOff_destination.length, //Force to 1 passenger for deliveries
+      actualRider: "me",
+      actualRiderPhone_number: this.props.App.userData.loginData.phone,
+      //DELIVERY SPECIFIC INFOS (receiver infos:name and phone)
+      receiverName_delivery: false,
+      receiverPhone_delivery: false,
+      packageSizeDelivery: "Small",
+      //...
+      rideType: "DELIVERY", //Ride or delivery
+      paymentMethod: "Wallet", //Payment method
+      timeScheduled: this.state.isScheduledTrip
+        ? this.state.scheduledTime
+        : "now",
+      pickupNote: false, //Additional note for the pickup
+      carTypeSelected: "carDelivery", //Ride selected, Economy normal taxis,etc
+      fareAmount: tmpFare, //Ride fare
+      pickupData: {
+        coordinates: [
+          this.state.pickup_destination.data.locationData.coordinates[0],
+          this.state.pickup_destination.data.locationData.coordinates[1],
+        ],
+        location_name:
+          this.state.pickup_destination.data.locationData.location_name,
+        street_name: this.state.pickup_destination.data.locationData.street,
+        city: this.state.pickup_destination.data.locationData.city,
+      },
+      destinationData: {},
+    };
+
+    //Complete the destination data
+    this.state.dropOff_destination.map((location, index) => {
+      let keyIndex = `passenger${index + 1}Destination`;
+      location.data.locationData["receiver_infos"] =
+        location.data.receiverInfos;
+      //...
+      RIDE_OR_DELIVERY_BOOKING_DATA.destinationData[keyIndex] =
+        location.data.locationData;
+    });
+    //...
+    console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
+    //! Make a single request - risky
+    //Not yet request and no errors
+    //Check wheher an answer was already received - if not keep requesting
+    this.SOCKET_CORE.emit(
+      "requestRideOrDeliveryForThis",
+      RIDE_OR_DELIVERY_BOOKING_DATA
+    );
+  }
+
   render() {
     //Initialize the input data
     this.state.pickup_destination =
@@ -1131,37 +1253,56 @@ class DeliveryNode extends React.Component {
               <div className={classes.locationsInputsContainer}>
                 {/* Pickup location */}
                 <div className={classes.pickupLocationPrimitiveContainer}>
-                  <input
-                    type="text"
-                    placeholder="Enter pickup location"
-                    className={classes.formBasicInput}
-                    onFocus={() => {
-                      //Update focused input index
-                      this.setState({ focusedInput: -1 });
-                    }}
-                    value={
-                      this.state.pickup_destination !== undefined &&
-                      this.state.pickup_destination !== null &&
-                      this.state.pickup_destination.data !== null &&
-                      this.state.pickup_destination.data !== undefined &&
-                      this.state.pickup_destination.data.locationData !== null
-                        ? this.state.pickup_destination.data.locationData
-                            .location_name
-                        : ""
-                    }
-                    onChange={(event) => {
-                      //? Update the input field
-                      let oldState = this.state.pickup_destination;
-                      oldState.data["locationData"] = {
-                        location_name: event.target.value,
-                      };
-                      //?---
-                      this.setState({ pickup_destination: oldState });
-                      //?----
-                      this._searchForThisQuery(event.target.value, 0);
-                    }}
-                    style={{ position: "relative", left: "3px" }}
-                  />
+                  <div className={classes.inputPrimitiveContainer}>
+                    <input
+                      type="text"
+                      placeholder="Enter pickup location"
+                      className={classes.formBasicInput}
+                      onFocus={() => {
+                        //Update focused input index
+                        this.setState({ focusedInput: -1 });
+                      }}
+                      value={
+                        this.state.pickup_destination !== undefined &&
+                        this.state.pickup_destination !== null &&
+                        this.state.pickup_destination.data !== null &&
+                        this.state.pickup_destination.data !== undefined &&
+                        this.state.pickup_destination.data.locationData !== null
+                          ? this.state.pickup_destination.data.locationData
+                              .location_name
+                          : ""
+                      }
+                      onChange={(event) => {
+                        //? Update the input field
+                        let oldState = this.state.pickup_destination;
+                        oldState.data["locationData"] = {
+                          location_name: event.target.value,
+                        };
+                        //?---
+                        this.setState({ pickup_destination: oldState });
+                        //?----
+                        this._searchForThisQuery(event.target.value, 0);
+                      }}
+                      style={{
+                        position: "relative",
+                        left: "3px",
+                        // paddingRight: "60px",
+                        // width: "77.8%",
+                      }}
+                    />
+                    <div
+                      className={classes.findMyLocationInputContainer}
+                      onClick={() => {
+                        this.resetCurrentPickupLocationToThis();
+                        this.setState({ hasCustomPickupLocation: false });
+                      }}
+                    >
+                      <MdNearMe
+                        style={{ width: 23, height: 23 }}
+                        title={"Set to your current location"}
+                      />
+                    </div>
+                  </div>
                   {/* Search */}
                   {this.state.focusedInput === -1
                     ? this.renderSearchBar()
@@ -1315,7 +1456,7 @@ class DeliveryNode extends React.Component {
                 className={classes.formBasicSubmitBttnClassics}
                 style={{
                   marginRight: 25,
-                  opacity: !this.state.shoudAllowRequest ? 1 : 0.2,
+                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
                   width: "80%",
                   fontSize: 17,
                 }}
@@ -1329,7 +1470,7 @@ class DeliveryNode extends React.Component {
                 className={classes.formBasicSubmitBttnClassics}
                 style={{
                   marginRight: 25,
-                  opacity: !this.state.shoudAllowRequest ? 1 : 0.2,
+                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
                   width: "80%",
                   fontSize: 17,
                   flexDirection: "column",
@@ -1337,7 +1478,7 @@ class DeliveryNode extends React.Component {
                 onClick={() =>
                   this.state.shoudAllowRequest === false
                     ? {}
-                    : console.log("Request for delivery")
+                    : this.makeDeliveryRequest()
                 }
               >
                 Request for delivery
@@ -1370,16 +1511,25 @@ class DeliveryNode extends React.Component {
                   backgroundColor: "#d0d0d0",
                   color: "black",
                   borderColor: "#d0d0d0",
-                  opacity: !this.state.shoudAllowRequest ? 1 : 0.2,
+                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
                   width: 70,
                   zIndex: 100000,
                 }}
                 onClick={() =>
-                  !this.state.shoudAllowRequest === false
+                  this.state.shoudAllowRequest === false
                     ? {}
+                    : this.state.isScheduledTrip
+                    ? this.setState({
+                        showDateTimePicker: false,
+                        scheduledTime: new Date(),
+                        isScheduledTrip: false,
+                      })
                     : this.state.showDateTimePicker
                     ? {}
-                    : this.setState({ showDateTimePicker: true })
+                    : this.setState({
+                        showDateTimePicker: true,
+                        scheduledTime: new Date(),
+                      })
                 }
               >
                 {this.state.showDateTimePicker ? (
@@ -1397,7 +1547,6 @@ class DeliveryNode extends React.Component {
                         toolbarTitle={"Select the delivery date"}
                         value={this.state.scheduledTime}
                         onChange={(newValue) => {
-                          console.log(newValue._d);
                           this.setState({
                             scheduledTime: new Date(newValue._d),
                           });
@@ -1425,8 +1574,10 @@ class DeliveryNode extends React.Component {
                       Set delivery date
                     </div>
                   </div>
+                ) : this.state.isScheduledTrip ? (
+                  <MdDeleteSweep style={{ width: 28, height: 28 }} />
                 ) : (
-                  <MdAccessTime style={{ width: 30, height: 30 }} />
+                  <MdAccessTime style={{ width: 28, height: 28 }} />
                 )}
               </div>
             </div>
@@ -1480,7 +1631,7 @@ class DeliveryNode extends React.Component {
             onViewStateChange={(newArgs) => {
               //   console.log(newArgs);
             }}
-            asyncRender={true}
+            // asyncRender={true}
             dragPan={true}
             scrollZoom={true}
           >
@@ -1488,10 +1639,12 @@ class DeliveryNode extends React.Component {
               style={{
                 top: 15,
                 left: 15,
+                opacity: 0,
               }}
               positionOptions={{ enableHighAccuracy: true }}
               trackUserLocation={true}
               showAccuracyCircle={false}
+              showUserLocation={true}
               auto
               onGeolocate={(position) => {
                 if (
@@ -1500,6 +1653,10 @@ class DeliveryNode extends React.Component {
                   position.coords.latitude !== undefined &&
                   position.coords.longitude !== undefined
                 ) {
+                  //?Update the global app state as well as the local state
+                  this.props.App.latitude = position.coords.latitude;
+                  this.props.App.longitude = position.coords.longitude;
+                  //?----
                   this.setState({
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,

@@ -347,11 +347,34 @@
   color: #686767bb;
 }
 
-.input {
-  background-color: red;
-}
-
 .dateExtrDeliveryBtn {
   font-family: "MoveTextRegular", sans-serif;
-  font-size: 15px;
+  font-size: 14px;
+  margin-top: 3px;
+}
+
+.inputPrimitiveContainer {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.findMyLocationInputContainer {
+  /* border: 1px solid black; */
+  z-index: 9000000;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 45px;
+  width: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #686767bb;
+  cursor: pointer;
+}
+
+.findMyLocationInputContainer:hover {
+  color: #096ed4;
 }
