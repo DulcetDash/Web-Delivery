@@ -18,3 +18,9 @@ export const UpdateCurrentLocationMetadat = (currentLocationMtd) => ({
   type: "UPDATE_CURRENT_LOCATION_METADATA",
   payload: currentLocationMtd,
 });
+
+//1. Update the trips data
+export const UpdateTripsData = (dataReceived) => ({
+  type: "UPDATE_TRIPS_DATA",
+  payload: dataReceived,
+});

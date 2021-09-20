@@ -27,6 +27,7 @@ import {
   ImPieChart,
   ImShare2,
 } from "react-icons/im";
+import { MdApps } from "react-icons/md";
 
 const iconStyle = {
   width: 35,
@@ -59,7 +60,14 @@ class Sidebar extends React.PureComponent {
           <MenuItem className="menuItemSideBar">
             <Link to="/Delivery">
               <AiTwotoneBuild style={iconStyle} />
-              <span className="menuText">Delivery</span>
+              <span className="menuText">Make a delivery</span>
+            </Link>
+          </MenuItem>
+
+          <MenuItem className="menuItemSideBar">
+            <Link to="/MyDeliveries">
+              <MdApps style={iconStyle} />
+              <span className="menuText">My deliveries</span>
             </Link>
           </MenuItem>
 
@@ -69,12 +77,12 @@ class Sidebar extends React.PureComponent {
               <span className="menuText">Statistics</span>
             </Link>
           </MenuItem>
-          <MenuItem className="menuItemSideBar">
+          {/* <MenuItem className="menuItemSideBar">
             <Link to="/Settings">
               <AiOutlineSetting style={iconStyle} />
               <span className="menuText">Settings</span>
             </Link>
-          </MenuItem>
+          </MenuItem> */}
 
           <MenuItem className="menuItemSideBar">
             <Link

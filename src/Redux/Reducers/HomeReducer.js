@@ -52,6 +52,22 @@ const HomeReducer = (state = INIT_STATE, action) => {
         console.error(error);
         return state;
       }
+
+    case "UPDATE_TRIPS_DATA":
+      console.log(newState.tripsData);
+      //?Optimized
+      if (
+        `${JSON.stringify(newState.tripsData)}` !==
+        `${JSON.stringify(action.payload)}`
+      ) {
+        //New data received
+        newState.tripsData = action.payload;
+
+        return { ...state, ...newState };
+      } //Same data
+      else {
+        return state;
+      }
     default:
       return state;
   }

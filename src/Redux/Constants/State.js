@@ -89,6 +89,8 @@ const STATE = {
   userCurrentLocationMetaData: {}, //Metadata of the user's current location - directly geocoded and shallowly processed
   latitude: 0,
   longitude: 0,
+
+  tripsData: {}, //Will hold all the trips data
 };
 
 export default STATE;

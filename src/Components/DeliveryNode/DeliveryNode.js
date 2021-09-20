@@ -1181,6 +1181,7 @@ class DeliveryNode extends React.Component {
         : "now",
       pickupNote: false, //Additional note for the pickup
       carTypeSelected: "carDelivery", //Ride selected, Economy normal taxis,etc
+      request_globality: "corporate", //!Extremely important
       fareAmount: tmpFare, //Ride fare
       pickupData: {
         coordinates: [
@@ -1647,6 +1648,7 @@ class DeliveryNode extends React.Component {
               showUserLocation={true}
               auto
               onGeolocate={(position) => {
+                console.log(position);
                 if (
                   position.coords !== undefined &&
                   position.coords !== null &&

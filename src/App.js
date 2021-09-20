@@ -15,6 +15,7 @@ import PresentPlans from "./Components/Screens/PresentPlans";
 import Delivery from "./Components/Screens/Delivery";
 import Sidebar from "./Components/Sidebar/Sidebar";
 import HeaderStd from "./Components/HeaderStd/HeaderStd";
+import MyDeliveries from "./Components/Screens/MyDeliveries";
 
 export const transformCircular = createTransform(
   (inboundState, key) => stringify(inboundState),
@@ -56,6 +57,7 @@ function App() {
                 <Route path="/" exact component={Home} />
                 <Route path="/plans" component={PresentPlans} />
                 <Route path="/Delivery" component={Delivery} />
+                <Route path="/MyDeliveries" component={MyDeliveries} />
               </Switch>
             </div>
           </div>
