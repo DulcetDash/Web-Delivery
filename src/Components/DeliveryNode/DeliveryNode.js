@@ -242,7 +242,6 @@ class DeliveryNode extends React.Component {
           return snap.distance !== 0 && snap.eta !== "0 sec away";
         });
         //...
-        console.log(previousSnapshots);
         globalObject.setState({
           snapshotsToDestination: previousSnapshots,
           isLoadingEta: false,
@@ -284,7 +283,6 @@ class DeliveryNode extends React.Component {
           }
         : null;
     //...
-    console.log(pickupLocation);
     this.setState({ pickup_destination: pickupLocation });
   }
 

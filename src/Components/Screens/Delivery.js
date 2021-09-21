@@ -5,6 +5,20 @@ import {
   UpdateCurrentLocationMetadat,
   UpdateTripsData,
 } from "../../Redux/HomeActionsCreators";
+import {
+  MdAccessTime,
+  MdDeleteSweep,
+  MdNearMe,
+  MdPhone,
+  MdBrightness1,
+  MdCheckCircle,
+  MdBlock,
+  MdAutorenew,
+  MdArrowForward,
+  MdPlayArrow,
+  MdStar,
+  MdWork,
+} from "react-icons/md";
 import classes from "../../styles/Delivery.module.css";
 import SOCKET_CORE from "../../Helper/managerNode";
 import DeliveryNode from "../DeliveryNode/DeliveryNode";
@@ -52,14 +66,13 @@ class Delivery extends React.PureComponent {
      */
     this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
       console.log(response);
-      globalObject.props.UpdateTripsData(response);
-
       try {
         if (
           response !== null &&
           response !== undefined &&
           /no_rides/i.test(response.request_status) === false
         ) {
+          globalObject.props.UpdateTripsData(response);
           //1. Trip in progress: in route to pickup or in route to drop off
           if (
             response.response === undefined &&
@@ -77,21 +90,26 @@ class Delivery extends React.PureComponent {
             //...
           } else if (/pending/i.test(response.request_status)) {
             console.log("Pending");
+            globalObject.props.UpdateTripsData(response);
           } else if (
             response.request_status !== undefined &&
             response.request_status !== null &&
             /riderDropoffConfirmation_left/i.test(response.request_status)
           ) {
             console.log("Confirm dropoff left");
+            globalObject.props.UpdateTripsData(response);
           } else if (response.request_status === "no_rides") {
             console.log("No rides");
+            globalObject.props.UpdateTripsData({});
           }
         } //No rides
         else {
           console.log("No rides");
+          globalObject.props.UpdateTripsData({});
         }
       } catch (error) {
         console.error(error);
+        globalObject.props.UpdateTripsData({});
       }
     });
   }
@@ -230,7 +248,8 @@ class Delivery extends React.PureComponent {
           </div>
         ) : (
           <>
-            {this.state.didGetTHeCurrentLocation ? (
+            {this.state.didGetTHeCurrentLocation &&
+            Object.keys(this.props.App.tripsData).length === 0 ? (
               <>
                 <div className={classes.mainScreenTitle}>
                   Make your delivery
@@ -239,6 +258,33 @@ class Delivery extends React.PureComponent {
                   <DeliveryNode />
                 </div>
               </>
+            ) : Object.keys(this.props.App.tripsData).length > 0 ? (
+              <div
+                style={{
+                  // border: "1px solid black",
+                  display: "flex",
+                  height: 400,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  width: "65%",
+                  margin: "auto",
+                  textAlign: "center",
+                }}
+              >
+                <MdWork style={{ width: 35, height: 35, marginBottom: 25 }} />
+                Sorry, you've reached your maximum allowed number of individual
+                requests, please wait until your active deliveries are completed
+                before making new ones.
+                <div
+                  className={classes.formBasicSubmitBttnClassicsReceiverInfos}
+                  onClick={() => {
+                    window.location.href = "/MyDeliveries";
+                  }}
+                >
+                  Track your delivery here
+                </div>
+              </div>
             ) : (
               <div
                 style={{

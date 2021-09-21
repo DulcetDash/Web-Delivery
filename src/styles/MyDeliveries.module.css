@@ -105,6 +105,10 @@
 .nameDriverHeader {
   font-family: "MoveTextBold", sans-serif;
   font-size: 17px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 5px;
 }
 
 .headerPart2 {
@@ -273,4 +277,15 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
+}
+
+.plateNoText {
+  margin-bottom: 5px;
+}
+
+.ratingContainer {
+  margin-left: 10px;
+  display: flex;
+  flex-direction: row;
+  font-family: "MoveTextRegular", sans-serif;
 }

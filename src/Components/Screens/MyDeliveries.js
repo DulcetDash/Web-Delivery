@@ -29,6 +29,7 @@ import {
   MdAutorenew,
   MdArrowForward,
   MdPlayArrow,
+  MdStar,
 } from "react-icons/md";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
@@ -63,14 +64,13 @@ class MyDeliveries extends React.Component {
      */
     this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
       console.log(response);
-      globalObject.props.UpdateTripsData(response);
-
       try {
         if (
           response !== null &&
           response !== undefined &&
           /no_rides/i.test(response.request_status) === false
         ) {
+          globalObject.props.UpdateTripsData(response);
           //1. Trip in progress: in route to pickup or in route to drop off
           if (
             response.response === undefined &&
@@ -88,21 +88,26 @@ class MyDeliveries extends React.Component {
             //...
           } else if (/pending/i.test(response.request_status)) {
             console.log("Pending");
+            globalObject.props.UpdateTripsData(response);
           } else if (
             response.request_status !== undefined &&
             response.request_status !== null &&
             /riderDropoffConfirmation_left/i.test(response.request_status)
           ) {
             console.log("Confirm dropoff left");
+            globalObject.props.UpdateTripsData(response);
           } else if (response.request_status === "no_rides") {
             console.log("No rides");
+            globalObject.props.UpdateTripsData({});
           }
         } //No rides
         else {
           console.log("No rides");
+          globalObject.props.UpdateTripsData({});
         }
       } catch (error) {
         console.error(error);
+        globalObject.props.UpdateTripsData({});
       }
     });
 
@@ -182,9 +187,9 @@ class MyDeliveries extends React.Component {
           Active deliveries
           <div className={classes.historyEntryTitle}>History</div>
         </div>
-        <div className={classes.contentContainer}>
-          {Object.keys(this.props.App.tripsData).length > 0 &&
-          deliveryData.birdview_infos !== undefined ? (
+        {Object.keys(this.props.App.tripsData).length > 0 &&
+        deliveryData.birdview_infos !== undefined ? (
+          <div className={classes.contentContainer}>
             <div className={classes.containterTracking}>
               {/* Header */}
               <div className={classes.headerTracking}>
@@ -204,8 +209,25 @@ class MyDeliveries extends React.Component {
                       <div className={classes.namePlateNoHeader}>
                         <div className={classes.nameDriverHeader}>
                           {deliveryData.driverDetails.name}
+                          <div className={classes.ratingContainer}>
+                            <MdStar
+                              style={{
+                                width: 15,
+                                height: 15,
+                                top: 2,
+                                position: "relative",
+                                color: "#FFC043",
+                              }}
+                            />{" "}
+                            4.9
+                          </div>
                         </div>
-                        Plate number
+                        <div className={classes.plateNoText}>
+                          {deliveryData.carDetails.car_brand}
+                          <span style={{ marginLeft: 12 }}>
+                            {deliveryData.carDetails.plate_number}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     {/* Phone number side if any (driver) */}
@@ -459,10 +481,10 @@ class MyDeliveries extends React.Component {
                               </div>
                               <div className={classes.receiverBatchContainer}>
                                 <div className={classes.receiverBatchName}>
-                                  Name
+                                  {location.receiver_infos.receiver_name}
                                 </div>
                                 <div className={classes.receiverBatchPhone}>
-                                  Phone number
+                                  {location.receiver_infos.receiver_phone}
                                 </div>
                               </div>
                             </div>
@@ -510,32 +532,30 @@ class MyDeliveries extends React.Component {
                 )}
               </div>
             </div>
-          ) : (
+          </div>
+        ) : (
+          <div
+            style={{
+              // border: "1px solid black",
+              display: "flex",
+              height: 400,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
+          >
+            <MdAutorenew style={{ width: 35, height: 35, marginBottom: 25 }} />
+            No active deliveries, but feel free to make a new request.
             <div
-              style={{
-                // border: "1px solid black",
-                display: "flex",
-                height: 400,
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
+              className={classes.formBasicSubmitBttnClassicsReceiverInfos}
+              onClick={() => {
+                window.location.href = "/Delivery";
               }}
             >
-              <MdAutorenew
-                style={{ width: 35, height: 35, marginBottom: 25 }}
-              />
-              No active deliveries, but feel free to make a new request.
-              <div
-                className={classes.formBasicSubmitBttnClassicsReceiverInfos}
-                onClick={() => {
-                  window.location.href = "/Delivery";
-                }}
-              >
-                Make a delivery
-              </div>
+              Make a delivery
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   }

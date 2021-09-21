@@ -14,7 +14,6 @@ const HomeReducer = (state = INIT_STATE, action) => {
 
   switch (action.type) {
     case "UPDATE_LOGGIN_DATA":
-      console.log(action.payload);
       newState.userData.loginData = action.payload;
       //...
       return { ...state, ...newState };
