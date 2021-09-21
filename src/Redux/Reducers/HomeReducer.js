@@ -54,7 +54,6 @@ const HomeReducer = (state = INIT_STATE, action) => {
       }
 
     case "UPDATE_TRIPS_DATA":
-      console.log(newState.tripsData);
       //?Optimized
       if (
         `${JSON.stringify(newState.tripsData)}` !==

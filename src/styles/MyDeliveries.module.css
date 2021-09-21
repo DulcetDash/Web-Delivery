@@ -2,6 +2,7 @@
   background-color: #f3f3f3;
   height: 90%;
   padding: 25px;
+  margin-bottom: 90px;
 }
 
 .mainScreenTitle {
@@ -142,6 +143,7 @@
   font-family: "MoveTextMedium", sans-serif;
   padding-left: 15px;
   margin-top: 10px;
+  color: #096ed4;
 }
 
 .globalTripDataContainer {
@@ -253,4 +255,22 @@
   min-width: 100px;
   border-radius: 3px;
   margin-top: 50px;
+}
+
+.receiverBatchName {
+  font-family: "MoveTextMedium", sans-serif;
+  font-size: 15px;
+  color: #096ed4;
+}
+
+.receiverBatchPhone {
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 14px;
+}
+
+.profilePicDriver_linked {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }

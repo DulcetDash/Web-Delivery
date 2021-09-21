@@ -27,6 +27,8 @@ import {
   MdCheckCircle,
   MdBlock,
   MdAutorenew,
+  MdArrowForward,
+  MdPlayArrow,
 } from "react-icons/md";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
@@ -60,7 +62,7 @@ class MyDeliveries extends React.Component {
      * Responsible for redirecting updates to map graphics data based on if the status of the request is: pending, in route to pickup, in route to drop off or completed
      */
     this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
-      //   console.log(response);
+      console.log(response);
       globalObject.props.UpdateTripsData(response);
 
       try {
@@ -192,9 +194,17 @@ class MyDeliveries extends React.Component {
                   <>
                     {/* driver side if any */}
                     <div className={classes.headerPart1}>
-                      <div className={classes.driverPicHeader}>Image</div>
+                      <div className={classes.driverPicHeader}>
+                        <img
+                          alt="drv"
+                          src={deliveryData.driverDetails.profile_picture}
+                          className={classes.profilePicDriver_linked}
+                        />
+                      </div>
                       <div className={classes.namePlateNoHeader}>
-                        <div className={classes.nameDriverHeader}>Name</div>
+                        <div className={classes.nameDriverHeader}>
+                          {deliveryData.driverDetails.name}
+                        </div>
                         Plate number
                       </div>
                     </div>
@@ -203,7 +213,7 @@ class MyDeliveries extends React.Component {
                       <MdPhone
                         style={{ width: 20, height: 20, color: "#096ED4" }}
                       />{" "}
-                      +264856997167
+                      {deliveryData.driverDetails.phone_number}
                     </div>
                   </>
                 )}
@@ -242,6 +252,8 @@ class MyDeliveries extends React.Component {
                   <span>
                     {/pending/i.test(deliveryData.request_status)
                       ? "Finding you a driver"
+                      : /inRouteToPickup/i.test(deliveryData.request_status)
+                      ? "In route to pickup your package"
                       : "some other status..."}
                   </span>
                   <div style={{ marginLeft: 10 }}>
@@ -255,9 +267,10 @@ class MyDeliveries extends React.Component {
                   </div>
                 </div>
                 <div className={classes.etaReport}>
-                  {/pending/i.test(deliveryData.request_status)
+                  {/pending/i.test(deliveryData.request_status) &&
+                  deliveryData.eta !== undefined
                     ? ""
-                    : "5min away"}
+                    : deliveryData.eta}
                 </div>
               </div>
               {/* Trip global data */}
@@ -369,41 +382,88 @@ class MyDeliveries extends React.Component {
                     style={{ position: "relative", top: 24 }}
                   >
                     <div className={classes.labelDestination}>Drop off at</div>
-                    <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flex: 1,
+                        flexDirection: "column",
+                      }}
+                    >
                       {/* Single el */}
                       {deliveryData.birdview_infos.dropoff_details.map(
-                        (location) => {
+                        (location, index) => {
                           return (
-                            <div style={{ marginBottom: 20 }}>
-                              <div className={classes.suburbName}>
-                                {location.suburb}
+                            <div
+                              style={{
+                                marginBottom: 20,
+                                borderBottom:
+                                  index + 1 !==
+                                  deliveryData.birdview_infos.dropoff_details
+                                    .length
+                                    ? "1px solid #f3f3f3"
+                                    : "none",
+                                display: "flex",
+                                flex: 1,
+                                paddingBottom: 15,
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <div className={classes.suburbName}>
+                                  {location.suburb}
+                                </div>
+                                <div className={classes.detailsLocationText}>
+                                  {`${
+                                    location.location_name !== undefined &&
+                                    location.location_name !== false &&
+                                    location.location_name !== "false" &&
+                                    location.location_name !== null &&
+                                    location.location_name !==
+                                      location.street_name &&
+                                    location.location_name !== location.suburb
+                                      ? `${location.location_name}, `
+                                      : ""
+                                  }${
+                                    location.street_name !== undefined &&
+                                    location.street_name !== false &&
+                                    location.street_name !== "false" &&
+                                    location.street_name !== null
+                                      ? `${
+                                          location.street_name.length > 20
+                                            ? `${location.street_name.substring(
+                                                0,
+                                                20
+                                              )}.`
+                                            : location.street_name
+                                        }, `
+                                      : ""
+                                  }${location.city}`}
+                                </div>
                               </div>
-                              <div className={classes.detailsLocationText}>
-                                {`${
-                                  location.location_name !== undefined &&
-                                  location.location_name !== false &&
-                                  location.location_name !== "false" &&
-                                  location.location_name !== null &&
-                                  location.location_name !==
-                                    location.street_name &&
-                                  location.location_name !== location.suburb
-                                    ? `${location.location_name}, `
-                                    : ""
-                                }${
-                                  location.street_name !== undefined &&
-                                  location.street_name !== false &&
-                                  location.street_name !== "false" &&
-                                  location.street_name !== null
-                                    ? `${
-                                        location.street_name.length > 20
-                                          ? `${location.street_name.substring(
-                                              0,
-                                              20
-                                            )}.`
-                                          : location.street_name
-                                      }, `
-                                    : ""
-                                }${location.city}`}
+                              {/* Receiver's side */}
+                              <div
+                                style={{
+                                  //   border: "1px solid black",
+                                  width: 100,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <MdPlayArrow
+                                  style={{
+                                    width: 13,
+                                    height: 13,
+                                    color: "#646d74",
+                                  }}
+                                />
+                              </div>
+                              <div className={classes.receiverBatchContainer}>
+                                <div className={classes.receiverBatchName}>
+                                  Name
+                                </div>
+                                <div className={classes.receiverBatchPhone}>
+                                  Phone number
+                                </div>
                               </div>
                             </div>
                           );
