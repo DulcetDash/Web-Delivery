@@ -335,7 +335,10 @@ class MyDeliveries extends React.Component {
                             deliveryData.birdview_infos.pickup_details
                               .location_name !==
                               deliveryData.birdview_infos.pickup_details
-                                .street_name
+                                .street_name &&
+                            deliveryData.birdview_infos.pickup_details
+                              .location_name !==
+                              deliveryData.birdview_infos.pickup_details.suburb
                               ? `${deliveryData.birdview_infos.pickup_details.location_name}, `
                               : ""
                           }${
@@ -371,7 +374,7 @@ class MyDeliveries extends React.Component {
                       {deliveryData.birdview_infos.dropoff_details.map(
                         (location) => {
                           return (
-                            <div>
+                            <div style={{ marginBottom: 20 }}>
                               <div className={classes.suburbName}>
                                 {location.suburb}
                               </div>
@@ -379,14 +382,17 @@ class MyDeliveries extends React.Component {
                                 {`${
                                   location.location_name !== undefined &&
                                   location.location_name !== false &&
+                                  location.location_name !== "false" &&
                                   location.location_name !== null &&
                                   location.location_name !==
-                                    location.street_name
+                                    location.street_name &&
+                                  location.location_name !== location.suburb
                                     ? `${location.location_name}, `
                                     : ""
                                 }${
                                   location.street_name !== undefined &&
                                   location.street_name !== false &&
+                                  location.street_name !== "false" &&
                                   location.street_name !== null
                                     ? `${
                                         location.street_name.length > 20
