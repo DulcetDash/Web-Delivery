@@ -273,7 +273,7 @@ class Delivery extends React.PureComponent {
                 }}
               >
                 <MdWork style={{ width: 35, height: 35, marginBottom: 25 }} />
-                Sorry, you've reached your maximum allowed number of individual
+                Hi, you've reached your maximum allowed number of individual
                 requests, please wait until your active deliveries are completed
                 before making new ones.
                 <div

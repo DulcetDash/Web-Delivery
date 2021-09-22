@@ -119,6 +119,29 @@ class MyDeliveries extends React.Component {
         globalObject.setState({ isLoadingCancellation: false });
       }
     );
+
+    //3. Handle request dropoff request response
+    this.SOCKET_CORE.on(
+      "confirmRiderDropoff_requests_io-response",
+      function (response) {
+        // globalObject.setState({ isLoadingCancellation: false });
+        setTimeout(function () {
+          window.location.href = "/MyDeliveries";
+        }, 3000);
+
+        if (
+          response !== false &&
+          response.response !== undefined &&
+          response.response !== null
+        ) {
+        } //error - close the modal
+        else {
+          //Stop the loader and restore
+          // globalObject.setState({isLoading_something: false});
+          // globalObject.props.UpdateErrorModalLog(false, false, 'any'); //Close modal
+        }
+      }
+    );
   }
 
   /**
@@ -153,6 +176,24 @@ class MyDeliveries extends React.Component {
     else {
       //   this.props.UpdateErrorModalLog(false, false, "any"); //Close modal
     }
+  }
+
+  /**
+   * @func confirmRiderDropoff
+   * @param request_fp: the request fingerprint
+   * Responsible for bundling the request data and requesting for a rider's drop off confirmation.
+   */
+  confirmRiderDropoff(request_fp) {
+    this.setState({ isLoadingCancellation: true }); //Activate the loader - and lock the rating, compliment, done button and additional note input
+    let dropoff_bundle = {
+      user_fingerprint: this.props.App.userData.loginData.company_fp,
+      dropoff_compliments: false,
+      dropoff_personal_note: false,
+      rating_score: 4.9,
+      request_fp: request_fp,
+    };
+    //..
+    this.SOCKET_CORE.emit("confirmRiderDropoff_requests_io", dropoff_bundle);
   }
 
   /**
@@ -202,13 +243,23 @@ class MyDeliveries extends React.Component {
                       <div className={classes.driverPicHeader}>
                         <img
                           alt="drv"
-                          src={deliveryData.driverDetails.profile_picture}
+                          src={
+                            /riderDropoffConfirmation_left/i.test(
+                              deliveryData.request_status
+                            )
+                              ? deliveryData.driver_details.profile_picture
+                              : deliveryData.driverDetails.profile_picture
+                          }
                           className={classes.profilePicDriver_linked}
                         />
                       </div>
                       <div className={classes.namePlateNoHeader}>
                         <div className={classes.nameDriverHeader}>
-                          {deliveryData.driverDetails.name}
+                          {/riderDropoffConfirmation_left/i.test(
+                            deliveryData.request_status
+                          )
+                            ? deliveryData.driver_details.name
+                            : deliveryData.driverDetails.name}
                           <div className={classes.ratingContainer}>
                             <MdStar
                               style={{
@@ -223,9 +274,17 @@ class MyDeliveries extends React.Component {
                           </div>
                         </div>
                         <div className={classes.plateNoText}>
-                          {deliveryData.carDetails.car_brand}
+                          {/riderDropoffConfirmation_left/i.test(
+                            deliveryData.request_status
+                          )
+                            ? deliveryData.driver_details.car_brand
+                            : deliveryData.carDetails.car_brand}
                           <span style={{ marginLeft: 12 }}>
-                            {deliveryData.carDetails.plate_number}
+                            {/riderDropoffConfirmation_left/i.test(
+                              deliveryData.request_status
+                            )
+                              ? deliveryData.driver_details.plate_number
+                              : deliveryData.carDetails.plate_number}
                           </span>
                         </div>
                       </div>
@@ -235,7 +294,11 @@ class MyDeliveries extends React.Component {
                       <MdPhone
                         style={{ width: 20, height: 20, color: "#096ED4" }}
                       />{" "}
-                      {deliveryData.driverDetails.phone_number}
+                      {/riderDropoffConfirmation_left/i.test(
+                        deliveryData.request_status
+                      )
+                        ? deliveryData.driver_details.phone_number
+                        : deliveryData.driverDetails.phone_number}
                     </div>
                   </>
                 )}
@@ -255,17 +318,41 @@ class MyDeliveries extends React.Component {
                     />
                     <Steps.Step
                       title=""
-                      status={"wait"}
+                      status={
+                        /inRouteToPickup/i.test(deliveryData.request_status)
+                          ? "process"
+                          : /(inRouteToDestination|riderDropoffConfirmation_left)/i.test(
+                              deliveryData.request_status
+                            )
+                          ? "finish"
+                          : "wait"
+                      }
                       icon={<MdBrightness1 />}
                     />
                     <Steps.Step
                       title=""
-                      status={"wait"}
+                      status={
+                        /riderDropoffConfirmation_left/i.test(
+                          deliveryData.request_status
+                        )
+                          ? "finish"
+                          : /(pending|inRouteToPickup)/i.test(
+                              deliveryData.request_status
+                            )
+                          ? "wait"
+                          : "process"
+                      }
                       icon={<MdBrightness1 />}
                     />
                     <Steps.Step
                       title=""
-                      status={"wait"}
+                      status={
+                        /riderDropoffConfirmation_left/i.test(
+                          deliveryData.request_status
+                        )
+                          ? "finish"
+                          : "wait"
+                      }
                       icon={<MdCheckCircle />}
                     />
                   </Steps>
@@ -276,23 +363,45 @@ class MyDeliveries extends React.Component {
                       ? "Finding you a driver"
                       : /inRouteToPickup/i.test(deliveryData.request_status)
                       ? "In route to pickup your package"
-                      : "some other status..."}
+                      : /inRouteToDestination/i.test(
+                          deliveryData.request_status
+                        )
+                      ? "In route to drop off your package"
+                      : /riderDropoffConfirmation_left/i.test(
+                          deliveryData.request_status
+                        )
+                      ? `${
+                          deliveryData.birdview_infos.dropoff_details.length ===
+                          1
+                            ? "Package"
+                            : "Packages"
+                        } dropped off successfully`
+                      : "..."}
                   </span>
-                  <div style={{ marginLeft: 10 }}>
-                    <Loader
-                      type="TailSpin"
-                      color="#000"
-                      height={15}
-                      width={15}
-                      timeout={300000000} //3 secs
-                    />
-                  </div>
+                  {/riderDropoffConfirmation_left/i.test(
+                    deliveryData.request_status
+                  ) ? (
+                    <></>
+                  ) : (
+                    <div style={{ marginLeft: 10 }}>
+                      <Loader
+                        type="TailSpin"
+                        color="#000"
+                        height={15}
+                        width={15}
+                        timeout={300000000} //3 secs
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className={classes.etaReport}>
-                  {/pending/i.test(deliveryData.request_status) &&
-                  deliveryData.eta !== undefined
-                    ? ""
-                    : deliveryData.eta}
+                  {/pending/i.test(deliveryData.request_status)
+                    ? deliveryData.eta
+                    : /(inRouteToPickup|inRouteToDestination)/i.test(
+                        deliveryData.request_status
+                      )
+                    ? deliveryData.ETA_toDestination
+                    : ""}
                 </div>
               </div>
               {/* Trip global data */}
@@ -480,12 +589,30 @@ class MyDeliveries extends React.Component {
                                 />
                               </div>
                               <div className={classes.receiverBatchContainer}>
-                                <div className={classes.receiverBatchName}>
-                                  {location.receiver_infos.receiver_name}
-                                </div>
-                                <div className={classes.receiverBatchPhone}>
-                                  {location.receiver_infos.receiver_phone}
-                                </div>
+                                {location.receiver_infos.receiver_name !==
+                                  undefined &&
+                                location.receiver_infos.receiver_name.length >
+                                  0 ? (
+                                  <>
+                                    <div className={classes.receiverBatchName}>
+                                      {location.receiver_infos.receiver_name}
+                                    </div>
+                                    <div className={classes.receiverBatchPhone}>
+                                      {location.receiver_infos.receiver_phone}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div
+                                    style={{
+                                      fontSize: 14,
+                                      height: "100%",
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    No receiver specified
+                                  </div>
+                                )}
                               </div>
                             </div>
                           );
@@ -498,31 +625,67 @@ class MyDeliveries extends React.Component {
 
               {/* Cancellation side */}
               <div className={classes.cancelRegionContainer}>
-                <div
-                  style={{
-                    // border: "1px solid black",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "flex-start",
-                    cursor: "pointer",
-                    fontFamily: "MoveTextMedium, sans-serif",
-                  }}
-                  onClick={() => this.cancelRequest_rider()}
-                >
-                  <MdBlock
-                    style={{ marginRight: 3, top: 1, position: "relative" }}
-                  />
-                  <div>
-                    Cancel your delivery
-                    <div className={classes.smallExplanation}>
-                      You can only cancel before your package(s) pick up.
+                {/(inRouteToPickup|pending)/i.test(
+                  deliveryData.request_status
+                ) ? (
+                  <div
+                    style={{
+                      // border: "1px solid black",
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      cursor: "pointer",
+                      fontFamily: "MoveTextMedium, sans-serif",
+                    }}
+                    onClick={() => this.cancelRequest_rider()}
+                  >
+                    <MdBlock
+                      style={{ marginRight: 3, top: 1, position: "relative" }}
+                    />
+                    <div>
+                      Cancel your delivery
+                      <div className={classes.smallExplanation}>
+                        You can only cancel before your package(s) pick up.
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : /riderDropoffConfirmation_left/i.test(
+                    deliveryData.request_status
+                  ) ? (
+                  <div
+                    style={{
+                      // border: "1px solid black",
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      cursor: "pointer",
+                      fontFamily: "MoveTextBold, sans-serif",
+                      color: "#09864A",
+                    }}
+                    onClick={() =>
+                      this.confirmRiderDropoff(
+                        deliveryData.trip_details.request_fp
+                      )
+                    }
+                  >
+                    <MdCheckCircle
+                      style={{ marginRight: 3, top: 1, position: "relative" }}
+                    />
+                    <div>
+                      Confirm drop off
+                      <div className={classes.smallExplanation}>
+                        Please here click to confirm that the receiver has
+                        received your package.
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <></>
+                )}
                 {this.state.isLoadingCancellation ? (
                   <Loader
                     type="TailSpin"
-                    color="#b22222"
+                    color="#09864A"
                     height={20}
                     width={20}
                     timeout={300000000} //3 secs

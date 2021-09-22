@@ -18,7 +18,14 @@ import {
   FiPhone,
   FiMapPin,
 } from "react-icons/fi";
-import { MdAccessTime, MdDeleteSweep, MdNearMe } from "react-icons/md";
+import {
+  MdAccessTime,
+  MdDeleteSweep,
+  MdNearMe,
+  MdCheckCircle,
+  MdTrendingFlat,
+  MdReportProblem,
+} from "react-icons/md";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
@@ -104,6 +111,9 @@ class DeliveryNode extends React.Component {
       isScheduledTrip: false, //Whether or not the request is scheduled
       showDateTimePicker: false, //Whether or not the show the date time picker
       hasCustomPickupLocation: false, //If false will take the current pickup location data
+      isLoadingGeneral: false, //General loader
+      didRequestJustBeenMade: false, //To know if a request had just been made
+      isThereRequestError: false, //To know if there was an error when requesting
     };
   }
 
@@ -246,6 +256,46 @@ class DeliveryNode extends React.Component {
           snapshotsToDestination: previousSnapshots,
           isLoadingEta: false,
         });
+      }
+    );
+
+    /**
+     * CHECK IF A RIDE WAS ACCEPTED
+     * @event: requestRideOrDeliveryForThis
+     * ? Responsible for handling the request ride or wallet response after booking
+     * ? to know whether the request was successfully dispatched or not.
+     */
+    this.SOCKET_CORE.on(
+      "requestRideOrDeliveryForThis-response",
+      function (response) {
+        if (
+          response !== false &&
+          response.response !== undefined &&
+          /successfully_requested/i.test(response.response)
+        ) {
+          globalObject.setState({
+            isLoadingGeneral: false,
+            didRequestJustBeenMade: true,
+            isThereRequestError: false,
+          });
+        } //An unxepected error occured
+        else if (
+          response !== false &&
+          response.response !== undefined &&
+          /already_have_a_pending_request/i.test(response.response)
+        ) {
+          globalObject.setState({
+            isLoadingGeneral: false,
+            didRequestJustBeenMade: true,
+            isThereRequestError: true,
+          });
+        } else {
+          globalObject.setState({
+            isLoadingGeneral: false,
+            didRequestJustBeenMade: true,
+            isThereRequestError: true,
+          });
+        }
       }
     );
   }
@@ -1155,7 +1205,11 @@ class DeliveryNode extends React.Component {
         tmpFare = fare.base_fare;
       }
     });
-    console.log(this.state.pickup_destination);
+    this.setState({
+      isLoadingGeneral: true,
+      didRequestJustBeenMade: false,
+      isThereRequestError: false,
+    });
     //Package all the data
     let RIDE_OR_DELIVERY_BOOKING_DATA = {
       user_fingerprint: this.props.App.userData.loginData.company_fp,
@@ -1237,219 +1291,235 @@ class DeliveryNode extends React.Component {
 
     return (
       <div className={classes.deliverNode}>
-        <div className={classes.inputDataContainer}>
-          {/* Line esthetique */}
-          <div style={{ padding: "10px", paddingTop: "20px" }}>
-            <div className={classes.primitiveContainer}>
-              <div className={classes.lineSideDeco}>
-                <AiTwotoneCheckCircle className={classes.decoShapes} />
-                <div className={classes.lineAssocDeco}></div>
-                <AiTwotoneCalculator
-                  className={classes.decoShapes}
-                  style={{ color: "#096ED4" }}
-                />
-              </div>
-              <div className={classes.locationsInputsContainer}>
-                {/* Pickup location */}
-                <div className={classes.pickupLocationPrimitiveContainer}>
-                  <div className={classes.inputPrimitiveContainer}>
-                    <input
-                      type="text"
-                      placeholder="Enter pickup location"
-                      className={classes.formBasicInput}
-                      onFocus={() => {
-                        //Update focused input index
-                        this.setState({ focusedInput: -1 });
-                      }}
-                      value={
-                        this.state.pickup_destination !== undefined &&
-                        this.state.pickup_destination !== null &&
-                        this.state.pickup_destination.data !== null &&
-                        this.state.pickup_destination.data !== undefined &&
-                        this.state.pickup_destination.data.locationData !== null
-                          ? this.state.pickup_destination.data.locationData
-                              .location_name
-                          : ""
-                      }
-                      onChange={(event) => {
-                        //? Update the input field
-                        let oldState = this.state.pickup_destination;
-                        oldState.data["locationData"] = {
-                          location_name: event.target.value,
-                        };
-                        //?---
-                        this.setState({ pickup_destination: oldState });
-                        //?----
-                        this._searchForThisQuery(event.target.value, 0);
-                      }}
+        {this.state.didRequestJustBeenMade === false ? (
+          <>
+            <div className={classes.inputDataContainer}>
+              {/* Line esthetique */}
+              <div style={{ padding: "10px", paddingTop: "20px" }}>
+                <div className={classes.primitiveContainer}>
+                  <div className={classes.lineSideDeco}>
+                    <AiTwotoneCheckCircle className={classes.decoShapes} />
+                    <div className={classes.lineAssocDeco}></div>
+                    <AiTwotoneCalculator
+                      className={classes.decoShapes}
+                      style={{ color: "#096ED4" }}
+                    />
+                  </div>
+                  <div className={classes.locationsInputsContainer}>
+                    {/* Pickup location */}
+                    <div className={classes.pickupLocationPrimitiveContainer}>
+                      <div className={classes.inputPrimitiveContainer}>
+                        <input
+                          type="text"
+                          placeholder="Enter pickup location"
+                          className={classes.formBasicInput}
+                          onFocus={() => {
+                            //Update focused input index
+                            this.setState({ focusedInput: -1 });
+                          }}
+                          value={
+                            this.state.pickup_destination !== undefined &&
+                            this.state.pickup_destination !== null &&
+                            this.state.pickup_destination.data !== null &&
+                            this.state.pickup_destination.data !== undefined &&
+                            this.state.pickup_destination.data.locationData !==
+                              null
+                              ? this.state.pickup_destination.data.locationData
+                                  .location_name
+                              : ""
+                          }
+                          onChange={(event) => {
+                            //? Update the input field
+                            let oldState = this.state.pickup_destination;
+                            oldState.data["locationData"] = {
+                              location_name: event.target.value,
+                            };
+                            //?---
+                            this.setState({ pickup_destination: oldState });
+                            //?----
+                            this._searchForThisQuery(event.target.value, 0);
+                          }}
+                          style={{
+                            position: "relative",
+                            left: "3px",
+                            // paddingRight: "60px",
+                            // width: "77.8%",
+                          }}
+                        />
+                        <div
+                          className={classes.findMyLocationInputContainer}
+                          onClick={() => {
+                            this.resetCurrentPickupLocationToThis();
+                            this.setState({ hasCustomPickupLocation: false });
+                          }}
+                        >
+                          <MdNearMe
+                            style={{ width: 23, height: 23 }}
+                            title={"Set to your current location"}
+                          />
+                        </div>
+                      </div>
+                      {/* Search */}
+                      {this.state.focusedInput === -1
+                        ? this.renderSearchBar()
+                        : null}
+                    </div>
+                    {/* Drop locations */}
+                    {this.renderDestinationinput()}
+                  </div>
+                </div>
+
+                {this.props.App.userData.loginData.plans.delivery_limit !==
+                undefined ? (
+                  <div
+                    className={classes.addMoreDropOffBtn}
+                    style={{
+                      opacity:
+                        this.state.dropOff_destination.length <
+                        parseInt(
+                          this.props.App.userData.loginData.plans.delivery_limit
+                        )
+                          ? 1
+                          : 0.3,
+                    }}
+                    onClick={() =>
+                      this.state.dropOff_destination.length <
+                      parseInt(
+                        this.props.App.userData.loginData.plans.delivery_limit
+                      )
+                        ? this.addAdditionalDestination()
+                        : {}
+                    }
+                  >
+                    <AiFillPlusCircle
                       style={{
+                        color: "#0e8491",
+                        marginRight: 5,
                         position: "relative",
-                        left: "3px",
-                        // paddingRight: "60px",
-                        // width: "77.8%",
+                        bottom: 1,
                       }}
                     />
+                    Add additional drop off
+                  </div>
+                ) : null}
+              </div>
+              <div className={classes.gloalTripInfos}>
+                <div className={classes.elGlobalTripIfos}>
+                  {this.state.fareETAEstimations.fareData !== undefined &&
+                  this.state.isLoadingForFare === false ? (
+                    <>
+                      <div className={classes.globalInfosPrimitiveContainer}>
+                        <AiTwotoneProject
+                          className={classes.icoGlobalTripsIfos1}
+                        />
+                      </div>
+                      Estimated fare{" "}
+                      <strong style={{ position: "relative", marginLeft: 5 }}>
+                        {this.state.fareETAEstimations.fareData.map((fare) => {
+                          if (/carDelivery/i.test(fare.car_type)) {
+                            return `N$${fare.base_fare}`;
+                          }
+                        })}
+                      </strong>
+                      .
+                    </>
+                  ) : this.state.isLoadingForFare ? (
                     <div
-                      className={classes.findMyLocationInputContainer}
-                      onClick={() => {
-                        this.resetCurrentPickupLocationToThis();
-                        this.setState({ hasCustomPickupLocation: false });
+                      style={{
+                        // border: "1px solid black",
+                        display: "flex",
+                        flexDirection: "row",
+                        marginBottom: 5,
                       }}
                     >
-                      <MdNearMe
-                        style={{ width: 23, height: 23 }}
-                        title={"Set to your current location"}
+                      <Loader
+                        type="TailSpin"
+                        color="#000"
+                        height={15}
+                        width={15}
+                        timeout={300000000} //3 secs
                       />
+                      <span
+                        style={{
+                          position: "relative",
+                          marginLeft: 4,
+                          color: "#0e8491",
+                        }}
+                      >
+                        Estimating your fare...
+                      </span>
                     </div>
-                  </div>
-                  {/* Search */}
-                  {this.state.focusedInput === -1
-                    ? this.renderSearchBar()
-                    : null}
+                  ) : null}
                 </div>
-                {/* Drop locations */}
-                {this.renderDestinationinput()}
+                <div className={classes.elGlobalTripIfos}>
+                  {this.state.isLoadingEta ? (
+                    <div
+                      style={{
+                        // border: "1px solid black",
+                        display: "flex",
+                        flexDirection: "row",
+                        marginBottom: 5,
+                      }}
+                    >
+                      <Loader
+                        type="TailSpin"
+                        color="#000"
+                        height={15}
+                        width={15}
+                        timeout={300000000} //3 secs
+                      />
+                      <span
+                        style={{
+                          position: "relative",
+                          marginLeft: 4,
+                          color: "#0e8491",
+                        }}
+                      >
+                        Estimating your ETA...
+                      </span>
+                    </div>
+                  ) : this.state.snapshotsToDestination.length > 0 ? (
+                    <>
+                      <div className={classes.globalInfosPrimitiveContainer}>
+                        <AiTwotoneProject
+                          className={classes.icoGlobalTripsIfos1}
+                        />
+                      </div>
+                      ETA
+                      <strong style={{ position: "relative", marginLeft: 5 }}>
+                        {this.renderUnifiedETATime()}
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      <div className={classes.globalInfosPrimitiveContainer}>
+                        <AiTwotoneProject
+                          className={classes.icoGlobalTripsIfos1}
+                        />
+                      </div>
+                      Please fill in all the locations.
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-
-            {this.props.App.userData.loginData.plans.delivery_limit !==
-            undefined ? (
-              <div
-                className={classes.addMoreDropOffBtn}
-                style={{
-                  opacity:
-                    this.state.dropOff_destination.length <
-                    parseInt(
-                      this.props.App.userData.loginData.plans.delivery_limit
-                    )
-                      ? 1
-                      : 0.3,
-                }}
-                onClick={() =>
-                  this.state.dropOff_destination.length <
-                  parseInt(
-                    this.props.App.userData.loginData.plans.delivery_limit
-                  )
-                    ? this.addAdditionalDestination()
-                    : {}
-                }
-              >
-                <AiFillPlusCircle
-                  style={{
-                    color: "#0e8491",
-                    marginRight: 5,
-                    position: "relative",
-                    bottom: 1,
-                  }}
-                />
-                Add additional drop off
-              </div>
-            ) : null}
-          </div>
-          <div className={classes.gloalTripInfos}>
-            <div className={classes.elGlobalTripIfos}>
-              {this.state.fareETAEstimations.fareData !== undefined &&
-              this.state.isLoadingForFare === false ? (
-                <>
+              <div className={classes.requestBtnContainer}>
+                <div
+                  className={classes.elGlobalTripIfos2}
+                  style={{ fontSize: 13 }}
+                >
                   <div className={classes.globalInfosPrimitiveContainer}>
-                    <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
+                    <AiFillTag className={classes.icoGlobalTripsIfos2} />
                   </div>
-                  Estimated fare{" "}
-                  <strong style={{ position: "relative", marginLeft: 5 }}>
-                    {this.state.fareETAEstimations.fareData.map((fare) => {
-                      if (/carDelivery/i.test(fare.car_type)) {
-                        return `N$${fare.base_fare}`;
-                      }
-                    })}
-                  </strong>
-                  .
-                </>
-              ) : this.state.isLoadingForFare ? (
+                  The receivers can track their deliveries.
+                </div>
                 <div
                   style={{
-                    // border: "1px solid black",
                     display: "flex",
                     flexDirection: "row",
-                    marginBottom: 5,
+                    marginTop: 20,
                   }}
                 >
-                  <Loader
-                    type="TailSpin"
-                    color="#000"
-                    height={15}
-                    width={15}
-                    timeout={300000000} //3 secs
-                  />
-                  <span
-                    style={{
-                      position: "relative",
-                      marginLeft: 4,
-                      color: "#0e8491",
-                    }}
-                  >
-                    Estimating your fare...
-                  </span>
-                </div>
-              ) : null}
-            </div>
-            <div className={classes.elGlobalTripIfos}>
-              {this.state.isLoadingEta ? (
-                <div
-                  style={{
-                    // border: "1px solid black",
-                    display: "flex",
-                    flexDirection: "row",
-                    marginBottom: 5,
-                  }}
-                >
-                  <Loader
-                    type="TailSpin"
-                    color="#000"
-                    height={15}
-                    width={15}
-                    timeout={300000000} //3 secs
-                  />
-                  <span
-                    style={{
-                      position: "relative",
-                      marginLeft: 4,
-                      color: "#0e8491",
-                    }}
-                  >
-                    Estimating your ETA...
-                  </span>
-                </div>
-              ) : this.state.snapshotsToDestination.length > 0 ? (
-                <>
-                  <div className={classes.globalInfosPrimitiveContainer}>
-                    <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
-                  </div>
-                  ETA
-                  <strong style={{ position: "relative", marginLeft: 5 }}>
-                    {this.renderUnifiedETATime()}
-                  </strong>
-                </>
-              ) : (
-                <>
-                  <div className={classes.globalInfosPrimitiveContainer}>
-                    <AiTwotoneProject className={classes.icoGlobalTripsIfos1} />
-                  </div>
-                  Please fill in all the locations.
-                </>
-              )}
-            </div>
-          </div>
-          <div className={classes.requestBtnContainer}>
-            <div className={classes.elGlobalTripIfos2} style={{ fontSize: 13 }}>
-              <div className={classes.globalInfosPrimitiveContainer}>
-                <AiFillTag className={classes.icoGlobalTripsIfos2} />
-              </div>
-              The receivers can track their deliveries.
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 20 }}
-            >
-              {/* <input
+                  {/* <input
                 type="submit"
                 value="Request for delivery"
                 className={classes.formBasicSubmitBttnClassics}
@@ -1465,209 +1535,229 @@ class DeliveryNode extends React.Component {
                     : console.log("Request for delivery")
                 }
               /> */}
-              <div
-                className={classes.formBasicSubmitBttnClassics}
-                style={{
-                  marginRight: 25,
-                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
-                  width: "80%",
-                  fontSize: 17,
-                  flexDirection: "column",
-                }}
-                onClick={() =>
-                  this.state.shoudAllowRequest === false
-                    ? {}
-                    : this.makeDeliveryRequest()
-                }
-              >
-                Request for delivery
-                {this.state.isScheduledTrip ? (
-                  <div className={classes.dateExtrDeliveryBtn}>
-                    {`${
-                      this.state.scheduledTime.toDateString().split(" ")[0]
-                    }, ${this.state.scheduledTime
-                      .toLocaleDateString()
-                      .replaceAll("/", "-")} at ${
-                      this.state.scheduledTime
-                        .toLocaleString()
-                        .split(", ")[1]
-                        .split(":")[0]
-                    }:${
-                      this.state.scheduledTime
-                        .toLocaleString()
-                        .split(", ")[1]
-                        .split(":")[1]
-                    }`}
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
-
-              <div
-                className={classes.formBasicSubmitBttnClassics}
-                style={{
-                  backgroundColor: "#d0d0d0",
-                  color: "black",
-                  borderColor: "#d0d0d0",
-                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
-                  width: 70,
-                  zIndex: 100000,
-                }}
-                onClick={() =>
-                  this.state.shoudAllowRequest === false
-                    ? {}
-                    : this.state.isScheduledTrip
-                    ? this.setState({
-                        showDateTimePicker: false,
-                        scheduledTime: new Date(),
-                        isScheduledTrip: false,
-                      })
-                    : this.state.showDateTimePicker
-                    ? {}
-                    : this.setState({
-                        showDateTimePicker: true,
-                        scheduledTime: new Date(),
-                      })
-                }
-              >
-                {this.state.showDateTimePicker ? (
                   <div
+                    className={classes.formBasicSubmitBttnClassics}
                     style={{
-                      display: "flex",
+                      marginRight: 25,
+                      opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                      width: "80%",
+                      fontSize: 17,
                       flexDirection: "column",
-                      boxShadow: "0px 0px 15px 1px rgba(0, 0, 0, 0.14)",
-                      marginBottom: 150,
                     }}
+                    onClick={() =>
+                      this.state.shoudAllowRequest === false
+                        ? {}
+                        : this.state.isLoadingGeneral === false
+                        ? this.makeDeliveryRequest()
+                        : {}
+                    }
                   >
-                    <LocalizationProvider dateAdapter={DateAdapter}>
-                      <StaticDateTimePicker
-                        displayStaticWrapperAs="mobile"
-                        toolbarTitle={"Select the delivery date"}
-                        value={this.state.scheduledTime}
-                        onChange={(newValue) => {
-                          this.setState({
-                            scheduledTime: new Date(newValue._d),
-                          });
-                        }}
-                        ampmInClock={false}
-                        ampm={false}
-                        renderInput={(params) => <TextField {...params} />}
+                    {this.state.isLoadingGeneral === false ? (
+                      <>
+                        Request for delivery
+                        {this.state.isScheduledTrip ? (
+                          <div className={classes.dateExtrDeliveryBtn}>
+                            {`${
+                              this.state.scheduledTime
+                                .toDateString()
+                                .split(" ")[0]
+                            }, ${this.state.scheduledTime
+                              .toLocaleDateString()
+                              .replaceAll("/", "-")} at ${
+                              this.state.scheduledTime
+                                .toLocaleString()
+                                .split(", ")[1]
+                                .split(":")[0]
+                            }:${
+                              this.state.scheduledTime
+                                .toLocaleString()
+                                .split(", ")[1]
+                                .split(":")[1]
+                            }`}
+                          </div>
+                        ) : (
+                          <></>
+                        )}
+                      </>
+                    ) : (
+                      <Loader
+                        type="TailSpin"
+                        color="#fff"
+                        height={27}
+                        width={27}
+                        timeout={300000000} //3 secs
                       />
-                    </LocalizationProvider>
-                    <div
-                      className={classes.formBasicSubmitBttnClassics}
-                      style={{
-                        width: "99.45%",
-                        backgroundColor: "#096ED4",
-                        borderColor: "#096ED4",
-                        borderRadius: 0,
-                      }}
-                      onClick={() => {
-                        this.setState({
-                          showDateTimePicker: false,
-                          isScheduledTrip: true,
-                        });
-                      }}
-                    >
-                      Set delivery date
-                    </div>
+                    )}
                   </div>
-                ) : this.state.isScheduledTrip ? (
-                  <MdDeleteSweep style={{ width: 28, height: 28 }} />
-                ) : (
-                  <MdAccessTime style={{ width: 28, height: 28 }} />
-                )}
+
+                  <div
+                    className={classes.formBasicSubmitBttnClassics}
+                    style={{
+                      backgroundColor: "#d0d0d0",
+                      color: "black",
+                      borderColor: "#d0d0d0",
+                      opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                      width: 70,
+                      zIndex: 100000,
+                    }}
+                    onClick={() =>
+                      this.state.shoudAllowRequest === false
+                        ? {}
+                        : this.state.isScheduledTrip
+                        ? this.setState({
+                            showDateTimePicker: false,
+                            scheduledTime: new Date(),
+                            isScheduledTrip: false,
+                          })
+                        : this.state.showDateTimePicker
+                        ? {}
+                        : this.setState({
+                            showDateTimePicker: true,
+                            scheduledTime: new Date(),
+                          })
+                    }
+                  >
+                    {this.state.showDateTimePicker ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          boxShadow: "0px 0px 15px 1px rgba(0, 0, 0, 0.14)",
+                          marginBottom: 150,
+                        }}
+                      >
+                        <LocalizationProvider dateAdapter={DateAdapter}>
+                          <StaticDateTimePicker
+                            displayStaticWrapperAs="mobile"
+                            toolbarTitle={"Select the delivery date"}
+                            value={this.state.scheduledTime}
+                            onChange={(newValue) => {
+                              this.setState({
+                                scheduledTime: new Date(newValue._d),
+                              });
+                            }}
+                            ampmInClock={false}
+                            ampm={false}
+                            renderInput={(params) => <TextField {...params} />}
+                          />
+                        </LocalizationProvider>
+                        <div
+                          className={classes.formBasicSubmitBttnClassics}
+                          style={{
+                            width: "99.45%",
+                            backgroundColor: "#096ED4",
+                            borderColor: "#096ED4",
+                            borderRadius: 0,
+                          }}
+                          onClick={() => {
+                            this.setState({
+                              showDateTimePicker: false,
+                              isScheduledTrip: true,
+                            });
+                          }}
+                        >
+                          Set delivery date
+                        </div>
+                      </div>
+                    ) : this.state.isScheduledTrip ? (
+                      <MdDeleteSweep style={{ width: 28, height: 28 }} />
+                    ) : (
+                      <MdAccessTime style={{ width: 28, height: 28 }} />
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className={classes.mapContainer} ref="mapPrimitiveContainer">
-          <ReactMapGL
-            width={"100%"}
-            height={"100%"}
-            latitude={
-              this.state.customFitboundsCoords.latitude !== undefined &&
-              this.state.customFitboundsCoords.longitude !== undefined
-                ? this.state.customFitboundsCoords.latitude
-                : this.state.pickup_destination !== null &&
-                  this.state.pickup_destination.data !== undefined &&
-                  this.state.pickup_destination.data.locationData !== null &&
-                  this.state.pickup_destination.data.locationData
-                    .coordinates !== undefined
-                ? this.state.pickup_destination.data.locationData.coordinates[0]
-                : this.state.latitude
-            }
-            longitude={
-              this.state.customFitboundsCoords.latitude !== undefined &&
-              this.state.customFitboundsCoords.longitude !== undefined
-                ? this.state.customFitboundsCoords.longitude
-                : this.state.pickup_destination !== null &&
-                  this.state.pickup_destination.data !== undefined &&
-                  this.state.pickup_destination.data.locationData !== null &&
-                  this.state.pickup_destination.data.locationData
-                    .coordinates !== undefined
-                ? this.state.pickup_destination.data.locationData.coordinates[1]
-                : this.state.longitude
-            }
-            zoom={
-              this.state.customFitboundsCoords.latitude !== undefined &&
-              this.state.customFitboundsCoords.longitude !== undefined &&
-              this.state.customFitboundsCoords.zoom
-                ? this.state.customFitboundsCoords.zoom
-                : this.state.zoom
-            }
-            mapStyle={"mapbox://styles/mapbox/streets-v11"}
-            mapboxApiAccessToken={
-              "pk.eyJ1IjoiZG9taW5pcXVla3R0IiwiYSI6ImNrYXg0M3gyNDAybDgyem81cjZuMXp4dzcifQ.PpW6VnORUHYSYqNCD9n6Yg"
-            }
-            onViewportChange={(newArgs) => {
-              //   console.log(newArgs);
-              this.setState({
-                zoom: newArgs.zoom,
-              });
-            }}
-            onViewStateChange={(newArgs) => {
-              //   console.log(newArgs);
-            }}
-            // asyncRender={true}
-            dragPan={true}
-            scrollZoom={true}
-          >
-            <GeolocateControl
-              style={{
-                top: 15,
-                left: 15,
-                opacity: 0,
-              }}
-              positionOptions={{ enableHighAccuracy: true }}
-              trackUserLocation={true}
-              showAccuracyCircle={false}
-              showUserLocation={true}
-              auto
-              onGeolocate={(position) => {
-                console.log(position);
-                if (
-                  position.coords !== undefined &&
-                  position.coords !== null &&
-                  position.coords.latitude !== undefined &&
-                  position.coords.longitude !== undefined
-                ) {
-                  //?Update the global app state as well as the local state
-                  this.props.App.latitude = position.coords.latitude;
-                  this.props.App.longitude = position.coords.longitude;
-                  //?----
-                  this.setState({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                  });
+            <div className={classes.mapContainer} ref="mapPrimitiveContainer">
+              <ReactMapGL
+                width={"100%"}
+                height={"100%"}
+                latitude={
+                  this.state.customFitboundsCoords.latitude !== undefined &&
+                  this.state.customFitboundsCoords.longitude !== undefined
+                    ? this.state.customFitboundsCoords.latitude
+                    : this.state.pickup_destination !== null &&
+                      this.state.pickup_destination.data !== undefined &&
+                      this.state.pickup_destination.data.locationData !==
+                        null &&
+                      this.state.pickup_destination.data.locationData
+                        .coordinates !== undefined
+                    ? this.state.pickup_destination.data.locationData
+                        .coordinates[0]
+                    : this.state.latitude
                 }
-              }}
-            />
-            {this.renderClusteredPolyline()}
-            {this.renderPickupMarker()}
-            {this.renderDropoffMarker()}
-            {/* <PolylineOverlay
+                longitude={
+                  this.state.customFitboundsCoords.latitude !== undefined &&
+                  this.state.customFitboundsCoords.longitude !== undefined
+                    ? this.state.customFitboundsCoords.longitude
+                    : this.state.pickup_destination !== null &&
+                      this.state.pickup_destination.data !== undefined &&
+                      this.state.pickup_destination.data.locationData !==
+                        null &&
+                      this.state.pickup_destination.data.locationData
+                        .coordinates !== undefined
+                    ? this.state.pickup_destination.data.locationData
+                        .coordinates[1]
+                    : this.state.longitude
+                }
+                zoom={
+                  this.state.customFitboundsCoords.latitude !== undefined &&
+                  this.state.customFitboundsCoords.longitude !== undefined &&
+                  this.state.customFitboundsCoords.zoom
+                    ? this.state.customFitboundsCoords.zoom
+                    : this.state.zoom
+                }
+                mapStyle={"mapbox://styles/mapbox/streets-v11"}
+                mapboxApiAccessToken={
+                  "pk.eyJ1IjoiZG9taW5pcXVla3R0IiwiYSI6ImNrYXg0M3gyNDAybDgyem81cjZuMXp4dzcifQ.PpW6VnORUHYSYqNCD9n6Yg"
+                }
+                onViewportChange={(newArgs) => {
+                  //   console.log(newArgs);
+                  this.setState({
+                    zoom: newArgs.zoom,
+                  });
+                }}
+                onViewStateChange={(newArgs) => {
+                  //   console.log(newArgs);
+                }}
+                // asyncRender={true}
+                dragPan={true}
+                scrollZoom={true}
+              >
+                <GeolocateControl
+                  style={{
+                    top: 15,
+                    left: 15,
+                    opacity: 0,
+                  }}
+                  positionOptions={{ enableHighAccuracy: true }}
+                  trackUserLocation={true}
+                  showAccuracyCircle={false}
+                  showUserLocation={true}
+                  auto
+                  onGeolocate={(position) => {
+                    console.log(position);
+                    if (
+                      position.coords !== undefined &&
+                      position.coords !== null &&
+                      position.coords.latitude !== undefined &&
+                      position.coords.longitude !== undefined
+                    ) {
+                      //?Update the global app state as well as the local state
+                      this.props.App.latitude = position.coords.latitude;
+                      this.props.App.longitude = position.coords.longitude;
+                      //?----
+                      this.setState({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                      });
+                    }
+                  }}
+                />
+                {this.renderClusteredPolyline()}
+                {this.renderPickupMarker()}
+                {this.renderDropoffMarker()}
+                {/* <PolylineOverlay
               points={[
                 [17.0809507, -22.5654531],
                 [17.0818734, -22.5685244],
@@ -1678,8 +1768,93 @@ class DeliveryNode extends React.Component {
                 [17.0808434, -22.5747658],
               ]}
             /> */}
-          </ReactMapGL>
-        </div>
+              </ReactMapGL>
+            </div>
+          </>
+        ) : this.state.isThereRequestError === false ? (
+          <div
+            style={{
+              //   border: "1px solid black",
+              display: "flex",
+              height: 400,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              margin: "auto",
+              width: "70%",
+              textAlign: "center",
+            }}
+          >
+            <MdCheckCircle
+              style={{ width: 35, height: 35, marginBottom: 25 }}
+              color={"#09864A"}
+            />
+            Your request has been successfully made, you can track it in real
+            time by clicking on "Track my delivery", below.
+            <div
+              className={classes.formBasicSubmitBttnClassicsReceiverInfos}
+              style={{ marginTop: 60, borderRadius: 3 }}
+              onClick={() => {
+                window.location.href = "/MyDeliveries";
+              }}
+            >
+              Track my delivery
+            </div>
+            <div
+              style={{
+                marginTop: 30,
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => (window.location.href = "Delivery")}
+            >
+              Or make another one{" "}
+              <MdTrendingFlat
+                style={{ position: "relative", top: 2, marginLeft: 5 }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              //   border: "1px solid black",
+              display: "flex",
+              height: 400,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              margin: "auto",
+              width: "70%",
+              textAlign: "center",
+            }}
+          >
+            <MdReportProblem
+              style={{ width: 35, height: 35, marginBottom: 25 }}
+              color={"#b22222"}
+            />
+            Sorry we were unable to make this request due to an unexpected
+            error, please refresh you web page and try again. If it persists
+            please contact us at <strong>support@taxiconnectna.com</strong>
+            <div
+              style={{
+                marginTop: 30,
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                fontWeight: "bold",
+                color: "#096ED4",
+              }}
+              onClick={() => (window.location.href = "Delivery")}
+            >
+              Try fixing the issue{" "}
+              <MdTrendingFlat
+                style={{ position: "relative", top: 2, marginLeft: 5 }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
