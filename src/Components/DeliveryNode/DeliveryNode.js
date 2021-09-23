@@ -53,7 +53,7 @@ const SIZE = 20;
 
 const applyToArray = (func, array) => func.apply(Math, array);
 const getBoundsForPoints = (points, mapPrimitiveDimensionsObj) => {
-  console.log(mapPrimitiveDimensionsObj);
+  // console.log(mapPrimitiveDimensionsObj);
   // Calculate corner values of bounds
   const pointsLong = points.map((point) => point.longitude);
   const pointsLat = points.map((point) => point.latitude);
@@ -75,8 +75,8 @@ class DeliveryNode extends React.Component {
     super(props);
 
     //! DEBUG
-    this.props.App.userData.loginData.plans.subscribed_plan = "starter";
-    this.props.App.userData.loginData.plans["delivery_limit"] = 2;
+    // this.props.App.userData.loginData.plans.subscribed_plan = "starter";
+    // this.props.App.userData.loginData.plans["delivery_limit"] = 2;
     //! ----------
 
     this.SOCKET_CORE = SOCKET_CORE;
@@ -126,7 +126,7 @@ class DeliveryNode extends React.Component {
 
     //Handle socket events
     this.SOCKET_CORE.on("getLocations-response", function (response) {
-      console.log(response);
+      // console.log(response);
       //...
       if (
         response !== false &&
@@ -1101,7 +1101,7 @@ class DeliveryNode extends React.Component {
     //...
     // console.log(pickupPoint);
     // console.log(dropOffPoints);
-    console.log(`Are valid for bounds: ${areValidForFitBounds}`);
+    // console.log(`Are valid for bounds: ${areValidForFitBounds}`);
 
     if (areValidForFitBounds) {
       let pointsBundle = dropOffPoints;
@@ -1142,7 +1142,7 @@ class DeliveryNode extends React.Component {
       ///...
       Promise.all(parentPromises)
         .then((result) => {
-          console.log(result);
+          // console.log(result);
         })
         .catch((error) => {
           console.error(error);
@@ -1258,7 +1258,7 @@ class DeliveryNode extends React.Component {
         location.data.locationData;
     });
     //...
-    console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
+    // console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
     //! Make a single request - risky
     //Not yet request and no errors
     //Check wheher an answer was already received - if not keep requesting

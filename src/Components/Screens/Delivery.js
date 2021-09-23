@@ -65,7 +65,7 @@ class Delivery extends React.PureComponent {
      * Responsible for redirecting updates to map graphics data based on if the status of the request is: pending, in route to pickup, in route to drop off or completed
      */
     this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
-      console.log(response);
+      // console.log(response);
       try {
         if (
           response !== null &&
@@ -83,28 +83,28 @@ class Delivery extends React.PureComponent {
           ) {
             //Update route to destination var - request status: inRouteToPickup, inRouteToDestination
             if (/inRouteToPickup/i.test(response.request_status)) {
-              console.log("In route to pickup");
+              // console.log("In route to pickup");
             } else if (response.request_status === "inRouteToDestination") {
-              console.log("In route to destination");
+              // console.log("In route to destination");
             }
             //...
           } else if (/pending/i.test(response.request_status)) {
-            console.log("Pending");
+            // console.log("Pending");
             globalObject.props.UpdateTripsData(response);
           } else if (
             response.request_status !== undefined &&
             response.request_status !== null &&
             /riderDropoffConfirmation_left/i.test(response.request_status)
           ) {
-            console.log("Confirm dropoff left");
+            // console.log("Confirm dropoff left");
             globalObject.props.UpdateTripsData(response);
           } else if (response.request_status === "no_rides") {
-            console.log("No rides");
+            // console.log("No rides");
             globalObject.props.UpdateTripsData({});
           }
         } //No rides
         else {
-          console.log("No rides");
+          // console.log("No rides");
           globalObject.props.UpdateTripsData({});
         }
       } catch (error) {
@@ -129,7 +129,7 @@ class Delivery extends React.PureComponent {
         } else if (result.state === "prompt") {
           navigator.geolocation.getCurrentPosition(
             (position) => {
-              console.log(position);
+              // console.log(position);
               globalObject.setState({ geolocationState: "granted" });
             },
             (error) => {
@@ -189,7 +189,7 @@ class Delivery extends React.PureComponent {
         user_nature: "rider",
         pushnotif_token: false,
       };
-      console.log(bundle);
+      // console.log(bundle);
       globalObject.SOCKET_CORE.emit("update-passenger-location", bundle);
     }, 2000);
   }
@@ -236,7 +236,7 @@ class Delivery extends React.PureComponent {
               style={{ borderRadius: 3 }}
               onClick={() =>
                 navigator.geolocation.getCurrentPosition((position) => {
-                  console.log(position);
+                  // console.log(position);
                 })
               }
             >

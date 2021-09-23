@@ -5,6 +5,10 @@ import { UpdateLoggingData } from "../../Redux/HomeActionsCreators";
 import Header from "../Screens/Header";
 import classes from "../../styles/Plans.module.css";
 import PlanNode from "./PlanNode";
+import jigsaw from "../../Images/jigsaw.png";
+import bird from "../../Images/bird.png";
+import divide from "../../Images/divide.png";
+import layer from "../../Images/layer.png";
 
 class PresentPlans extends React.PureComponent {
   constructor(props) {
@@ -18,7 +22,7 @@ class PresentPlans extends React.PureComponent {
           customButton={{
             show: true,
             title: "Skip for now",
-            action: null,
+            action: (window.location.href = "/Delivery"),
           }}
         />
         <div className={classes.mainTitle}>Business friendly pricing</div>
@@ -31,16 +35,19 @@ class PresentPlans extends React.PureComponent {
             description={"Powerful logistic with easy setup"}
             priceSmallBreakdown={"2 deliveries for about N$50 per delivery."}
             price={"N$100"}
-            paymentPeriod={"month"}
+            icon={jigsaw}
+            paymentPeriod={""}
             marginRight={20}
             isActive
+            featuresList={[{ title: "Deliveries graph" }]}
           />
           <PlanNode
             planName={"Intermediate"}
             description={"Grow your business with minimal setup"}
             price={"N$2500"}
+            icon={bird}
             priceSmallBreakdown={"50 deliveries for about N$50 per delivery."}
-            paymentPeriod={"month"}
+            paymentPeriod={""}
             marginRight={20}
             isRecommended
             isActive
@@ -49,14 +56,16 @@ class PresentPlans extends React.PureComponent {
             planName={"Pro"}
             description={"Scale your business seamlessly"}
             price={"N$15000"}
+            icon={divide}
             priceSmallBreakdown={"300 deliveries for about N$50 per delivery."}
-            paymentPeriod={"month"}
+            paymentPeriod={""}
             marginRight={20}
           />
           <PlanNode
             planName={"Personalized"}
             description={"Ultimate control and support for your team"}
             price={"Custom"}
+            icon={layer}
             priceSmallBreakdown={
               "Custom deliveries above 300 and analytics tool."
             }
@@ -66,7 +75,7 @@ class PresentPlans extends React.PureComponent {
         {/* Footer */}
         <div className={classes.footer}>
           <div className={classes.copyrightText}>
-            TaxiConnect 2020. All rights reserved.
+            TaxiConnect © 2020. All rights reserved.
           </div>
         </div>
       </div>

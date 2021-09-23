@@ -41,12 +41,14 @@ const PlanNode = ({
           ) : (
             <>
               from <span className={classes.feeTrue}>{price}</span>
-              <span className={classes.perPeriodPayment}>/{paymentPeriod}</span>
+              <span className={classes.perPeriodPayment}>{paymentPeriod}</span>
             </>
           )}
         </div>
         <div className={classes.subExplanationPrice}>{priceSmallBreakdown}</div>
-        <div className={classes.planICON}>{icon}</div>
+        <div className={classes.planICON}>
+          <img alt="planIco" src={icon} className={classes.planIcoTrue} />
+        </div>
         <div
           className={
             isActive

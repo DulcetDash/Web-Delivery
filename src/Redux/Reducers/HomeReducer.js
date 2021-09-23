@@ -66,6 +66,11 @@ const HomeReducer = (state = INIT_STATE, action) => {
       else {
         return state;
       }
+
+    case "LOG_OUT":
+      newState.userData.loginData = null;
+
+      return { ...state, ...newState };
     default:
       return state;
   }

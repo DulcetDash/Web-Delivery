@@ -1,6 +1,5 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 import HomeReducer from "./Redux/Reducers/HomeReducer";
 import { createStore } from "redux";
@@ -10,12 +9,7 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage for
 import { PersistGate } from "redux-persist/integration/react";
 import { parse, stringify } from "flatted";
 
-import Home from "./Components/Home";
-import PresentPlans from "./Components/Screens/PresentPlans";
-import Delivery from "./Components/Screens/Delivery";
-import Sidebar from "./Components/Sidebar/Sidebar";
-import HeaderStd from "./Components/HeaderStd/HeaderStd";
-import MyDeliveries from "./Components/Screens/MyDeliveries";
+import Entry from "./Entry";
 
 export const transformCircular = createTransform(
   (inboundState, key) => stringify(inboundState),
@@ -38,30 +32,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <div
-          style={{
-            backgroundColor: "#f3f3f3",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            height: "100vh",
-          }}
-        >
-          <HeaderStd />
-          <div className="mainParentNode">
-            <div className="sidebar">
-              <Sidebar />
-            </div>
-            <div className="globalDisplayContent">
-              <Switch>
-                <Route path="/" exact component={Home} />
-                <Route path="/plans" component={PresentPlans} />
-                <Route path="/Delivery" component={Delivery} />
-                <Route path="/MyDeliveries" component={MyDeliveries} />
-              </Switch>
-            </div>
-          </div>
-        </div>
+        <Entry />
       </PersistGate>
     </Provider>
   );

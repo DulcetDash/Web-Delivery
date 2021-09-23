@@ -3,7 +3,10 @@ import { ProSidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 import { BrowserRouter as Router, Link, Redirect } from "react-router-dom"; // Ke
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { UpdateCurrentLocationMetadat } from "../../Redux/HomeActionsCreators";
+import {
+  UpdateCurrentLocationMetadat,
+  LogOut,
+} from "../../Redux/HomeActionsCreators";
 import SOCKET_CORE from "../../Helper/managerNode";
 import "react-pro-sidebar/dist/css/styles.css";
 import "./sidebar.scss";
@@ -44,13 +47,44 @@ class Sidebar extends React.PureComponent {
     this.SOCKET_CORE = SOCKET_CORE;
 
     this.intervalPersister = null;
+
+    this.shouldBeRenderedBasedOnAccess();
   }
 
   componentDidMount() {
     let globalObject = this;
+
+    this.shouldBeRenderedBasedOnAccess();
+  }
+
+  componentDidUpdate() {
+    this.shouldBeRenderedBasedOnAccess();
+  }
+
+  /**
+   * Responsible to answer to yes or no question of which component should be rendered
+   * @return true: Yes render
+   * @return false: No do not render
+   */
+  shouldBeRenderedBasedOnAccess() {
+    if (
+      (this.props.App.userData.loginData === null ||
+        this.props.App.userData.loginData.company_fp === undefined ||
+        this.props.App.userData.loginData.company_fp === null ||
+        this.props.App.userData.loginData.company_fp === undefined ||
+        this.props.App.userData.loginData.company_name === true ||
+        this.props.App.userData.loginData.company_name === undefined ||
+        this.props.App.userData.loginData.company_name === null) &&
+      /\/$/.test(window.location.href) === false
+    ) {
+      this.props.LogOut();
+      window.location.href = "/";
+    }
   }
 
   render() {
+    this.shouldBeRenderedBasedOnAccess();
+    ///...
     return (
       <ProSidebar>
         <Menu iconShape="square">
@@ -129,6 +163,7 @@ const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       UpdateCurrentLocationMetadat,
+      LogOut,
     },
     dispatch
   );

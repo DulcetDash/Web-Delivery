@@ -63,7 +63,7 @@ class MyDeliveries extends React.Component {
      * Responsible for redirecting updates to map graphics data based on if the status of the request is: pending, in route to pickup, in route to drop off or completed
      */
     this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
-      console.log(response);
+      // console.log(response);
       try {
         if (
           response !== null &&
@@ -81,28 +81,28 @@ class MyDeliveries extends React.Component {
           ) {
             //Update route to destination var - request status: inRouteToPickup, inRouteToDestination
             if (/inRouteToPickup/i.test(response.request_status)) {
-              console.log("In route to pickup");
+              // console.log("In route to pickup");
             } else if (response.request_status === "inRouteToDestination") {
-              console.log("In route to destination");
+              // console.log("In route to destination");
             }
             //...
           } else if (/pending/i.test(response.request_status)) {
-            console.log("Pending");
+            // console.log("Pending");
             globalObject.props.UpdateTripsData(response);
           } else if (
             response.request_status !== undefined &&
             response.request_status !== null &&
             /riderDropoffConfirmation_left/i.test(response.request_status)
           ) {
-            console.log("Confirm dropoff left");
+            // console.log("Confirm dropoff left");
             globalObject.props.UpdateTripsData(response);
           } else if (response.request_status === "no_rides") {
-            console.log("No rides");
+            // console.log("No rides");
             globalObject.props.UpdateTripsData({});
           }
         } //No rides
         else {
-          console.log("No rides");
+          // console.log("No rides");
           globalObject.props.UpdateTripsData({});
         }
       } catch (error) {
@@ -150,14 +150,14 @@ class MyDeliveries extends React.Component {
    * @param reason: the reason of cancelling the request.
    */
   cancelRequest_rider(reason = false) {
-    console.log("Cancellation");
+    // console.log("Cancellation");
     if (
       this.props.App.tripsData !== undefined &&
       this.props.App.tripsData !== null &&
       this.props.App.tripsData !== false &&
       Object.keys(this.props.App.tripsData).length > 0
     ) {
-      console.log("Inside");
+      // console.log("Inside");
       this.setState({ isLoadingCancellation: true }); //Activate the loader
       //Bundle the cancel input
       let bundleData = {

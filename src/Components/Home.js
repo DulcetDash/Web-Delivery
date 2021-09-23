@@ -18,6 +18,9 @@ import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import classes from "../styles/Home.module.css";
 import Countdown from "react-countdown";
+import savingMoney from "../Images/saving-money.png";
+import workflow from "../Images/workflow.png";
+import analysis from "../Images/analysis.png";
 
 class Home extends React.PureComponent {
   constructor(props) {
@@ -95,14 +98,14 @@ class Home extends React.PureComponent {
   componentDidMount() {
     this.redirectBasedOnState();
 
-    console.log(this.props.App);
+    // console.log(this.props.App);
     let globalObject = this;
 
     //Handle socket Events
     this.SOCKET_CORE.on(
       "opsOnCorpoDeliveryAccounts_io-response",
       function (response) {
-        console.log(response);
+        // console.log(response);
         globalObject.state.isLoading = false;
         if (
           response !== undefined &&
@@ -207,7 +210,7 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "resetConfirmationSMSDeliveryWeb_io-response",
       function (response) {
-        console.log(response);
+        // console.log(response);
         globalObject.setState({ isLoadingResendSMS: false });
 
         if (
@@ -231,7 +234,7 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "validatePhoneNumberDeliveryWeb_io-response",
       function (response) {
-        console.log(response);
+        // console.log(response);
         globalObject.setState({ isLoading: false });
 
         if (
@@ -272,7 +275,7 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "updatePhoneNumberDeliveryWeb_io-response",
       function (response) {
-        console.log(response);
+        // console.log(response);
         globalObject.setState({ isLoading: false });
 
         if (
@@ -345,7 +348,7 @@ class Home extends React.PureComponent {
                     if (this.state.password === this.state.password_confirm) {
                       //! ALL GOOD
                       //Good
-                      console.log("All good");
+                      // console.log("All good");
                       this.setState({ isLoading: true });
                       this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
                         op: "signup",
@@ -398,7 +401,7 @@ class Home extends React.PureComponent {
           this.state.password !== undefined
         ) {
           //Good
-          console.log("All good, login");
+          // console.log("All good, login");
           this.setState({ isLoading: true });
           this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
             op: "login",
@@ -646,12 +649,12 @@ class Home extends React.PureComponent {
           this.props.App.userData.loginData.company_fp !== undefined
         ) {
           this.setState({ isLoading: true });
-          console.log({
-            op: "validatePhoneNumber",
-            otp: this.state.otp,
-            company_fp: this.props.App.userData.loginData.company_fp,
-            phone: this.props.App.userData.loginData.phone,
-          });
+          // console.log({
+          //   op: "validatePhoneNumber",
+          //   otp: this.state.otp,
+          //   company_fp: this.props.App.userData.loginData.company_fp,
+          //   phone: this.props.App.userData.loginData.phone,
+          // });
           this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
             op: "validatePhoneNumber",
             otp: this.state.otp,
@@ -707,7 +710,7 @@ class Home extends React.PureComponent {
 
   render() {
     return (
-      <div>
+      <div style={{ backgroundColor: "#fff" }}>
         <Header />
         <div className={classes.headerContainerSecond}>
           <div className={classes.headerTitleContainer}>
@@ -1134,26 +1137,47 @@ class Home extends React.PureComponent {
           <div className={classes.optionsMaiNContainer}>
             <div className={classes.optionNode}>
               <div className={classes.imageOptionInsider}>
-                <image alt="img" src="" />
+                <img
+                  alt="img"
+                  src={savingMoney}
+                  className={classes.imageAspectGeneric}
+                />
               </div>
               <div className={classes.titleInsideOption}>Flexible pricing</div>
-              <div className={classes.descriptionInsideOption}>Description</div>
+              <div className={classes.descriptionInsideOption}>
+                Get realistic prices based on your location and type of
+                packages.
+              </div>
             </div>
             {/* 2 */}
             <div className={classes.optionNode}>
               <div className={classes.imageOptionInsider}>
-                <image alt="img" src="" />
+                <img
+                  alt="img"
+                  src={workflow}
+                  className={classes.imageAspectGeneric}
+                />
               </div>
               <div className={classes.titleInsideOption}>Request anytime</div>
-              <div className={classes.descriptionInsideOption}>Description</div>
+              <div className={classes.descriptionInsideOption}>
+                Make as many delivery request as your business need to handle
+                all your logistical needs in once go and in one place.
+              </div>
             </div>
             {/* 3 */}
             <div className={classes.optionNode}>
               <div className={classes.imageOptionInsider}>
-                <image alt="img" src={this.props.App.timeIco} />
+                <img
+                  alt="img"
+                  src={analysis}
+                  className={classes.imageAspectGeneric}
+                />
               </div>
               <div className={classes.titleInsideOption}>Keep track</div>
-              <div className={classes.descriptionInsideOption}>Description</div>
+              <div className={classes.descriptionInsideOption}>
+                Get detailed analytics about your deliveries to help you
+                understand you pick times and many more.
+              </div>
             </div>
           </div>
         </div>
@@ -1161,7 +1185,7 @@ class Home extends React.PureComponent {
         {/* Footer */}
         <div className={classes.footer}>
           <div className={classes.copyrightText}>
-            TaxiConnect 2020. All rights reserved.
+            TaxiConnect © 2020. All rights reserved.
           </div>
         </div>
       </div>

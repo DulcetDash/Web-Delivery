@@ -24,3 +24,8 @@ export const UpdateTripsData = (dataReceived) => ({
   type: "UPDATE_TRIPS_DATA",
   payload: dataReceived,
 });
+
+//3. Log out
+export const LogOut = () => ({
+  type: "LOG_OUT",
+});
