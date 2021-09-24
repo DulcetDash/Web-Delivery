@@ -87,6 +87,7 @@ class Sidebar extends React.PureComponent {
         op: "getAccountData",
         company_fp: globalObject.props.App.userData.loginData.company_fp,
       });
+      globalObject.shouldBeRenderedBasedOnAccess();
     }, 2000);
   }
 
@@ -111,7 +112,9 @@ class Sidebar extends React.PureComponent {
       /\/$/.test(window.location.href) === false
     ) {
       this.props.LogOut();
-      window.location.href = "/";
+      setTimeout(function () {
+        window.location.href = "/";
+      }, 800);
     }
   }
 
