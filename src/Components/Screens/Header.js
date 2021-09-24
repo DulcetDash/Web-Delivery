@@ -18,9 +18,9 @@ const Header = ({
           <div class={classes.customButtonRightContainer}>
             <div
               className={classes.trueCustButtonHeader}
-              onClick={() => customButton.action}
+              onClick={customButton.action}
             >
-              Skip for now <AiOutlineRight />
+              {customButton.title} <AiOutlineRight />
             </div>
           </div>
         ) : null}

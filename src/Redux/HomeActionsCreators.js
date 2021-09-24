@@ -29,3 +29,9 @@ export const UpdateTripsData = (dataReceived) => ({
 export const LogOut = () => ({
   type: "LOG_OUT",
 });
+
+//4. Update the plan that's about to be pruchased
+export const UpdatePlanPurchaseData = (dataReceived) => ({
+  type: "UPDATE_PLAN_PURCHASE_DATA",
+  payload: dataReceived,
+});

@@ -9,6 +9,7 @@ const PlanNode = ({
   icon = "image",
   buttonTitle = "Get started now",
   priceSmallBreakdown = "breakdown of the price",
+  titleFeatures = "Free access to:",
   featuresList = [
     { title: "Feature 1" },
     { title: "Feature 2" },
@@ -17,6 +18,7 @@ const PlanNode = ({
   marginRight = 0,
   isRecommended = false,
   isActive = false,
+  actionGetStartedButton = null,
 }) => {
   return (
     <div style={{ marginRight: marginRight }}>
@@ -50,6 +52,7 @@ const PlanNode = ({
           <img alt="planIco" src={icon} className={classes.planIcoTrue} />
         </div>
         <div
+          onClick={isActive ? actionGetStartedButton : null}
           className={
             isActive
               ? classes.getStartedButton
@@ -59,7 +62,7 @@ const PlanNode = ({
           {buttonTitle}
         </div>
         <div className={classes.featuresList}>
-          <div className={classes.titleFeaturesList}>Free access to</div>
+          <div className={classes.titleFeaturesList}>{titleFeatures}</div>
           <div className={classes.featuresTrueMother}>
             {featuresList.map((feature) => {
               return (

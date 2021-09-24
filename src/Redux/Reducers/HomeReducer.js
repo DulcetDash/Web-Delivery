@@ -14,9 +14,20 @@ const HomeReducer = (state = INIT_STATE, action) => {
 
   switch (action.type) {
     case "UPDATE_LOGGIN_DATA":
-      newState.userData.loginData = action.payload;
-      //...
-      return { ...state, ...newState };
+      //? Optimized
+      if (
+        `${JSON.stringify(newState.userData.loginData)}` !==
+        `${JSON.stringify(action.payload)}`
+      ) {
+        //New data
+        console.log("NEW DATA");
+        newState.userData.loginData = action.payload;
+        //...
+        return { ...state, ...newState };
+      } else {
+        console.log("SAME DATA");
+        return state;
+      }
 
     case "UPDATE_CURRENT_LOCATION_METADATA":
       //? Optmimized
@@ -69,6 +80,12 @@ const HomeReducer = (state = INIT_STATE, action) => {
 
     case "LOG_OUT":
       newState.userData.loginData = null;
+
+      return { ...state, ...newState };
+
+    case "UPDATE_PLAN_PURCHASE_DATA":
+      newState.temporaryPackagePurchaseVars.planName = action.payload.planName;
+      newState.temporaryPackagePurchaseVars.amount = action.payload.amount;
 
       return { ...state, ...newState };
     default:

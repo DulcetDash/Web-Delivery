@@ -13,6 +13,7 @@ import Delivery from "./Components/Screens/Delivery";
 import Sidebar from "./Components/Sidebar/Sidebar";
 import HeaderStd from "./Components/HeaderStd/HeaderStd";
 import MyDeliveries from "./Components/Screens/MyDeliveries";
+import Purchase from "./Components/Screens/Purchase";
 
 class Entry extends React.Component {
   constructor(props) {
@@ -29,15 +30,18 @@ class Entry extends React.Component {
    * @return false: No do not render
    */
   shouldBeRenderedBasedOnAccess() {
+    // console.log(/plans/i.test(window.location.href));
+    let initialCond =
+      this.props.App.userData.loginData !== null &&
+      this.props.App.userData.loginData.company_fp !== undefined &&
+      this.props.App.userData.loginData.company_fp !== null &&
+      this.props.App.userData.loginData.company_fp !== undefined &&
+      this.props.App.userData.loginData.company_name !== undefined &&
+      this.props.App.userData.loginData.company_name !== null;
+
+    //...
     return (
-      (this.props.App.userData.loginData === null ||
-        this.props.App.userData.loginData.company_fp === undefined ||
-        this.props.App.userData.loginData.company_fp === null ||
-        this.props.App.userData.loginData.company_fp === undefined ||
-        this.props.App.userData.loginData.company_name === true ||
-        this.props.App.userData.loginData.company_name === undefined ||
-        this.props.App.userData.loginData.company_name === null) &&
-      /\/$/.test(window.location.href) === false
+      initialCond && /(plans|purchase)/i.test(window.location.href) === false
     );
   }
 
@@ -52,9 +56,9 @@ class Entry extends React.Component {
           height: "100vh",
         }}
       >
-        {this.shouldBeRenderedBasedOnAccess() === false ? <HeaderStd /> : <></>}
+        {this.shouldBeRenderedBasedOnAccess() ? <HeaderStd /> : <></>}
         <div className="mainParentNode">
-          {this.shouldBeRenderedBasedOnAccess() === false ? (
+          {this.shouldBeRenderedBasedOnAccess() ? (
             <div className="sidebar">
               <Sidebar />
             </div>
@@ -67,6 +71,7 @@ class Entry extends React.Component {
               <Route path="/plans" component={PresentPlans} />
               <Route path="/Delivery" component={Delivery} />
               <Route path="/MyDeliveries" component={MyDeliveries} />
+              <Route path="/Purchase" component={Purchase} />
             </Switch>
           </div>
         </div>

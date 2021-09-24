@@ -1,0 +1,173 @@
+.mainContainer {
+  /* border: 1px solid black; */
+  background-color: #fff;
+}
+
+.mainTitle {
+  /* border: 1px solid red; */
+  margin-top: 5%;
+  /* text-align: center; */
+  font-family: "MoveBold", sans-serif;
+  font-size: 25px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.subMainTitle {
+  /* border: 1px solid black; */
+  /* text-align: center; */
+  font-size: 16px;
+  font-family: "MoveTextMedium", sans-serif;
+  margin-top: 1%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: #096ed4;
+  width: 260px;
+  cursor: pointer;
+}
+
+.contentContainer {
+  /* border: 1px solid black; */
+  padding-left: 11%;
+  padding-right: 10%;
+  margin-top: 5%;
+  max-width: 1000px;
+}
+
+/* Footer */
+
+.footer {
+  /* border: 1px solid black; */
+  margin-top: 15%;
+  height: 150px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 11%;
+  background-color: #f0f0f0;
+}
+
+.copyrightText {
+  font-family: "MoveTextRegular", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.paymentPrimitiveContainer {
+  /* border: 1px solid black; */
+  margin-top: 50px;
+  display: flex;
+  flex-direction: row;
+  min-height: 300px;
+}
+
+.paymentSide {
+  /* border: 1px solid red; */
+  flex: 1;
+}
+
+.planSide {
+  /* border: 1px solid blue; */
+  flex: 1;
+}
+
+.infosRefs {
+  /* border: 1px solid black; */
+  margin-top: 30px;
+  font-size: 13px;
+  width: 80%;
+  color: #1d1c1cbb;
+}
+
+.formBasicInput {
+  font-family: "MoveTextRegular", sans-serif;
+  /* border: none; */
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  font-size: 16px;
+  padding: 10px;
+  width: 377px;
+  margin-bottom: 15px;
+  margin-top: 20px;
+}
+
+.formBasicSubmitBttn {
+  font-family: "MoveTextRegular", sans-serif;
+  border: 1px solid #000;
+  border-radius: 2px;
+  font-size: 19px;
+  padding: 10px;
+  width: 375px;
+  margin-top: 20px;
+  height: 30px;
+  background-color: #000;
+  color: #fff;
+  font-family: "MoveTextBold", sans-serif;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.planICON {
+  /* border: 1px solid black; */
+  margin: auto;
+  width: 100px;
+  height: 80px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+.planIcoTrue {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+.planPrimitiveContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.planMainTitle {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.descrTextContainer {
+  /* border: 1px solid black; */
+  width: 80%;
+  font-size: 16px;
+  text-align: center;
+}
+
+.infosErrorShow {
+  font-size: 14px;
+  color: #b22222;
+  height: 25px;
+  border: 1px solid #fff;
+}
+
+.formBasicSubmitBttnClassicsReceiverInfos {
+  font-family: "MoveTextRegular", sans-serif;
+  border: 1px solid #096ed4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  padding: 10px;
+  height: 20px;
+  background-color: #096ed4;
+  color: #fff;
+  font-family: "MoveTextBold", sans-serif;
+  cursor: pointer;
+  min-width: 100px;
+}

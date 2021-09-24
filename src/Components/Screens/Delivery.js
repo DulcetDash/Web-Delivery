@@ -25,6 +25,7 @@ import DeliveryNode from "../DeliveryNode/DeliveryNode";
 import { geolocated } from "react-geolocated";
 import { AiTwotoneEnvironment, AiTwotoneSetting } from "react-icons/ai";
 import Loader from "react-loader-spinner";
+import GreetingImage from "../../Images/newDriverWelcome.jpg";
 
 class Delivery extends React.PureComponent {
   constructor(props) {
@@ -198,10 +199,72 @@ class Delivery extends React.PureComponent {
     clearInterval(this.intervalPersister);
   }
 
-  render() {
+  renderNoPlansFound() {
     return (
-      <div className={classes.mainContainer}>
-        {!this.props.isGeolocationAvailable ? (
+      <div
+        style={{
+          // border: "1px solid black",
+          display: "flex",
+          height: 400,
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          width: "65%",
+          margin: "auto",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontFamily: "MoveBold, sans-serif", fontSize: 30 }}>
+          Welcome!
+        </div>
+        <div
+          style={{
+            // border: "1px solid black",
+            width: 400,
+            height: 200,
+            marginBottom: 20,
+          }}
+        >
+          <img
+            alt="greet"
+            src={GreetingImage}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        </div>
+        It looks like you don't have any active package yet, please purchase to
+        start.
+        <div
+          className={classes.formBasicSubmitBttnClassicsReceiverInfos}
+          onClick={() => {
+            window.location.href = "/plans";
+          }}
+        >
+          Purchase a package
+        </div>
+      </div>
+    );
+  }
+
+  render() {
+    //!DEBUG
+    //this.props.App.userData.loginData.subscribed_plan = false;
+    //!---
+
+    return (
+      <div
+        className={classes.mainContainer}
+        style={{
+          backgroundColor:
+            this.props.App.userData.loginData.subscribed_plan === false ||
+            this.props.App.userData.loginData.isPlan_active === false
+              ? "#fff"
+              : "#f3f3f3",
+        }}
+      >
+        {this.props.App.userData.loginData.subscribed_plan === false ||
+        this.props.App.userData.loginData.isPlan_active === false ? (
+          this.renderNoPlansFound()
+        ) : !this.props.isGeolocationAvailable ? (
           <div>Your browser does not support geolocation</div>
         ) : !this.props.isGeolocationEnabled ? (
           <div

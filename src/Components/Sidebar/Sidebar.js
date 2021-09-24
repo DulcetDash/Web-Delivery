@@ -6,6 +6,7 @@ import { bindActionCreators } from "redux";
 import {
   UpdateCurrentLocationMetadat,
   LogOut,
+  UpdateLoggingData,
 } from "../../Redux/HomeActionsCreators";
 import SOCKET_CORE from "../../Helper/managerNode";
 import "react-pro-sidebar/dist/css/styles.css";
@@ -55,6 +56,38 @@ class Sidebar extends React.PureComponent {
     let globalObject = this;
 
     this.shouldBeRenderedBasedOnAccess();
+    this.updateBackgroundData();
+
+    /**
+     * Handle the updating of the account data
+     */
+    this.SOCKET_CORE.on(
+      "getAccountDataDeliveryWeb_io-response",
+      function (response) {
+        if (
+          response !== undefined &&
+          response !== null &&
+          response.response !== undefined &&
+          response.response !== null &&
+          /authed/i.test(response.response)
+        ) {
+          console.log(response);
+          globalObject.props.UpdateLoggingData(response.metadata);
+        }
+      }
+    );
+  }
+
+  updateBackgroundData() {
+    let globalObject = this;
+
+    this.intervalPersister = setInterval(function () {
+      //! Get the account data
+      globalObject.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+        op: "getAccountData",
+        company_fp: globalObject.props.App.userData.loginData.company_fp,
+      });
+    }, 2000);
   }
 
   componentDidUpdate() {
@@ -164,6 +197,7 @@ const mapDispatchToProps = (dispatch) =>
     {
       UpdateCurrentLocationMetadat,
       LogOut,
+      UpdateLoggingData,
     },
     dispatch
   );
