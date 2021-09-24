@@ -155,7 +155,9 @@ class Sidebar extends React.PureComponent {
             <Link
               onClick={() => {
                 this.props.LogOut();
-                window.location.href = "/";
+                setTimeout(function () {
+                  window.location.href = "/";
+                }, 1000);
               }}
             >
               <AiOutlineLogout style={iconStyle} />
