@@ -20,12 +20,10 @@ const HomeReducer = (state = INIT_STATE, action) => {
         `${JSON.stringify(action.payload)}`
       ) {
         //New data
-        console.log("NEW DATA");
         newState.userData.loginData = action.payload;
         //...
         return { ...state, ...newState };
       } else {
-        console.log("SAME DATA");
         return state;
       }
 

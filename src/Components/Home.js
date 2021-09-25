@@ -84,7 +84,8 @@ class Home extends React.PureComponent {
       this.props.App.userData.loginData.account.confirmations.isPhoneConfirmed
     ) {
       //Move to plans
-      window.location.href = "/plans";
+      // window.location.href = "/plans";
+      console.log(this.props.App.userData.loginData);
     } //Stay
     else {
     }
@@ -154,6 +155,7 @@ class Home extends React.PureComponent {
             }
           } //No error occured
           else {
+            console.log(response);
             if (/successfully_created/i.test(response.response)) {
               //SUCCESS
               globalObject.props.UpdateLoggingData(response.metadata);
@@ -183,7 +185,7 @@ class Home extends React.PureComponent {
                 globalObject.setState({
                   isLoading: true,
                 });
-                window.location.href = "/plans";
+                //window.location.href = "/plans";
               }
             }
             //An error occured

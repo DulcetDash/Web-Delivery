@@ -30,7 +30,6 @@ class Entry extends React.Component {
    * @return false: No do not render
    */
   shouldBeRenderedBasedOnAccess() {
-    // console.log(/plans/i.test(window.location.href));
     let initialCond =
       this.props.App.userData.loginData !== null &&
       this.props.App.userData.loginData.company_fp !== undefined &&
@@ -40,8 +39,15 @@ class Entry extends React.Component {
       this.props.App.userData.loginData.company_name !== null;
 
     //...
+    console.log(
+      initialCond &&
+        /(plans|purchase)/i.test(window.location.href) === false &&
+        /\/$/i.test(window.location.href) === false
+    );
     return (
-      initialCond && /(plans|purchase)/i.test(window.location.href) === false
+      initialCond &&
+      /(plans|purchase)/i.test(window.location.href) === false &&
+      /\/$/i.test(window.location.href) === false
     );
   }
 

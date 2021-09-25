@@ -71,7 +71,6 @@ class Sidebar extends React.PureComponent {
           response.response !== null &&
           /authed/i.test(response.response)
         ) {
-          console.log(response);
           globalObject.props.UpdateLoggingData(response.metadata);
         }
       }
@@ -183,7 +182,7 @@ class Sidebar extends React.PureComponent {
                     : "#01101f",
                 }}
               />
-              <span className="menuTextVersionNo">v1.0.020</span>
+              <span className="menuTextVersionNo">v1.0.026</span>
             </Link>
           </MenuItem>
         </Menu>

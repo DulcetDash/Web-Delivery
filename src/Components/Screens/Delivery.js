@@ -249,20 +249,19 @@ class Delivery extends React.PureComponent {
     //!DEBUG
     //this.props.App.userData.loginData.subscribed_plan = false;
     //!---
-
     return (
       <div
         className={classes.mainContainer}
         style={{
           backgroundColor:
-            this.props.App.userData.loginData.subscribed_plan === false ||
-            this.props.App.userData.loginData.isPlan_active === false
+            this.props.App.userData.loginData.plans.subscribed_plan === false ||
+            this.props.App.userData.loginData.plans.isPlan_active === false
               ? "#fff"
               : "#f3f3f3",
         }}
       >
-        {this.props.App.userData.loginData.subscribed_plan === false ||
-        this.props.App.userData.loginData.isPlan_active === false ? (
+        {this.props.App.userData.loginData.plans.subscribed_plan === false ||
+        this.props.App.userData.loginData.plans.isPlan_active === false ? (
           this.renderNoPlansFound()
         ) : !this.props.isGeolocationAvailable ? (
           <div>Your browser does not support geolocation</div>
