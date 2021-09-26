@@ -2,15 +2,13 @@ FROM mhart/alpine-node:14
 
 ADD . /app/
 
-WORKDIR /app/src
+WORKDIR /app/
 
 RUN rm .env
 #Production
 # RUN mv .env_live .env
 #Development
 RUN mv .env_dev .env
-
-WORKDIR /app/
 
 RUN npm install yarn -g --force
 RUN yarn global add pm2
