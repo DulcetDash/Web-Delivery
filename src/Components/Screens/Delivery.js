@@ -297,9 +297,16 @@ class Delivery extends React.PureComponent {
               className={classes.formBasicButton}
               style={{ borderRadius: 3 }}
               onClick={() =>
-                navigator.geolocation.getCurrentPosition((position) => {
-                  // console.log(position);
-                })
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    console.log(position);
+                    this.setState({ geolocationState: "granted" });
+                  },
+                  (error) => {
+                    console.log(error);
+                    this.setState({ geolocationState: "denied" });
+                  }
+                )
               }
             >
               <AiTwotoneEnvironment

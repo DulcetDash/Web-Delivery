@@ -84,7 +84,7 @@ class Home extends React.PureComponent {
       this.props.App.userData.loginData.account.confirmations.isPhoneConfirmed
     ) {
       //Move to plans
-      // window.location.href = "/plans";
+      window.location.href = "/plans";
       console.log(this.props.App.userData.loginData);
     } //Stay
     else {
@@ -185,7 +185,7 @@ class Home extends React.PureComponent {
                 globalObject.setState({
                   isLoading: true,
                 });
-                //window.location.href = "/plans";
+                window.location.href = "/plans";
               }
             }
             //An error occured
@@ -548,6 +548,7 @@ class Home extends React.PureComponent {
           globalObject.props.App.userData.loginData.email !== null
         ) {
           //Has valid data
+          globalObject.resendConfirmationSMSAgain();
           globalObject.setState({
             shouldShowSMSAuth: true,
           });
