@@ -146,12 +146,12 @@ class Sidebar extends React.PureComponent {
               <span className="menuText">Statistics</span>
             </Link>
           </MenuItem>
-          {/* <MenuItem className="menuItemSideBar">
+          <MenuItem className="menuItemSideBar">
             <Link to="/Settings">
               <AiOutlineSetting style={iconStyle} />
               <span className="menuText">Settings</span>
             </Link>
-          </MenuItem> */}
+          </MenuItem>
 
           <MenuItem className="menuItemSideBar">
             <Link

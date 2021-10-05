@@ -84,7 +84,17 @@ class Home extends React.PureComponent {
       this.props.App.userData.loginData.account.confirmations.isPhoneConfirmed
     ) {
       //Move to plans
-      window.location.href = "/plans";
+      //? move to plans or straight home based on if a package was purchased or not
+      if (
+        this.props.App.userData.loginData.plans.subscribed_plan !== false &&
+        this.props.App.userData.loginData.plans.isPlan_active
+      ) {
+        //Has an active plans
+        window.location.href = "/Delivery";
+      } //No active plans
+      else {
+        window.location.href = "/plans";
+      }
       console.log(this.props.App.userData.loginData);
     } //Stay
     else {
@@ -185,7 +195,17 @@ class Home extends React.PureComponent {
                 globalObject.setState({
                   isLoading: true,
                 });
-                window.location.href = "/plans";
+                //? move to plans or straight home based on if a package was purchased or not
+                if (
+                  response.metadata.plans.subscribed_plan !== false &&
+                  response.metadata.plans.isPlan_active
+                ) {
+                  //Has an active plans
+                  window.location.href = "/Delivery";
+                } //No active plans
+                else {
+                  window.location.href = "/plans";
+                }
               }
             }
             //An error occured
