@@ -1,0 +1,51 @@
+.nodeContainer {
+  /* border: 1px solid black; */
+  display: flex;
+  flex-direction: row;
+}
+.titleNodeInsider {
+  font-family: "MoveTextBold", sans-serif;
+  color: #888585;
+  font-size: 13px;
+  /* border: 1px solid black; */
+  height: 40px;
+}
+
+.nodeInsideSideContainer {
+  /* border: 1px solid red; */
+  flex: 1;
+}
+
+.podInsideInsider {
+  /* border-bottom: 1px solid black; */
+  margin-top: 20px;
+}
+
+.lineLabelData {
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.labelInsido {
+  /* border: 1px solid red; */
+  flex: 1;
+  display: flex;
+  flex-direction: "row";
+  align-items: center;
+  font-size: 15px;
+}
+
+.squarePoint {
+  position: "relative";
+  width: 7px;
+  height: 7px;
+  margin-right: 3px;
+  bottom: 2px;
+}
+
+.dataInsido {
+  font-family: "MoveTextBold", sans-serif;
+}

@@ -14,6 +14,8 @@ import Sidebar from "./Components/Sidebar/Sidebar";
 import HeaderStd from "./Components/HeaderStd/HeaderStd";
 import MyDeliveries from "./Components/Screens/MyDeliveries";
 import Purchase from "./Components/Screens/Purchase";
+import History from "./Components/Screens/History";
+import Statistics from "./Components/Screens/Statistics";
 
 class Entry extends React.Component {
   constructor(props) {
@@ -78,6 +80,8 @@ class Entry extends React.Component {
               <Route path="/Delivery" component={Delivery} />
               <Route path="/MyDeliveries" component={MyDeliveries} />
               <Route path="/Purchase" component={Purchase} />
+              <Route path="/History" component={History} />
+              <Route path="/Statistics" component={Statistics} />
             </Switch>
           </div>
         </div>

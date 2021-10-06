@@ -226,7 +226,12 @@ class MyDeliveries extends React.Component {
       <div className={classes.mainContainer}>
         <div className={classes.mainScreenTitle}>
           Active deliveries
-          <div className={classes.historyEntryTitle}>History</div>
+          <div
+            className={classes.historyEntryTitle}
+            onClick={() => (window.location.href = "/History")}
+          >
+            History
+          </div>
         </div>
         {Object.keys(this.props.App.tripsData).length > 0 &&
         deliveryData.birdview_infos !== undefined ? (

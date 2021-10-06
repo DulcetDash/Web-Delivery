@@ -182,7 +182,7 @@ class Sidebar extends React.PureComponent {
                     : "#01101f",
                 }}
               />
-              <span className="menuTextVersionNo">v1.0.030</span>
+              <span className="menuTextVersionNo">v1.0.034</span>
             </Link>
           </MenuItem>
         </Menu>
