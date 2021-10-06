@@ -34,7 +34,7 @@ class HeaderStd extends React.PureComponent {
           <img alt="logo" src={logotaxiconnect} className={classes.trueLogo} />
         </div>
         <div></div>
-        <div className={classes.rightContainer}>
+        {/* <div className={classes.rightContainer}>
           <div
             style={{
               display: "flex",
@@ -62,7 +62,7 @@ class HeaderStd extends React.PureComponent {
               style={{ color: "#fff", width: 10, height: 10, marginLeft: 10 }}
             />
           </div>
-        </div>
+        </div> */}
         {/* Modal */}
         <Modal
           isOpen={false}

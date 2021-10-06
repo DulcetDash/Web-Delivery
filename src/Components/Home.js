@@ -95,7 +95,6 @@ class Home extends React.PureComponent {
       else {
         window.location.href = "/plans";
       }
-      console.log(this.props.App.userData.loginData);
     } //Stay
     else {
     }

@@ -82,12 +82,12 @@ class PresentPlans extends React.PureComponent {
             featuresList={[
               { title: "15 batch deliveries" },
               { title: "15 destinations at once" },
-              {
-                title: "Demand predictions",
-              },
-              {
-                title: "Advanced historical analytics",
-              },
+              // {
+              //   title: "Demand predictions",
+              // },
+              // {
+              //   title: "Advanced historical analytics",
+              // },
             ]}
             actionGetStartedButton={() => {
               //! Update the redux corresponding vars - temporaryPackagePurchaseVars

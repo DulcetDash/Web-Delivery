@@ -16,6 +16,7 @@ import MyDeliveries from "./Components/Screens/MyDeliveries";
 import Purchase from "./Components/Screens/Purchase";
 import History from "./Components/Screens/History";
 import Statistics from "./Components/Screens/Statistics";
+import Settings from "./Components/Screens/Settings";
 
 class Entry extends React.Component {
   constructor(props) {
@@ -82,6 +83,7 @@ class Entry extends React.Component {
               <Route path="/Purchase" component={Purchase} />
               <Route path="/History" component={History} />
               <Route path="/Statistics" component={Statistics} />
+              <Route path="/Settings" component={Settings} />
             </Switch>
           </div>
         </div>

@@ -31,7 +31,7 @@ import {
   ImPieChart,
   ImShare2,
 } from "react-icons/im";
-import { MdApps } from "react-icons/md";
+import { MdApps, MdExtension } from "react-icons/md";
 
 const iconStyle = {
   width: 35,
@@ -64,6 +64,7 @@ class Sidebar extends React.PureComponent {
     this.SOCKET_CORE.on(
       "getAccountDataDeliveryWeb_io-response",
       function (response) {
+        console.log(response);
         if (
           response !== undefined &&
           response !== null &&
@@ -146,6 +147,14 @@ class Sidebar extends React.PureComponent {
               <span className="menuText">Statistics</span>
             </Link>
           </MenuItem>
+
+          <MenuItem className="menuItemSideBar">
+            <Link onClick={() => (window.location.href = "/plans")}>
+              <MdExtension style={iconStyle} />
+              <span className="menuText">Plans</span>
+            </Link>
+          </MenuItem>
+
           <MenuItem className="menuItemSideBar">
             <Link to="/Settings">
               <AiOutlineSetting style={iconStyle} />
@@ -182,7 +191,7 @@ class Sidebar extends React.PureComponent {
                     : "#01101f",
                 }}
               />
-              <span className="menuTextVersionNo">v1.0.034</span>
+              <span className="menuTextVersionNo">v1.0.035</span>
             </Link>
           </MenuItem>
         </Menu>

@@ -1,0 +1,187 @@
+.mainContainer {
+  background-color: #f3f3f3;
+  height: 90%;
+  padding: 25px;
+  margin-bottom: 90px;
+}
+
+.mainScreenTitle {
+  /* border: 1px solid black; */
+  font-family: "MoveBold", sans-serif;
+  font-size: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyEntryTitle {
+  font-family: "MoveRegular", sans-serif;
+  font-size: 17px;
+  color: #096ed4;
+  cursor: pointer;
+}
+
+.contentContainer {
+  border: 1px solid #d0d0d0;
+  margin-top: 20px;
+  min-height: 400px;
+  background-color: #fff;
+  max-width: 800px;
+  border-radius: 3px;
+}
+
+.formBasicButton {
+  font-family: "MoveTextRegular", sans-serif;
+  border: 1px solid #096ed4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  padding: 10px;
+  height: 20px;
+  background-color: #096ed4;
+  color: #fff;
+  font-family: "MoveTextBold", sans-serif;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.mainTitleNotice {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 17px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.mainMessageNotice {
+  /* border: 1px solid black; */
+  width: 50%;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.historyContainer {
+  border: 1px solid #d0d0d0;
+  margin-top: 30px;
+  background-color: #fff;
+  padding: 20px;
+  padding-bottom: 0px;
+}
+
+.historyLine {
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  align-items: flex-start;
+}
+
+.destinationLine {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+
+.dateRequestedLine {
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.carBrandLine {
+  color: #0e8491;
+}
+
+.globalInfosData {
+  border: 1px solid #d0d0d0;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+}
+
+.inforBubble {
+  /* border: 1px solid black; */
+  margin-bottom: 20px;
+}
+
+.placeholderData {
+  /* font-family: 'MoveTextBold', sans-serif; */
+  color: #7c6e6ebb;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.fleshInfoData {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 14px;
+}
+
+.genericBigTitle {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 18px;
+}
+
+.planBubbleData {
+  border-bottom: 1px solid #d0d0d0;
+  display: flex;
+  flex-direction: row;
+  margin-top: 2%;
+  padding-bottom: 40px;
+  margin-bottom: 30px;
+}
+
+.planImageContainer {
+  /* border: 1px solid black; */
+  width: 100px;
+  height: 80px;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mainPlanTitle {
+  font-family: "MoveBold", sans-serif;
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+
+.balanceNumber {
+  font-family: "MoveBold", sans-serif;
+  font-size: 24px;
+  color: #096ed4;
+}
+
+.planIcoTrue {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+.planPrimitiveContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.planMainTitle {
+  font-family: "MoveTextBold", sans-serif;
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.descrTextContainer {
+  /* border: 1px solid black; */
+  width: 80%;
+  font-size: 16px;
+  text-align: center;
+}
+
+.copyright {
+  font-size: 12px;
+  margin-top: 60px;
+}
