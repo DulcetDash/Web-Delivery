@@ -27,7 +27,7 @@ import { AiTwotoneEnvironment, AiTwotoneSetting } from "react-icons/ai";
 import Loader from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
 
-class Delivery extends React.PureComponent {
+class Delivery extends React.Component {
   constructor(props) {
     super(props);
 
@@ -323,7 +323,7 @@ class Delivery extends React.PureComponent {
         ) : (
           <>
             {this.state.didGetTHeCurrentLocation &&
-            this.props.App.tripsData.length <=
+            this.props.App.tripsData.length <
               QUOTAS_BATCHES[
                 this.props.App.userData.loginData.plans.subscribed_plan
               ] ? (
