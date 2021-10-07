@@ -74,11 +74,6 @@ class DeliveryNode extends React.Component {
   constructor(props) {
     super(props);
 
-    //! DEBUG
-    // this.props.App.userData.loginData.plans.subscribed_plan = "starter";
-    // this.props.App.userData.loginData.plans["delivery_limit"] = 2;
-    //! ----------
-
     this.SOCKET_CORE = SOCKET_CORE;
 
     this.state = {
@@ -1234,6 +1229,7 @@ class DeliveryNode extends React.Component {
       pickupNote: false, //Additional note for the pickup
       carTypeSelected: "carDelivery", //Ride selected, Economy normal taxis,etc
       request_globality: "corporate", //!Extremely important
+      subscribed_plan: this.props.App.userData.loginData.plans.subscribed_plan, //!Extremely important
       fareAmount: tmpFare, //Ride fare
       pickupData: {
         coordinates: [

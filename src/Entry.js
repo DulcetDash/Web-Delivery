@@ -23,9 +23,7 @@ class Entry extends React.Component {
     super(props);
   }
 
-  componentDidMount() {
-    console.log(this.props.App);
-  }
+  componentDidMount() {}
 
   /**
    * Responsible to answer to yes or no question of which component should be rendered
@@ -42,11 +40,6 @@ class Entry extends React.Component {
       this.props.App.userData.loginData.company_name !== null;
 
     //...
-    console.log(
-      initialCond &&
-        /(plans|purchase)/i.test(window.location.href) === false &&
-        /\/$/i.test(window.location.href) === false
-    );
     return (
       initialCond &&
       /(plans|purchase)/i.test(window.location.href) === false &&

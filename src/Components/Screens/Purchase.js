@@ -56,13 +56,11 @@ class Purchase extends React.PureComponent {
       this.props.App.temporaryPackagePurchaseVars.amount === 0
     ) {
       window.location.href = "/plans";
-      console.log(this.props.App.temporaryPackagePurchaseVars);
     }
   }
 
   componentDidMount() {
     let globalObject = this;
-    console.log(this.props.App.temporaryPackagePurchaseVars);
 
     /**
      * SOCKET IO Handlers
@@ -72,7 +70,6 @@ class Purchase extends React.PureComponent {
      * event: topUp_wallet_io
      */
     this.SOCKET_CORE.on("topUp_wallet_io-response", function (dataReceived) {
-      console.log(dataReceived);
       if (dataReceived !== undefined) {
         if (
           /success/i.test(dataReceived.response) &&
