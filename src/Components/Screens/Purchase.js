@@ -56,13 +56,11 @@ class Purchase extends React.PureComponent {
       this.props.App.temporaryPackagePurchaseVars.amount === 0
     ) {
       window.location.href = "/plans";
-      console.log(this.props.App.temporaryPackagePurchaseVars);
     }
   }
 
   componentDidMount() {
     let globalObject = this;
-    console.log(this.props.App.temporaryPackagePurchaseVars);
 
     /**
      * SOCKET IO Handlers

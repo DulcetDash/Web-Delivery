@@ -108,7 +108,6 @@ class Home extends React.PureComponent {
   componentDidMount() {
     this.redirectBasedOnState();
 
-    // console.log(this.props.App);
     let globalObject = this;
 
     //Handle socket Events

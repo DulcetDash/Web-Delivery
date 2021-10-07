@@ -9,7 +9,7 @@ const STATE = {
   latitude: 0,
   longitude: 0,
 
-  tripsData: {}, //Will hold all the trips data
+  tripsData: [], //Will hold all the trips data
   temporaryPackagePurchaseVars: {
     planName: null,
     amount: 0,

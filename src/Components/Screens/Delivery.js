@@ -101,16 +101,16 @@ class Delivery extends React.PureComponent {
             globalObject.props.UpdateTripsData(response);
           } else if (response.request_status === "no_rides") {
             // console.log("No rides");
-            globalObject.props.UpdateTripsData({});
+            globalObject.props.UpdateTripsData([]);
           }
         } //No rides
         else {
           // console.log("No rides");
-          globalObject.props.UpdateTripsData({});
+          globalObject.props.UpdateTripsData([]);
         }
       } catch (error) {
         console.error(error);
-        globalObject.props.UpdateTripsData({});
+        globalObject.props.UpdateTripsData([]);
       }
     });
   }
@@ -246,9 +246,15 @@ class Delivery extends React.PureComponent {
   }
 
   render() {
-    //!DEBUG
-    //this.props.App.userData.loginData.subscribed_plan = false;
-    //!---
+    //! PLANS QUOTAS
+    //! Batches
+    let QUOTAS_BATCHES = {
+      STR: 1,
+      ITMD: 15,
+      PR: 50,
+      PRSNLD: 100,
+    };
+
     return (
       <div
         className={classes.mainContainer}
@@ -318,7 +324,10 @@ class Delivery extends React.PureComponent {
         ) : (
           <>
             {this.state.didGetTHeCurrentLocation &&
-            Object.keys(this.props.App.tripsData).length === 0 ? (
+            this.props.App.tripsData.length <=
+              QUOTAS_BATCHES[
+                this.props.App.userData.loginData.plans.subscribed_plan
+              ] ? (
               <>
                 <div className={classes.mainScreenTitle}>
                   Make your delivery
@@ -327,7 +336,10 @@ class Delivery extends React.PureComponent {
                   <DeliveryNode />
                 </div>
               </>
-            ) : Object.keys(this.props.App.tripsData).length > 0 ? (
+            ) : this.props.App.tripsData.length >=
+              QUOTAS_BATCHES[
+                this.props.App.userData.loginData.plans.subscribed_plan
+              ] ? (
               <div
                 style={{
                   // border: "1px solid black",

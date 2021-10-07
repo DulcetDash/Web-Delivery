@@ -64,7 +64,6 @@ class Sidebar extends React.PureComponent {
     this.SOCKET_CORE.on(
       "getAccountDataDeliveryWeb_io-response",
       function (response) {
-        console.log(response);
         if (
           response !== undefined &&
           response !== null &&

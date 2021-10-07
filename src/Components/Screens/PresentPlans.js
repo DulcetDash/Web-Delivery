@@ -81,7 +81,7 @@ class PresentPlans extends React.PureComponent {
             isActive
             featuresList={[
               { title: "15 batch deliveries" },
-              { title: "15 destinations at once" },
+              { title: "10 destinations at once" },
               // {
               //   title: "Demand predictions",
               // },
@@ -119,7 +119,7 @@ class PresentPlans extends React.PureComponent {
             marginRight={20}
             featuresList={[
               { title: "50 batch deliveries" },
-              { title: "20 destinations at once" },
+              { title: "15 destinations at once" },
               {
                 title: "Financial forecasting",
               },

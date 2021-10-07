@@ -50,7 +50,6 @@ class Settings extends React.PureComponent {
     let globalObject = this;
 
     //Handle socket io events
-    console.log(this.props.App.userData.loginData);
   }
 
   componentWillMount() {}
