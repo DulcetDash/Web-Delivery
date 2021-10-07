@@ -102,17 +102,21 @@ class Statistics extends React.Component {
           response !== undefined &&
           response.stateHash !== undefined &&
           response.response !== undefined &&
-          response.response.daily_view !== undefined
+          response.response.daily_view !== undefined &&
+          /(error|no_data)/i.test(response.response) === false
         ) {
           //?Optimized
           if (
             response.stateHash !== globalObject.state.statisticalData.stateHash
           ) {
-            globalObject.setState({ statisticalData: response });
+            globalObject.setState({
+              statisticalData: response,
+              isLoading: false,
+            });
           }
         } //Clear data
         else {
-          globalObject.setState({ statisticalData: {} });
+          globalObject.setState({ statisticalData: {}, isLoading: false });
         }
       }
     );
@@ -158,7 +162,8 @@ class Statistics extends React.Component {
         </div>
 
         <div className={classes.graphContainer}>
-          {Object.keys(this.state.statisticalData).length > 0 ? (
+          {Object.keys(this.state.statisticalData).length > 0 &&
+          this.state.isLoading === false ? (
             <FlexibleXYPlot xType="ordinal" height={400} stackBy="y">
               <VerticalGridLines />
               <HorizontalGridLines />
@@ -234,7 +239,7 @@ class Statistics extends React.Component {
                 ]}
               />
             </FlexibleXYPlot>
-          ) : (
+          ) : this.state.isLoading ? (
             <div
               style={{
                 margin: "auto",
@@ -252,6 +257,18 @@ class Statistics extends React.Component {
                 width={45}
                 timeout={300000000} //3 secs
               />
+            </div>
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              No data to show
             </div>
           )}
         </div>

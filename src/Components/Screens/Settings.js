@@ -139,33 +139,46 @@ class Settings extends React.PureComponent {
           this.props.App.userData.loginData.plans.isPlan_active ? (
             <div className={classes.planBubbleData}>
               <div className={classes.planImageContainer}>
-                {this.renderAppropriateSidePlans(
-                  this.planCodes[
-                    this.props.App.userData.loginData.plans.subscribed_plan
-                  ]
-                )}
+                {this.props.App.userData.loginData.plans.subscribed_plan !==
+                  false &&
+                this.props.App.userData.loginData.plans.subscribed_plan !==
+                  "false"
+                  ? this.renderAppropriateSidePlans(
+                      this.planCodes[
+                        this.props.App.userData.loginData.plans.subscribed_plan
+                      ]
+                    )
+                  : "Purchase a package"}
               </div>
               <div className={classes.planBriefInfosBalance}>
                 <div className={classes.mainPlanTitle}>
-                  {
-                    this.planCodes[
-                      this.props.App.userData.loginData.plans.subscribed_plan
-                    ]
-                  }
+                  {this.props.App.userData.loginData.plans.subscribed_plan !==
+                    false &&
+                  this.props.App.userData.loginData.plans.subscribed_plan !==
+                    "false"
+                    ? this.planCodes[
+                        this.props.App.userData.loginData.plans.subscribed_plan
+                      ]
+                    : "No package"}
                 </div>
                 <div style={{ fontSize: 12 }}>
                   Balance
                   <br />
                   <span className={classes.balanceNumber}>
-                    N${this.props.App.userData.loginData.wallet.balance}
+                    N$
+                    {this.props.App.userData.loginData.wallet !== undefined &&
+                    this.props.App.userData.loginData.wallet !== null &&
+                    this.props.App.userData.loginData.wallet.balance !==
+                      undefined &&
+                    this.props.App.userData.loginData.wallet.balance !== null
+                      ? this.props.App.userData.loginData.wallet.balance
+                      : 0}
                   </span>
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ height: 50, paddingTop: 20 }}>
-              No subscribed plans
-            </div>
+            <div style={{ height: 50, paddingTop: 20 }}>No purchased plans</div>
           )}
           {/* Change plan */}
           <div

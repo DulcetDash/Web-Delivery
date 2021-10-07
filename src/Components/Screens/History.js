@@ -156,7 +156,17 @@ class History extends React.PureComponent {
             })}
           </div>
         ) : (
-          <div>No data</div>
+          <div
+            style={{
+              width: "100%",
+              height: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Your history is empty
+          </div>
         )}
       </div>
     );
