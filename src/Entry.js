@@ -40,11 +40,6 @@ class Entry extends React.Component {
       this.props.App.userData.loginData.company_name !== null;
 
     //...
-    // console.log(
-    //   initialCond &&
-    //     /(plans|purchase)/i.test(window.location.href) === false &&
-    //     /\/$/i.test(window.location.href) === false
-    // );
     return (
       initialCond &&
       /(plans|purchase)/i.test(window.location.href) === false &&

@@ -70,7 +70,6 @@ class Purchase extends React.PureComponent {
      * event: topUp_wallet_io
      */
     this.SOCKET_CORE.on("topUp_wallet_io-response", function (dataReceived) {
-      console.log(dataReceived);
       if (dataReceived !== undefined) {
         if (
           /success/i.test(dataReceived.response) &&

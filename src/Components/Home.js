@@ -114,7 +114,6 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "opsOnCorpoDeliveryAccounts_io-response",
       function (response) {
-        // console.log(response);
         globalObject.state.isLoading = false;
         if (
           response !== undefined &&
@@ -163,7 +162,6 @@ class Home extends React.PureComponent {
             }
           } //No error occured
           else {
-            console.log(response);
             if (/successfully_created/i.test(response.response)) {
               //SUCCESS
               globalObject.props.UpdateLoggingData(response.metadata);
@@ -230,7 +228,6 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "resetConfirmationSMSDeliveryWeb_io-response",
       function (response) {
-        // console.log(response);
         globalObject.setState({ isLoadingResendSMS: false });
 
         if (
@@ -254,7 +251,6 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "validatePhoneNumberDeliveryWeb_io-response",
       function (response) {
-        // console.log(response);
         globalObject.setState({ isLoading: false });
 
         if (
@@ -295,7 +291,6 @@ class Home extends React.PureComponent {
     this.SOCKET_CORE.on(
       "updatePhoneNumberDeliveryWeb_io-response",
       function (response) {
-        // console.log(response);
         globalObject.setState({ isLoading: false });
 
         if (
@@ -368,7 +363,6 @@ class Home extends React.PureComponent {
                     if (this.state.password === this.state.password_confirm) {
                       //! ALL GOOD
                       //Good
-                      // console.log("All good");
                       this.setState({ isLoading: true });
                       this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
                         op: "signup",
@@ -421,7 +415,6 @@ class Home extends React.PureComponent {
           this.state.password !== undefined
         ) {
           //Good
-          // console.log("All good, login");
           this.setState({ isLoading: true });
           this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
             op: "login",
@@ -577,7 +570,7 @@ class Home extends React.PureComponent {
           });
         }
       } catch (error) {
-        console.log(error);
+        // console.log(error);
         globalObject.setState({
           isLoading: false,
         });
@@ -670,12 +663,7 @@ class Home extends React.PureComponent {
           this.props.App.userData.loginData.company_fp !== undefined
         ) {
           this.setState({ isLoading: true });
-          // console.log({
-          //   op: "validatePhoneNumber",
-          //   otp: this.state.otp,
-          //   company_fp: this.props.App.userData.loginData.company_fp,
-          //   phone: this.props.App.userData.loginData.phone,
-          // });
+
           this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
             op: "validatePhoneNumber",
             otp: this.state.otp,
@@ -691,7 +679,7 @@ class Home extends React.PureComponent {
         this.setState({ otp_error_color: "red" });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       this.swicthContextForms();
     }
   }
@@ -724,7 +712,7 @@ class Home extends React.PureComponent {
         this.swicthContextForms();
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       this.swicthContextForms();
     }
   }

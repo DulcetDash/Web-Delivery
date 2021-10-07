@@ -63,7 +63,6 @@ class MyDeliveries extends React.Component {
      * Responsible for redirecting updates to map graphics data based on if the status of the request is: pending, in route to pickup, in route to drop off or completed
      */
     this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
-      console.log(response);
       try {
         if (
           response !== null &&
@@ -126,9 +125,9 @@ class MyDeliveries extends React.Component {
       "confirmRiderDropoff_requests_io-response",
       function (response) {
         // globalObject.setState({ isLoadingCancellation: false });
-        setTimeout(function () {
-          window.location.href = "/MyDeliveries";
-        }, 3000);
+        // setTimeout(function () {
+        //   window.location.href = "/MyDeliveries";
+        // }, 3000);
 
         if (
           response !== false &&

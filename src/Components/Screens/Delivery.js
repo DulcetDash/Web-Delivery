@@ -134,7 +134,7 @@ class Delivery extends React.PureComponent {
               globalObject.setState({ geolocationState: "granted" });
             },
             (error) => {
-              console.log(error);
+              // console.log(error);
               globalObject.setState({ geolocationState: "denied" });
             }
           );
@@ -305,11 +305,10 @@ class Delivery extends React.PureComponent {
               onClick={() =>
                 navigator.geolocation.getCurrentPosition(
                   (position) => {
-                    console.log(position);
                     this.setState({ geolocationState: "granted" });
                   },
                   (error) => {
-                    console.log(error);
+                    // console.log(error);
                     this.setState({ geolocationState: "denied" });
                   }
                 )

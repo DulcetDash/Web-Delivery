@@ -139,7 +139,11 @@ class Settings extends React.PureComponent {
           this.props.App.userData.loginData.plans.isPlan_active ? (
             <div className={classes.planBubbleData}>
               <div className={classes.planImageContainer}>
-                {this.renderAppropriateSidePlans()}
+                {this.renderAppropriateSidePlans(
+                  this.planCodes[
+                    this.props.App.userData.loginData.plans.subscribed_plan
+                  ]
+                )}
               </div>
               <div className={classes.planBriefInfosBalance}>
                 <div className={classes.mainPlanTitle}>
