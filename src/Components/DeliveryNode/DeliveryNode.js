@@ -44,6 +44,10 @@ import TextField from "@mui/material/TextField";
 import DateAdapter from "@mui/lab/AdapterMoment";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import StaticDateTimePicker from "@mui/lab/StaticDateTimePicker";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Modal from "@mui/material/Modal";
 
 const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
   c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
@@ -68,6 +72,19 @@ const getBoundsForPoints = (points, mapPrimitiveDimensionsObj) => {
   }).fitBounds(cornersLongLat, { padding: 50 }); // Can also use option: offset: [0, -100]
   const { longitude, latitude, zoom } = viewport;
   return { longitude, latitude, zoom };
+};
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "1px solid #fff",
+  boxShadow: 24,
+  borderRadius: 2,
+  p: 4,
 };
 
 class DeliveryNode extends React.Component {
@@ -109,6 +126,16 @@ class DeliveryNode extends React.Component {
       isLoadingGeneral: false, //General loader
       didRequestJustBeenMade: false, //To know if a request had just been made
       isThereRequestError: false, //To know if there was an error when requesting
+      shouldShowModal: false, //TO show modal or not
+      destinationNotCompleted: [], //Will hold the destination not well completed
+      error_message_onRequest: (
+        <>
+          Sorry we were unable to make this request due to an unexpected error,
+          please refresh you web page and try again. If it persists please
+          contact us at <strong>support@taxiconnectna.com</strong>
+        </>
+      ), //THe merror message to show
+      error_onRequest_nature: "error", //The type of error that happended after the request
     };
   }
 
@@ -273,7 +300,30 @@ class DeliveryNode extends React.Component {
             didRequestJustBeenMade: true,
             isThereRequestError: false,
           });
-        } //An unxepected error occured
+        } else if (
+          response !== false &&
+          response.response !== undefined &&
+          /Unable_to_make_the_request_unsufficient_funds/i.test(
+            response.response
+          )
+        ) {
+          globalObject.setState({
+            isLoadingGeneral: false,
+            didRequestJustBeenMade: true,
+            isThereRequestError: true,
+            error_message_onRequest: (
+              <>
+                Sorry you don't have enough funds in your wallet to perform this
+                request, please purchase a plan and try again. For more
+                assistance please contact us at{" "}
+                <strong>support@taxiconnectna.com</strong>
+              </>
+            ),
+            error_onRequest_nature:
+              "Unable_to_make_the_request_unsufficient_funds",
+          });
+        }
+        //An unxepected error occured
         else if (
           response !== false &&
           response.response !== undefined &&
@@ -283,12 +333,28 @@ class DeliveryNode extends React.Component {
             isLoadingGeneral: false,
             didRequestJustBeenMade: true,
             isThereRequestError: true,
+            error_message_onRequest: (
+              <>
+                Sorry we were unable to make this request due to an unexpected
+                error, please refresh you web page and try again. If it persists
+                please contact us at <strong>support@taxiconnectna.com</strong>
+              </>
+            ),
+            error_onRequest_nature: "already_have_a_pending_request",
           });
         } else {
           globalObject.setState({
             isLoadingGeneral: false,
             didRequestJustBeenMade: true,
             isThereRequestError: true,
+            error_message_onRequest: (
+              <>
+                Sorry we were unable to make this request due to an unexpected
+                error, please refresh you web page and try again. If it persists
+                please contact us at <strong>support@taxiconnectna.com</strong>
+              </>
+            ),
+            error_onRequest_nature: "error",
           });
         }
       }
@@ -1165,7 +1231,13 @@ class DeliveryNode extends React.Component {
     if (this.state.snapshotsToDestination.length > 0) {
       let unifiedTimeSec = 0;
       this.state.snapshotsToDestination.map((snap) => {
-        let time = parseInt(snap.eta.split(" ")[0].trim());
+        let time =
+          snap !== undefined &&
+          snap !== null &&
+          snap.eta !== undefined &&
+          snap.eta !== null
+            ? parseInt(snap.eta.split(" ")[0].trim())
+            : 0;
         //...
         if (/min/i.test(snap.eta)) {
           //Minutes
@@ -1193,75 +1265,107 @@ class DeliveryNode extends React.Component {
    * Responsible for making the request
    */
   makeDeliveryRequest() {
-    //...Get fare
-    let tmpFare = 0;
-    this.state.fareETAEstimations.fareData.map((fare) => {
-      if (/carDelivery/i.test(fare.car_type)) {
-        tmpFare = fare.base_fare;
+    let globalObject = this;
+    //Check that all the receivers had been specified
+    let receiversInOrder = true;
+    this.state.dropOff_destination.map((tmpLocation, index) => {
+      if (
+        tmpLocation.data.receiverInfos.receiver_name !== undefined &&
+        tmpLocation.data.receiverInfos.receiver_name !== null &&
+        tmpLocation.data.receiverInfos.receiver_name.length > 0 &&
+        tmpLocation.data.receiverInfos.receiver_phone !== undefined &&
+        tmpLocation.data.receiverInfos.receiver_phone !== null &&
+        tmpLocation.data.receiverInfos.receiver_phone.length > 0
+      ) {
+        //Okay
+      } //Details not detected
+      else {
+        receiversInOrder = false;
+        globalObject.state.destinationNotCompleted.push(index + 1);
+        // globalObject.forceUpdate();
       }
     });
-    this.setState({
-      isLoadingGeneral: true,
-      didRequestJustBeenMade: false,
-      isThereRequestError: false,
-    });
-    //Package all the data
-    let RIDE_OR_DELIVERY_BOOKING_DATA = {
-      user_fingerprint: this.props.App.userData.loginData.company_fp,
-      connectType: "ConnectUs",
-      country: this.props.App.userCurrentLocationMetaData.country,
-      isAllGoingToSameDestination: false, //If all the passengers are going to the same destination
-      isGoingUntilHome: false, //! Will double the fares for the Economy - Set to false for the DELIVERY
-      naturePickup: "PrivateLocation", //Force PrivateLocation type if nothing found or delivery request,  -Nature of the pickup location (privateLOcation,etc)
-      passengersNo: this.state.dropOff_destination.length, //Force to 1 passenger for deliveries
-      actualRider: "me",
-      actualRiderPhone_number: this.props.App.userData.loginData.phone,
-      //DELIVERY SPECIFIC INFOS (receiver infos:name and phone)
-      receiverName_delivery: false,
-      receiverPhone_delivery: false,
-      packageSizeDelivery: "Small",
-      //...
-      rideType: "DELIVERY", //Ride or delivery
-      paymentMethod: "Wallet", //Payment method
-      timeScheduled: this.state.isScheduledTrip
-        ? this.state.scheduledTime
-        : "now",
-      pickupNote: false, //Additional note for the pickup
-      carTypeSelected: "carDelivery", //Ride selected, Economy normal taxis,etc
-      request_globality: "corporate", //!Extremely important
-      subscribed_plan: this.props.App.userData.loginData.plans.subscribed_plan, //!Extremely important
-      fareAmount: tmpFare, //Ride fare
-      pickupData: {
-        coordinates: [
-          this.state.pickup_destination.data.locationData.coordinates[0],
-          this.state.pickup_destination.data.locationData.coordinates[1],
-        ],
-        location_name:
-          this.state.pickup_destination.data.locationData.location_name,
-        street_name: this.state.pickup_destination.data.locationData.street,
-        city: this.state.pickup_destination.data.locationData.city,
-      },
-      destinationData: {},
-    };
 
-    //Complete the destination data
-    this.state.dropOff_destination.map((location, index) => {
-      let keyIndex = `passenger${index + 1}Destination`;
-      location.data.locationData["receiver_infos"] =
-        location.data.receiverInfos;
+    if (receiversInOrder) {
+      //...Get fare
+      let tmpFare = 0;
+      globalObject.state.fareETAEstimations.fareData.map((fare) => {
+        if (/carDelivery/i.test(fare.car_type)) {
+          tmpFare = fare.base_fare;
+        }
+      });
+      globalObject.setState({
+        isLoadingGeneral: true,
+        didRequestJustBeenMade: false,
+        isThereRequestError: false,
+      });
+      //Package all the data
+      let RIDE_OR_DELIVERY_BOOKING_DATA = {
+        user_fingerprint: globalObject.props.App.userData.loginData.company_fp,
+        connectType: "ConnectUs",
+        country: globalObject.props.App.userCurrentLocationMetaData.country,
+        isAllGoingToSameDestination: false, //If all the passengers are going to the same destination
+        isGoingUntilHome: false, //! Will double the fares for the Economy - Set to false for the DELIVERY
+        naturePickup: "PrivateLocation", //Force PrivateLocation type if nothing found or delivery request,  -Nature of the pickup location (privateLOcation,etc)
+        passengersNo: globalObject.state.dropOff_destination.length, //Force to 1 passenger for deliveries
+        actualRider: "me",
+        actualRiderPhone_number:
+          globalObject.props.App.userData.loginData.phone,
+        //DELIVERY SPECIFIC INFOS (receiver infos:name and phone)
+        receiverName_delivery: false,
+        receiverPhone_delivery: false,
+        packageSizeDelivery: "Small",
+        //...
+        rideType: "DELIVERY", //Ride or delivery
+        paymentMethod: "Wallet", //Payment method
+        timeScheduled: globalObject.state.isScheduledTrip
+          ? globalObject.state.scheduledTime
+          : "now",
+        pickupNote: false, //Additional note for the pickup
+        carTypeSelected: "carDelivery", //Ride selected, Economy normal taxis,etc
+        request_globality: "corporate", //!Extremely important
+        subscribed_plan:
+          globalObject.props.App.userData.loginData.plans.subscribed_plan, //!Extremely important
+        fareAmount: tmpFare, //Ride fare
+        pickupData: {
+          coordinates: [
+            globalObject.state.pickup_destination.data.locationData
+              .coordinates[0],
+            globalObject.state.pickup_destination.data.locationData
+              .coordinates[1],
+          ],
+          location_name:
+            globalObject.state.pickup_destination.data.locationData
+              .location_name,
+          street_name:
+            globalObject.state.pickup_destination.data.locationData.street,
+          city: globalObject.state.pickup_destination.data.locationData.city,
+        },
+        destinationData: {},
+      };
+
+      //Complete the destination data
+      globalObject.state.dropOff_destination.map((location, index) => {
+        let keyIndex = `passenger${index + 1}Destination`;
+        location.data.locationData["receiver_infos"] =
+          location.data.receiverInfos;
+        //...
+        RIDE_OR_DELIVERY_BOOKING_DATA.destinationData[keyIndex] =
+          location.data.locationData;
+      });
       //...
-      RIDE_OR_DELIVERY_BOOKING_DATA.destinationData[keyIndex] =
-        location.data.locationData;
-    });
-    //...
-    // console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
-    //! Make a single request - risky
-    //Not yet request and no errors
-    //Check wheher an answer was already received - if not keep requesting
-    this.SOCKET_CORE.emit(
-      "requestRideOrDeliveryForThis",
-      RIDE_OR_DELIVERY_BOOKING_DATA
-    );
+      // console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
+      //! Make a single request - risky
+      //Not yet request and no errors
+      //Check wheher an answer was already received - if not keep requesting
+      globalObject.SOCKET_CORE.emit(
+        "requestRideOrDeliveryForThis",
+        RIDE_OR_DELIVERY_BOOKING_DATA
+      );
+    } //!Receivers infos not in order
+    else {
+      this.setState({ shouldShowModal: true });
+    }
   }
 
   render() {
@@ -1287,6 +1391,40 @@ class DeliveryNode extends React.Component {
 
     return (
       <div className={classes.deliverNode}>
+        <Modal
+          open={this.state.shouldShowModal}
+          onClose={() =>
+            this.setState({
+              shouldShowModal: false,
+              destinationNotCompleted: [],
+            })
+          }
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Typography
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+              style={{ fontWeight: "bold", fontSize: 15, color: "#b22222" }}
+            >
+              Attention required
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+              Please check that all the receivers information has been provided.
+            </Typography>
+            <br />
+            {this.state.destinationNotCompleted.map((errorNode) => {
+              return (
+                <div style={{ fontWeight: "bold", marginBottom: 15 }}>
+                  - Destination {errorNode}
+                </div>
+              );
+            })}
+          </Box>
+        </Modal>
+
         {this.state.didRequestJustBeenMade === false ? (
           <>
             <div className={classes.inputDataContainer}>
@@ -1830,9 +1968,7 @@ class DeliveryNode extends React.Component {
               style={{ width: 35, height: 35, marginBottom: 25 }}
               color={"#b22222"}
             />
-            Sorry we were unable to make this request due to an unexpected
-            error, please refresh you web page and try again. If it persists
-            please contact us at <strong>support@taxiconnectna.com</strong>
+            {this.state.error_message_onRequest}
             <div
               style={{
                 marginTop: 30,
@@ -1842,9 +1978,19 @@ class DeliveryNode extends React.Component {
                 fontWeight: "bold",
                 color: "#096ED4",
               }}
-              onClick={() => (window.location.href = "Delivery")}
+              onClick={() =>
+                /Unable_to_make_the_request_unsufficient_funds/i.test(
+                  this.state.error_onRequest_nature
+                )
+                  ? (window.location.href = "/Settings")
+                  : (window.location.href = "/Delivery")
+              }
             >
-              Try fixing the issue{" "}
+              {/Unable_to_make_the_request_unsufficient_funds/i.test(
+                this.state.error_onRequest_nature
+              )
+                ? "Profile"
+                : "Try fixing the issue"}{" "}
               <MdTrendingFlat
                 style={{ position: "relative", top: 2, marginLeft: 5 }}
               />
