@@ -48,6 +48,8 @@ class PresentPlans extends React.PureComponent {
               { title: "1 batch delivery" },
               { title: "5 destinations at once" },
               { title: "Deliveries graph" },
+              { title: "SMS notification to clients" },
+              { title: "Tracking" },
               { title: "24/7h support" },
             ]}
             actionGetStartedButton={() => {

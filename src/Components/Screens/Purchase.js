@@ -343,7 +343,13 @@ class Purchase extends React.PureComponent {
                           color: "#09864A",
                         }}
                       />{" "}
-                      All the information entered is secure.
+                      <div>
+                        All the information entered is secure.
+                        <br />
+                        <div style={{ fontWeight: "bold", marginTop: 5 }}>
+                          4% service fee.
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -393,7 +399,8 @@ class Purchase extends React.PureComponent {
                 style={{ width: 55, height: 55, marginBottom: 25 }}
                 color={"#09864A"}
               />
-              Your purchase has been made successfully.
+              {this.props.App.temporaryPackagePurchaseVars.planName} package
+              purchased successfully.
               <div
                 style={{
                   fontFamily: "MoveBold, sans-serif",

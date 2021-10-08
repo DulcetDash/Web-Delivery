@@ -785,9 +785,9 @@ class Home extends React.PureComponent {
                   />
                 </div>
                 <div className={classes.textWarning}>
-                  You account has been successfully created!
+                  Your account has been successfully created!
                   <br />
-                  Click on "Next" to complete the verifications steps.
+                  Click on "Next" to complete the verification steps.
                 </div>
                 <div
                   className={classes.backButtonOnFail}
@@ -800,7 +800,7 @@ class Home extends React.PureComponent {
               this.state.hasErrorHappened === false ? (
               <div className={classes.signupForm}>
                 <div className={classes.mainTitle}>
-                  <div>Confirm your phone number</div>
+                  <div>Verify your phone number</div>
                 </div>
                 <input
                   type="text"
