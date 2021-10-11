@@ -314,7 +314,7 @@ class DeliveryNode extends React.Component {
             error_message_onRequest: (
               <>
                 Sorry you don't have enough funds in your wallet to perform this
-                request, please purchase a plan and try again. For more
+                request, please purchase a package and try again. For more
                 assistance please contact us at{" "}
                 <strong>support@taxiconnectna.com</strong>
               </>

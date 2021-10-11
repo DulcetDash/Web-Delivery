@@ -150,7 +150,7 @@ class Sidebar extends React.PureComponent {
           <MenuItem className="menuItemSideBar">
             <Link onClick={() => (window.location.href = "/plans")}>
               <MdExtension style={iconStyle} />
-              <span className="menuText">Plans</span>
+              <span className="menuText">Packages</span>
             </Link>
           </MenuItem>
 
@@ -190,7 +190,7 @@ class Sidebar extends React.PureComponent {
                     : "#01101f",
                 }}
               />
-              <span className="menuTextVersionNo">v1.0.040</span>
+              <span className="menuTextVersionNo">v1.0.041</span>
             </Link>
           </MenuItem>
         </Menu>
