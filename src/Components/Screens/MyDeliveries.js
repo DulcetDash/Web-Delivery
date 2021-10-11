@@ -688,9 +688,16 @@ class MyDeliveries extends React.Component {
                             cursor: "pointer",
                             fontFamily: "MoveTextMedium, sans-serif",
                           }}
-                          onClick={() =>
-                            this.cancelRequest_rider(deliveryData.request_fp)
-                          }
+                          onClick={() => {
+                            this.cancelRequest_rider(
+                              deliveryData.request_fp !== undefined
+                                ? deliveryData.request_fp
+                                : deliveryData.basicTripDetails.request_fp !==
+                                  undefined
+                                ? deliveryData.basicTripDetails.request_fp
+                                : false
+                            );
+                          }}
                         >
                           <MdBlock
                             style={{

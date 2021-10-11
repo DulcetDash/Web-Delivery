@@ -134,7 +134,7 @@ class Settings extends React.PureComponent {
 
         {/* Plans infos */}
         <div className={classes.globalInfosData}>
-          <div className={classes.genericBigTitle}>Plan</div>
+          <div className={classes.genericBigTitle}>Package</div>
           {this.props.App.userData.loginData.plans.subscribed_plan !== false &&
           this.props.App.userData.loginData.plans.isPlan_active ? (
             <div className={classes.planBubbleData}>
@@ -178,7 +178,9 @@ class Settings extends React.PureComponent {
               </div>
             </div>
           ) : (
-            <div style={{ height: 50, paddingTop: 20 }}>No purchased plans</div>
+            <div style={{ height: 50, paddingTop: 20 }}>
+              No purchased package
+            </div>
           )}
           {/* Change plan */}
           <div
@@ -186,7 +188,7 @@ class Settings extends React.PureComponent {
             style={{ width: 200, marginBottom: 20 }}
             onClick={() => (window.location.href = "/plans")}
           >
-            <div>Change my plan</div>
+            <div>Change my package</div>
             <FiArrowRight />
           </div>
         </div>
