@@ -38,7 +38,7 @@ class PresentPlans extends React.PureComponent {
           <PlanNode
             planName={"Starter"}
             description={"Powerful logistic with easy setup"}
-            priceSmallBreakdown={"2 deliveries for about N$50 per delivery."}
+            priceSmallBreakdown={"Get about 3 deliveries."}
             price={"N$100"}
             icon={jigsaw}
             paymentPeriod={""}
@@ -54,9 +54,13 @@ class PresentPlans extends React.PureComponent {
             ]}
             actionGetStartedButton={() => {
               //! Update the redux corresponding vars - temporaryPackagePurchaseVars
+              let basePrice = 100;
+              let transactionFees = basePrice * 0.04;
+              basePrice += transactionFees;
+
               this.props.UpdatePlanPurchaseData({
                 planName: "Starter",
-                amount: 100,
+                amount: basePrice,
               });
               //...
               window.location.href = "/Purchase";
@@ -76,7 +80,7 @@ class PresentPlans extends React.PureComponent {
                 +
               </span>
             }
-            priceSmallBreakdown={"50 deliveries for about N$50 per delivery."}
+            priceSmallBreakdown={"Get about 50 deliveries."}
             paymentPeriod={""}
             marginRight={20}
             isRecommended
@@ -93,9 +97,13 @@ class PresentPlans extends React.PureComponent {
             ]}
             actionGetStartedButton={() => {
               //! Update the redux corresponding vars - temporaryPackagePurchaseVars
+              let basePrice = 2500;
+              let transactionFees = basePrice * 0.04;
+              basePrice += transactionFees;
+
               this.props.UpdatePlanPurchaseData({
                 planName: "Intermediate",
-                amount: 2500,
+                amount: basePrice,
               });
               //...
               // console.log(this.props.App.temporaryPackagePurchaseVars);
@@ -116,7 +124,7 @@ class PresentPlans extends React.PureComponent {
                 +
               </span>
             }
-            priceSmallBreakdown={"300 deliveries for about N$50 per delivery."}
+            priceSmallBreakdown={"Get about 300 deliveries."}
             paymentPeriod={""}
             marginRight={20}
             featuresList={[
@@ -128,8 +136,14 @@ class PresentPlans extends React.PureComponent {
             ]}
             actionGetStartedButton={() => {
               //! Update the redux corresponding vars - temporaryPackagePurchaseVars
-              this.props.App.temporaryPackagePurchaseVars.planName = "Pro";
-              this.props.App.temporaryPackagePurchaseVars.amount = 15000;
+              let basePrice = 15000;
+              let transactionFees = basePrice * 0.04;
+              basePrice += transactionFees;
+
+              this.props.UpdatePlanPurchaseData({
+                planName: "Pro",
+                amount: basePrice,
+              });
               //...
               window.location.href = "/Purchase";
             }}
