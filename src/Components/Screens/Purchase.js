@@ -347,7 +347,7 @@ class Purchase extends React.PureComponent {
                         All the information entered is secure.
                         <br />
                         <div style={{ fontWeight: "bold", marginTop: 5 }}>
-                          4% service fee.
+                          + 4% service fee.
                         </div>
                       </div>
                     </div>

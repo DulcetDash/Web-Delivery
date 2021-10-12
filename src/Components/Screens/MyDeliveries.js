@@ -743,7 +743,7 @@ class MyDeliveries extends React.Component {
                           <div>
                             Confirm drop off
                             <div className={classes.smallExplanation}>
-                              Please here click to confirm that the receiver has
+                              Please click here to confirm that the receiver has
                               received your package.
                             </div>
                           </div>
