@@ -195,7 +195,7 @@ class Settings extends React.PureComponent {
 
         {/* Copyright */}
         <div className={classes.copyright}>
-          TaxiConnect © 2020. All rights reserved.
+          TaxiConnect © 2021. All rights reserved.
         </div>
       </div>
     );

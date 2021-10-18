@@ -723,7 +723,7 @@ class Home extends React.PureComponent {
         <Header />
         <div className={classes.headerContainerSecond}>
           <div className={classes.headerTitleContainer}>
-            Discover a new way of delivering
+            Discover a new way of delivery
           </div>
           <div
             className={classes.formContainer}
@@ -1169,8 +1169,8 @@ class Home extends React.PureComponent {
               </div>
               <div className={classes.titleInsideOption}>Request anytime</div>
               <div className={classes.descriptionInsideOption}>
-                Make as many delivery request as your business need to handle
-                all your logistical needs in once go and in one place.
+                Make as many delivery requests as your business requires to meet
+                all of your logistical demands all at once and in one place.
               </div>
             </div>
             {/* 3 */}
@@ -1185,7 +1185,7 @@ class Home extends React.PureComponent {
               <div className={classes.titleInsideOption}>Keep track</div>
               <div className={classes.descriptionInsideOption}>
                 Get detailed analytics about your deliveries to help you
-                understand you pick times and many more.
+                understand your pick times and many more.
               </div>
             </div>
           </div>
@@ -1194,7 +1194,7 @@ class Home extends React.PureComponent {
         {/* Footer */}
         <div className={classes.footer}>
           <div className={classes.copyrightText}>
-            TaxiConnect © 2020. All rights reserved.
+            TaxiConnect © 2021. All rights reserved.
           </div>
         </div>
       </div>
