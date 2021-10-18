@@ -456,7 +456,7 @@ class Purchase extends React.PureComponent {
           {/* Footer */}
           <div className={classes.footer}>
             <div className={classes.copyrightText}>
-              TaxiConnect © 2020. All rights reserved.
+              TaxiConnect © 2021. All rights reserved.
             </div>
           </div>
         </div>

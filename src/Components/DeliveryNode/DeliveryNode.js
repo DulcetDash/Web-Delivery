@@ -1730,25 +1730,28 @@ class DeliveryNode extends React.Component {
                       backgroundColor: "#d0d0d0",
                       color: "black",
                       borderColor: "#d0d0d0",
-                      opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                      //opacity: this.state.shoudAllowRequest ? 1 : 0.2,
+                      opacity: 0.2,
                       width: 70,
                       zIndex: 100000,
+                      cursor: "default",
                     }}
-                    onClick={() =>
-                      this.state.shoudAllowRequest === false
-                        ? {}
-                        : this.state.isScheduledTrip
-                        ? this.setState({
-                            showDateTimePicker: false,
-                            scheduledTime: new Date(),
-                            isScheduledTrip: false,
-                          })
-                        : this.state.showDateTimePicker
-                        ? {}
-                        : this.setState({
-                            showDateTimePicker: true,
-                            scheduledTime: new Date(),
-                          })
+                    onClick={
+                      () => {}
+                      // this.state.shoudAllowRequest === false
+                      //   ? {}
+                      //   : this.state.isScheduledTrip
+                      //   ? this.setState({
+                      //       showDateTimePicker: false,
+                      //       scheduledTime: new Date(),
+                      //       isScheduledTrip: false,
+                      //     })
+                      //   : this.state.showDateTimePicker
+                      //   ? {}
+                      //   : this.setState({
+                      //       showDateTimePicker: true,
+                      //       scheduledTime: new Date(),
+                      //     })
                     }
                   >
                     {this.state.showDateTimePicker ? (
