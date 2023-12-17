@@ -31,11 +31,12 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import ReactMapGL, {
-  GeolocateControl,
-  Marker,
-  WebMercatorViewport,
-} from "react-map-gl";
+// import ReactMapGL, {
+//   GeolocateControl,
+//   Marker,
+//   // WebMercatorViewport,
+// } from "react-map-gl";
+// import WebMercatorViewport from "viewport-mercator-project";
 import SOCKET_CORE from "../../Helper/managerNode";
 // import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { TailSpin as Loader } from "react-loader-spinner";
@@ -66,12 +67,12 @@ const getBoundsForPoints = (points, mapPrimitiveDimensionsObj) => {
     [applyToArray(Math.max, pointsLong), applyToArray(Math.max, pointsLat)],
   ];
   // Use WebMercatorViewport to get center longitude/latitude and zoom
-  const viewport = new WebMercatorViewport({
-    width: mapPrimitiveDimensionsObj.width,
-    height: mapPrimitiveDimensionsObj.height,
-  }).fitBounds(cornersLongLat, { padding: 50 }); // Can also use option: offset: [0, -100]
-  const { longitude, latitude, zoom } = viewport;
-  return { longitude, latitude, zoom };
+  // const viewport = new WebMercatorViewport({
+  //   width: mapPrimitiveDimensionsObj.width,
+  //   height: mapPrimitiveDimensionsObj.height,
+  // }).fitBounds(cornersLongLat, { padding: 50 }); // Can also use option: offset: [0, -100]
+  // const { longitude, latitude, zoom } = viewport;
+  // return { longitude, latitude, zoom };
 };
 
 const style = {
@@ -1039,74 +1040,76 @@ class DeliveryNode extends React.Component {
    * Render pickup marker
    */
   renderPickupMarker() {
-    if (
-      this.state.pickup_destination !== null &&
-      this.state.pickup_destination.data !== undefined &&
-      this.state.pickup_destination.data.locationData !== null &&
-      this.state.pickup_destination.data.locationData.coordinates !==
-        undefined &&
-      this.state.hasCustomPickupLocation
-    ) {
-      return (
-        <Marker
-          latitude={
-            this.state.pickup_destination.data.locationData.coordinates[0]
-          }
-          longitude={
-            this.state.pickup_destination.data.locationData.coordinates[1]
-          }
-          offsetLeft={-20}
-          offsetTop={-10}>
-          <svg
-            height={25}
-            viewBox="0 0 24 24"
-            style={{
-              cursor: "pointer",
-              fill: "#096ED4",
-              stroke: "none",
-            }}>
-            <path d={ICON} />
-          </svg>
-        </Marker>
-      );
-    } else {
-      return <></>;
-    }
+    // if (
+    //   this.state.pickup_destination !== null &&
+    //   this.state.pickup_destination.data !== undefined &&
+    //   this.state.pickup_destination.data.locationData !== null &&
+    //   this.state.pickup_destination.data.locationData.coordinates !==
+    //     undefined &&
+    //   this.state.hasCustomPickupLocation
+    // ) {
+    //   return (
+    //     <Marker
+    //       latitude={
+    //         this.state.pickup_destination.data.locationData.coordinates[0]
+    //       }
+    //       longitude={
+    //         this.state.pickup_destination.data.locationData.coordinates[1]
+    //       }
+    //       offsetLeft={-20}
+    //       offsetTop={-10}>
+    //       <svg
+    //         height={25}
+    //         viewBox="0 0 24 24"
+    //         style={{
+    //           cursor: "pointer",
+    //           fill: "#096ED4",
+    //           stroke: "none",
+    //         }}>
+    //         <path d={ICON} />
+    //       </svg>
+    //     </Marker>
+    //   );
+    // } else {
+    //   return <></>;
+    // }
+    return <></>;
   }
 
   /**
    * Render drop off marker
    */
   renderDropoffMarker() {
-    return this.state.dropOff_destination.map((location) => {
-      if (
-        location.data !== undefined &&
-        location.data.locationData !== null &&
-        location.data.locationData.coordinates !== undefined
-      ) {
-        return (
-          <Marker
-            latitude={location.data.locationData.coordinates[0]}
-            longitude={location.data.locationData.coordinates[1]}
-            offsetLeft={-20}
-            offsetTop={-10}>
-            <svg
-              height={25}
-              viewBox="0 0 24 24"
-              style={{
-                cursor: "pointer",
-                fill: "red",
-                stroke: "none",
-                zIndex: 1000,
-              }}>
-              <path d={ICON} />
-            </svg>
-          </Marker>
-        );
-      } else {
-        return <></>;
-      }
-    });
+    // return this.state.dropOff_destination.map((location) => {
+    //   if (
+    //     location.data !== undefined &&
+    //     location.data.locationData !== null &&
+    //     location.data.locationData.coordinates !== undefined
+    //   ) {
+    //     return (
+    //       <Marker
+    //         latitude={location.data.locationData.coordinates[0]}
+    //         longitude={location.data.locationData.coordinates[1]}
+    //         offsetLeft={-20}
+    //         offsetTop={-10}>
+    //         <svg
+    //           height={25}
+    //           viewBox="0 0 24 24"
+    //           style={{
+    //             cursor: "pointer",
+    //             fill: "red",
+    //             stroke: "none",
+    //             zIndex: 1000,
+    //           }}>
+    //           <path d={ICON} />
+    //         </svg>
+    //       </Marker>
+    //     );
+    //   } else {
+    //     return <></>;
+    //   }
+    // });
+    return <></>;
   }
 
   /**
@@ -1780,7 +1783,7 @@ class DeliveryNode extends React.Component {
               </div>
             </div>
             <div className={classes.mapContainer} ref="mapPrimitiveContainer">
-              <ReactMapGL
+              {/* <ReactMapGL
                 mapLib={import("mapbox-gl")}
                 width={"100%"}
                 height={"100%"}
@@ -1868,7 +1871,7 @@ class DeliveryNode extends React.Component {
                 {this.renderClusteredPolyline()}
                 {this.renderPickupMarker()}
                 {this.renderDropoffMarker()}
-                {/* <PolylineOverlay
+                 <PolylineOverlay
               points={[
                 [17.0809507, -22.5654531],
                 [17.0818734, -22.5685244],
@@ -1878,8 +1881,8 @@ class DeliveryNode extends React.Component {
                 [17.081058, -22.5738742],
                 [17.0808434, -22.5747658],
               ]}
-            /> */}
-              </ReactMapGL>
+            /> 
+              </ReactMapGL> */}
             </div>
           </>
         ) : this.state.isThereRequestError === false ? (
