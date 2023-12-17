@@ -49,6 +49,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
+import axios from "axios";
 
 const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
   c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
@@ -190,79 +191,6 @@ class DeliveryNode extends React.Component {
     });
 
     /**
-     * GET FARE ESTIMATION LIST FOR ALL THE RELEVANTS RIDES
-     * @event: getPricingForRideorDelivery
-     * ? Responsible for getting the list of fare estimates based on the user-selected parameters
-     * ? from the pricing service.
-     * ! If invalid fare received, try again - leave that to the initiated interval persister.
-     */
-    this.SOCKET_CORE.on(
-      "getPricingForRideorDelivery-response",
-      function (response) {
-        if (response !== false && response.response === undefined) {
-          //Estimates computed
-          //Convert to object
-          if (typeof response === String) {
-            try {
-              response = JSON.parse(response);
-              let previousFareData = globalObject.state.fareETAEstimations;
-              previousFareData["fareData"] = response;
-              //...
-              globalObject.setState({
-                isLoadingForFare: false,
-                fareETAEstimations: previousFareData,
-                shoudAllowRequest: true,
-              });
-            } catch (error) {
-              response = response;
-              let previousFareData = globalObject.state.fareETAEstimations;
-              previousFareData["fareData"] = response;
-              //...
-              globalObject.setState({
-                isLoadingForFare: false,
-                fareETAEstimations: previousFareData,
-                shoudAllowRequest: true,
-              });
-            }
-          } //Try to parse
-          else {
-            try {
-              response = JSON.parse(response);
-              let previousFareData = globalObject.state.fareETAEstimations;
-              previousFareData["fareData"] = response;
-              //...
-              globalObject.setState({
-                isLoadingForFare: false,
-                fareETAEstimations: previousFareData,
-                shoudAllowRequest: true,
-              });
-            } catch (error) {
-              response = response;
-              let previousFareData = globalObject.state.fareETAEstimations;
-              previousFareData["fareData"] = response;
-              //...
-              globalObject.setState({
-                isLoadingForFare: false,
-                fareETAEstimations: previousFareData,
-                shoudAllowRequest: true,
-              });
-            }
-          }
-        }
-        //! No valid estimates due to a problem, try again
-        else {
-          //? Force the estimates try again.
-          //globalObject.getFareEstimation();
-          globalObject.setState({
-            isLoadingForFare: false,
-            fareETAEstimations: {},
-            shoudAllowRequest: false,
-          });
-        }
-      }
-    );
-
-    /**
      * GET ROUTE SNAPSHOTS RESPONSES
      */
     this.SOCKET_CORE.on(
@@ -397,6 +325,75 @@ class DeliveryNode extends React.Component {
     //...
     this.setState({ pickup_destination: pickupLocation });
   }
+
+  processLocationSearchResults = (response) => {
+    // console.log(response);
+    //...
+    if (response !== false && response.result) {
+      if (this.state.search_querySearch.length !== 0) {
+        this.setState({
+          searchResults: response.result,
+          loaderStateSearch: false,
+          shouldShowSearch: true,
+          // search_querySearch: "",
+        });
+      } //No queries to be processed
+      else {
+        this.setState({
+          searchResults: [],
+          loaderStateSearch: false,
+          shouldShowSearch: false,
+          // search_querySearch: "",
+        });
+      }
+    } else {
+      //If the search results contained previous results, leave that
+      if (this.state.searchResults.length > 0) {
+        this.setState({
+          loaderStateSearch: false,
+          shouldShowSearch: true,
+        }); //? Stop the animation loader
+      } else {
+        this.setState({
+          loaderStateSearch: false,
+          shouldShowSearch: false,
+          // search_querySearch: "",
+        }); //? Stop the animation loader
+      }
+    }
+  };
+
+  /**
+   * GET FARE ESTIMATION LIST FOR ALL THE RELEVANTS RIDES
+   * @event: getPricingForRideorDelivery
+   * ? Responsible for getting the list of fare estimates based on the user-selected parameters
+   * ? from the pricing service.
+   * ! If invalid fare received, try again - leave that to the initiated interval persister.
+   */
+  handlePricingForDeliveryResponse = (response) => {
+    try {
+      let previousFareData = this.state.fareETAEstimations;
+      previousFareData["fareData"] = response;
+      //...
+      this.setState({
+        isLoadingForFare: false,
+        fareETAEstimations: previousFareData,
+        shoudAllowRequest: true,
+        isLoadingEta: false,
+      });
+    } catch (error) {
+      response = response;
+      let previousFareData = this.state.fareETAEstimations;
+      previousFareData["fareData"] = response;
+      //...
+      this.setState({
+        isLoadingForFare: false,
+        fareETAEstimations: previousFareData,
+        shoudAllowRequest: true,
+        isLoadingEta: false,
+      });
+    }
+  };
 
   /***
    * Render the destination input
@@ -663,7 +660,7 @@ class DeliveryNode extends React.Component {
                       }}
                       className={classes.formBasicInputClassics}
                       spellCheck={false}
-                      autocomplete="new-password"
+                      autoComplete="new-password"
                       autoCapitalize="false"
                       autoCorrect="false"
                     />
@@ -692,7 +689,7 @@ class DeliveryNode extends React.Component {
                         this.setState({ dropOff_destination: oldState });
                       }}
                       className={classes.formBasicInputClassics}
-                      autocomplete="new-password"
+                      autoComplete="new-password"
                       style={{
                         borderColor:
                           this.state.dropOff_destination[index].data
@@ -864,11 +861,41 @@ class DeliveryNode extends React.Component {
         shoudAllowRequest: false,
       });
       //..ask
-      this.SOCKET_CORE.emit(
-        "getPricingForRideorDelivery",
-        deliveryPricingInputDataRaw
+      // this.SOCKET_CORE.emit(
+      //   "getPricingForRideorDelivery",
+      //   deliveryPricingInputDataRaw
+      // );
+      this.handlePricingForDeliveryResponse(
+        this.state.dropOff_destination.map((destination) => ({ base_fare: 50 }))
       );
     }
+  }
+
+  validateData() {
+    let areDataValid = false; //False by default
+
+    if (!this.state.pickup_destination?.data) {
+      this.setState({
+        shoudAllowRequest: areDataValid,
+      });
+    }
+
+    //? Check the pickup location
+    areDataValid =
+      !this.state.pickup_destination?.data?.locationData ||
+      !this.state.pickup_destination?.data?.locationData?.coordinates
+        ? false
+        : true;
+    //? Check the drop off location
+    let invalidDropOff = this.state.dropOff_destination.filter((location) => {
+      return !location?.data?.receiverInfos?.receiver_name;
+    });
+    //...add in the data for the drop off
+    areDataValid = areDataValid && (invalidDropOff.length > 0 ? false : true);
+
+    this.setState({
+      shoudAllowRequest: areDataValid,
+    });
   }
 
   /**
@@ -996,7 +1023,7 @@ class DeliveryNode extends React.Component {
    * @param {*} query
    * Responsible for launching the server request for a specific query props.App typed by the user.
    */
-  _searchForThisQuery(query, inputFieldIndex) {
+  _searchForThisQuery = async (query, inputFieldIndex) => {
     this.search_time_requested = new Date();
     this.state.search_querySearch = query.trim();
 
@@ -1016,16 +1043,37 @@ class DeliveryNode extends React.Component {
         requestPackage.query = this.state.search_querySearch;
         requestPackage.city = "Windhoek"; //Default city to windhoek
         requestPackage.country = "Namibia"; //Default country to Namibia
+
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/getSearchedLocations`,
+          {
+            city: "Windhoek",
+            country: "Namibia",
+            query: this.state.search_querySearch,
+            state: "Khomas",
+            user_fp: this.props.App.userData.loginData.company_fp,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+            },
+          }
+        );
+
+        console.log(response.data);
+
+        this.processLocationSearchResults(response.data);
+
         //Submit to API
         //! Disable the ability to request temporarily as well
-        this.setState({
-          loaderStateSearch: true,
-          shouldShowSearch: true,
-          shoudAllowRequest: false,
-          fareETAEstimations: {},
-        });
+        // this.setState({
+        //   loaderStateSearch: true,
+        //   shouldShowSearch: true,
+        //   shoudAllowRequest: false,
+        //   fareETAEstimations: {},
+        // });
 
-        this.SOCKET_CORE.emit("getLocations", requestPackage);
+        // this.SOCKET_CORE.emit("getLocations", requestPackage);
       } //NO queries to process
       else {
         this.setState({ loaderStateSearch: false, searchResults: [] });
@@ -1034,7 +1082,7 @@ class DeliveryNode extends React.Component {
     else {
       this.setState({ loaderStateSearch: false, searchResults: [] });
     }
-  }
+  };
 
   /**
    * Render pickup marker
@@ -1155,51 +1203,51 @@ class DeliveryNode extends React.Component {
     // console.log(dropOffPoints);
     // console.log(`Are valid for bounds: ${areValidForFitBounds}`);
 
-    if (areValidForFitBounds) {
-      let pointsBundle = dropOffPoints;
-      pointsBundle.push(pickupPoint);
-      //..
-      this.setState({
-        customFitboundsCoords: getBoundsForPoints(
-          pointsBundle,
-          this.refs.mapPrimitiveContainer.getBoundingClientRect()
-        ),
-        snapshotsToDestination: [],
-        isLoadingEta: true,
-      });
-      this.forceUpdate();
+    // if (areValidForFitBounds) {
+    //   let pointsBundle = dropOffPoints;
+    //   pointsBundle.push(pickupPoint);
+    //   //..
+    //   this.setState({
+    //     customFitboundsCoords: getBoundsForPoints(
+    //       pointsBundle,
+    //       this.refs.mapPrimitiveContainer.getBoundingClientRect()
+    //     ),
+    //     snapshotsToDestination: [],
+    //     isLoadingEta: true,
+    //   });
+    //   this.forceUpdate();
 
-      //! Compute the route and ETA
-      dropOffPoints = dropOffPoints.filter((el) => el !== false);
-      //...
-      let parentPromises = dropOffPoints.map((dropOff) => {
-        return new Promise((resCompute) => {
-          let tmpBundleSnapShot = {
-            org_latitude: pickupPoint.latitude,
-            org_longitude: pickupPoint.longitude,
-            dest_latitude: dropOff.latitude,
-            dest_longitude: dropOff.longitude,
-            user_fingerprint: this.props.App.userData.loginData.company_fp,
-          };
-          //...
-          //   console.log(tmpBundleSnapShot);
-          this.SOCKET_CORE.emit(
-            "getRoute_to_destinationSnapshot",
-            tmpBundleSnapShot
-          );
-          //..
-          resCompute(true);
-        });
-      });
-      ///...
-      Promise.all(parentPromises)
-        .then((result) => {
-          // console.log(result);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
+    //   //! Compute the route and ETA
+    //   dropOffPoints = dropOffPoints.filter((el) => el !== false);
+    //   //...
+    //   let parentPromises = dropOffPoints.map((dropOff) => {
+    //     return new Promise((resCompute) => {
+    //       let tmpBundleSnapShot = {
+    //         org_latitude: pickupPoint.latitude,
+    //         org_longitude: pickupPoint.longitude,
+    //         dest_latitude: dropOff.latitude,
+    //         dest_longitude: dropOff.longitude,
+    //         user_fingerprint: this.props.App.userData.loginData.company_fp,
+    //       };
+    //       //...
+    //       //   console.log(tmpBundleSnapShot);
+    //       this.SOCKET_CORE.emit(
+    //         "getRoute_to_destinationSnapshot",
+    //         tmpBundleSnapShot
+    //       );
+    //       //..
+    //       resCompute(true);
+    //     });
+    //   });
+    //   ///...
+    //   Promise.all(parentPromises)
+    //     .then((result) => {
+    //       // console.log(result);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     });
+    // }
   }
 
   /**
@@ -1219,54 +1267,69 @@ class DeliveryNode extends React.Component {
    * Compute the total ETA time and render a unified time
    */
   renderUnifiedETATime() {
-    if (this.state.snapshotsToDestination.length > 0) {
-      let unifiedTimeSec = 0;
-      this.state.snapshotsToDestination.map((snap) => {
-        let time =
-          snap !== undefined &&
-          snap !== null &&
-          snap.eta !== undefined &&
-          snap.eta !== null
-            ? parseInt(snap.eta.split(" ")[0].trim())
-            : 0;
-        //...
-        if (/min/i.test(snap.eta)) {
-          //Minutes
-          unifiedTimeSec += time * 60;
-        } else if (/sec/i.test(snap.eta)) {
-          //Seconds
-          unifiedTimeSec += time;
-        }
-      });
-      //...
-      if (unifiedTimeSec >= 60) {
-        //Put in min
-        unifiedTimeSec = `${Math.round(unifiedTimeSec / 60)} min`;
-        return unifiedTimeSec;
-      } else {
-        unifiedTimeSec = `${Math.round(unifiedTimeSec)} sec`;
-        return unifiedTimeSec;
-      }
-    } else {
-      return <></>;
-    }
+    const totalMinutes = this.state.fareETAEstimations.fareData.reduce(
+      (acc, val) => acc + 30,
+      0
+    );
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    const displayTime =
+      totalMinutes < 60
+        ? `${totalMinutes} minutes`
+        : `${hours > 0 ? `${hours} hours` : ""} ${
+            minutes > 0 ? `${minutes} minutes` : ""
+          }`;
+
+    return displayTime.trim();
+
+    // if (this.state.snapshotsToDestination.length > 0) {
+    //   let unifiedTimeSec = 0;
+    //   this.state.snapshotsToDestination.map((snap) => {
+    //     let time =
+    //       snap !== undefined &&
+    //       snap !== null &&
+    //       snap.eta !== undefined &&
+    //       snap.eta !== null
+    //         ? parseInt(snap.eta.split(" ")[0].trim())
+    //         : 0;
+    //     //...
+    //     if (/min/i.test(snap.eta)) {
+    //       //Minutes
+    //       unifiedTimeSec += time * 60;
+    //     } else if (/sec/i.test(snap.eta)) {
+    //       //Seconds
+    //       unifiedTimeSec += time;
+    //     }
+    //   });
+    //   //...
+    //   if (unifiedTimeSec >= 60) {
+    //     //Put in min
+    //     unifiedTimeSec = `${Math.round(unifiedTimeSec / 60)} min`;
+    //     return unifiedTimeSec;
+    //   } else {
+    //     unifiedTimeSec = `${Math.round(unifiedTimeSec)} sec`;
+    //     return unifiedTimeSec;
+    //   }
+    // } else {
+    //   return <></>;
+    // }
   }
 
   /**
    * Responsible for making the request
    */
-  makeDeliveryRequest() {
+  makeDeliveryRequest = async () => {
     let globalObject = this;
     //Check that all the receivers had been specified
     let receiversInOrder = true;
     this.state.dropOff_destination.map((tmpLocation, index) => {
       if (
-        tmpLocation.data.receiverInfos.receiver_name !== undefined &&
-        tmpLocation.data.receiverInfos.receiver_name !== null &&
-        tmpLocation.data.receiverInfos.receiver_name.length > 0 &&
-        tmpLocation.data.receiverInfos.receiver_phone !== undefined &&
-        tmpLocation.data.receiverInfos.receiver_phone !== null &&
-        tmpLocation.data.receiverInfos.receiver_phone.length > 0
+        tmpLocation.data?.receiverInfos?.receiver_name &&
+        tmpLocation.data?.receiverInfos?.receiver_name?.length > 0 &&
+        tmpLocation.data?.receiverInfos?.receiver_phone &&
+        tmpLocation.data?.receiverInfos?.receiver_phone?.length > 0
       ) {
         //Okay
       } //Details not detected
@@ -1280,21 +1343,21 @@ class DeliveryNode extends React.Component {
     if (receiversInOrder) {
       //...Get fare
       let tmpFare = 0;
-      globalObject.state.fareETAEstimations.fareData.map((fare) => {
+      globalObject.state.fareETAEstimations?.fareData.map((fare) => {
         if (/carDelivery/i.test(fare.car_type)) {
           tmpFare = fare.base_fare;
         }
       });
-      globalObject.setState({
-        isLoadingGeneral: true,
-        didRequestJustBeenMade: false,
-        isThereRequestError: false,
-      });
+      // globalObject.setState({
+      //   isLoadingGeneral: true,
+      //   didRequestJustBeenMade: false,
+      //   isThereRequestError: false,
+      // });
       //Package all the data
       let RIDE_OR_DELIVERY_BOOKING_DATA = {
-        user_fingerprint: globalObject.props.App.userData.loginData.company_fp,
+        user_fingerprint: globalObject.props.App.userData.loginData?.company_fp,
         connectType: "ConnectUs",
-        country: globalObject.props.App.userCurrentLocationMetaData.country,
+        country: globalObject.props.App.userCurrentLocationMetaData?.country,
         isAllGoingToSameDestination: false, //If all the passengers are going to the same destination
         isGoingUntilHome: false, //! Will double the fares for the Economy - Set to false for the DELIVERY
         naturePickup: "PrivateLocation", //Force PrivateLocation type if nothing found or delivery request,  -Nature of the pickup location (privateLOcation,etc)
@@ -1346,18 +1409,69 @@ class DeliveryNode extends React.Component {
       });
       //...
       // console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
+      // {
+      //   user_identifier: 'ada5af56-e1ca-4e62-b1bd-0f73268c53ab',
+      //   payment_method: 'cash',
+      //   note: '',
+      //   dropOff_data: '[{"name":"Dominique","phone":"+264856997167","dropoff_location":{"query":"aca","suburb":"false","createdAt":"2023-11-29T01:03:17.190Z","country":"Namibia","state":"Khomas","city":"Windhoek","location_name":"Academia","indexSearch":0,"averageGeo":0,"updatedAt":"2023-11-29T01:03:17.190Z","location_id":"ChIJn8xVye4aCxwRKcworZ_nnuw","id":"00fd36a0-bf52-48ed-b2c1-d138b0836741","coordinates":[-22.6104205,17.0712807],"street":"Windhoek, Namibia","street_name":"Windhoek, Namibia"}}]',
+      //   totals: '{"delivery_fee":"50.00","service_fee":"0.00","total":"50.00"}',
+      //   pickup_location: '{"osm_id":11178801051,"country":"Namibia","city":"Windhoek","countrycode":"NA","postcode":"10012","type":"house","osm_type":"N","osm_key":"tourism","street":"Best Street","district":"Windhoek West","osm_value":"guest_house","name":"Sekira Guest House","state":"Khomas Region","isCity_supported":true,"location_name":"Best Street","coordinates":{"latitude":-22.560881,"longitude":17.0657552},"street_name":"Best Street","suburb":"Windhoek West"}',
+      //   ride_mode: 'delivery'
+      // }
+
+      // console.log(globalObject.state.dropOff_destination);
+
+      const dropOff_data = globalObject.state.dropOff_destination.map(
+        (destination) => {
+          return {
+            name: destination.data.receiverInfos.receiver_name,
+            phone: destination.data.receiverInfos.receiver_phone,
+            dropoff_location: {
+              ...destination.data.locationData,
+              receiver_infos: undefined,
+            },
+          };
+        }
+      );
+
+      const deliveryFee =
+        globalObject.state.fareETAEstimations.fareData.length * 50;
+
+      const bundleData = {
+        user_identifier: globalObject.props.App.userData.loginData?.company_fp,
+        passengers_number: dropOff_data.length,
+        payment_method: "wallet",
+        note: "",
+        dropOff_data: dropOff_data,
+        totals: {
+          delivery_fee: deliveryFee,
+          service_fee: "0.00",
+          total: deliveryFee,
+        },
+        pickup_location: globalObject.props.App.userCurrentLocationMetaData,
+        ride_mode: "delivery",
+      };
+
+      console.log(bundleData);
       //! Make a single request - risky
       //Not yet request and no errors
       //Check wheher an answer was already received - if not keep requesting
-      globalObject.SOCKET_CORE.emit(
-        "requestRideOrDeliveryForThis",
-        RIDE_OR_DELIVERY_BOOKING_DATA
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/requestForRideOrDelivery`,
+        bundleData,
+        {
+          headers: {
+            Authorization: `Bearer ${globalObject.props.App.userData.loginData?.company_fp}`,
+          },
+        }
       );
+
+      console.log(response.data);
     } //!Receivers infos not in order
     else {
       this.setState({ shouldShowModal: true });
     }
-  }
+  };
 
   render() {
     //Initialize the input data
@@ -1534,13 +1648,12 @@ class DeliveryNode extends React.Component {
                           className={classes.icoGlobalTripsIfos1}
                         />
                       </div>
-                      Estimated fare{" "}
+                      Estimated fee{" "}
                       <strong style={{ position: "relative", marginLeft: 5 }}>
-                        {this.state.fareETAEstimations.fareData.map((fare) => {
-                          if (/carDelivery/i.test(fare.car_type)) {
-                            return `N$${fare.base_fare}`;
-                          }
-                        })}
+                        {`N$${this.state.fareETAEstimations.fareData.reduce(
+                          (acc, val) => acc + val.base_fare,
+                          0
+                        )}`}
                       </strong>
                       .
                     </>
@@ -1595,14 +1708,14 @@ class DeliveryNode extends React.Component {
                         Estimating your ETA...
                       </span>
                     </div>
-                  ) : this.state.snapshotsToDestination.length > 0 ? (
+                  ) : this.state.fareETAEstimations?.fareData?.length > 0 ? (
                     <>
                       <div className={classes.globalInfosPrimitiveContainer}>
                         <AiTwotoneProject
                           className={classes.icoGlobalTripsIfos1}
                         />
                       </div>
-                      ETA
+                      Estimated delivery time
                       <strong style={{ position: "relative", marginLeft: 5 }}>
                         {this.renderUnifiedETATime()}
                       </strong>
@@ -1626,7 +1739,7 @@ class DeliveryNode extends React.Component {
                   <div className={classes.globalInfosPrimitiveContainer}>
                     <AiFillTag className={classes.icoGlobalTripsIfos2} />
                   </div>
-                  The receivers can track their deliveries.
+                  The receivers will be notified about their deliveries.
                 </div>
                 <div
                   style={{

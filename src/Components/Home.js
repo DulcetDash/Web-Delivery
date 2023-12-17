@@ -803,7 +803,7 @@ class Home extends React.PureComponent {
                   value={this.state.phone}
                   onChange={(value) => this.setState({ phone: value })}
                   className={classes.formBasicInput}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   style={{ borderColor: this.state.phone_error_color }}
                 />
                 <br />
@@ -862,7 +862,7 @@ class Home extends React.PureComponent {
                   style={{ borderColor: this.state.otp_error_color }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                   maxLength={6}
@@ -945,7 +945,7 @@ class Home extends React.PureComponent {
                       borderColor: this.state.firstname_error_color,
                     }}
                     spellCheck={false}
-                    autocomplete="new-password"
+                    autoComplete="new-password"
                     autoCapitalize="false"
                     autoCorrect="false"
                   />
@@ -965,7 +965,7 @@ class Home extends React.PureComponent {
                       borderColor: this.state.lastname_error_color,
                     }}
                     spellCheck={false}
-                    autocomplete="new-password"
+                    autoComplete="new-password"
                     autoCapitalize="false"
                     autoCorrect="false"
                   />
@@ -983,7 +983,7 @@ class Home extends React.PureComponent {
                   style={{ borderColor: this.state.email_error_color }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                 />
@@ -997,7 +997,7 @@ class Home extends React.PureComponent {
                   value={this.state.phone}
                   onChange={(value) => this.setState({ phone: value })}
                   className={classes.formBasicInput}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   style={{ borderColor: this.state.phone_error_color }}
                 />
                 <br />
@@ -1014,7 +1014,7 @@ class Home extends React.PureComponent {
                   style={{ borderColor: this.state.company_name_error_color }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                 />
@@ -1046,7 +1046,7 @@ class Home extends React.PureComponent {
                   style={{ borderColor: this.state.password_error_color }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                 />
@@ -1066,7 +1066,7 @@ class Home extends React.PureComponent {
                   }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                 />
@@ -1111,7 +1111,7 @@ class Home extends React.PureComponent {
                   style={{ borderColor: this.state.email_error_color }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                 />
@@ -1129,7 +1129,7 @@ class Home extends React.PureComponent {
                   style={{ borderColor: this.state.password }}
                   className={classes.formBasicInput}
                   spellCheck={false}
-                  autocomplete="new-password"
+                  autoComplete="new-password"
                   autoCapitalize="false"
                   autoCorrect="false"
                 />

@@ -201,7 +201,6 @@ class Delivery extends React.Component {
           }
         );
 
-        console.log(geocoding.data);
         this.handleGeocodedResponse(geocoding.data);
 
         // globalObject.SOCKET_CORE.emit("geocode-this-point", {
@@ -296,13 +295,6 @@ class Delivery extends React.Component {
       Pro: 50,
       PRSNLD: 100,
     };
-
-    console.log(this.props.App.userData?.loginData);
-    console.log(
-      this.state.didGetTHeCurrentLocation,
-      this.props.App?.tripsData.length,
-      QUOTAS_BATCHES[this.props.App.userData.loginData?.plans?.subscribed_plan]
-    );
 
     return (
       <div
