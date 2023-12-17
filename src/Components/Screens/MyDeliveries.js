@@ -36,8 +36,8 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import "react-phone-number-input/style.css";
 import SOCKET_CORE from "../../Helper/managerNode";
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-import Loader from "react-loader-spinner";
+// import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import { TailSpin as Loader } from "react-loader-spinner";
 import "rc-steps/assets/index.css";
 import Steps from "rc-steps";
 
@@ -221,8 +221,7 @@ class MyDeliveries extends React.Component {
           Active deliveries
           <div
             className={classes.historyEntryTitle}
-            onClick={() => (window.location.href = "/History")}
-          >
+            onClick={() => (window.location.href = "/History")}>
             History
           </div>
         </div>
@@ -317,8 +316,7 @@ class MyDeliveries extends React.Component {
                       <div className={classes.stepsProgress}>
                         <Steps
                           current={1}
-                          icons={{ finish: <MdCheckCircle /> }}
-                        >
+                          icons={{ finish: <MdCheckCircle /> }}>
                           <Steps.Step
                             title=""
                             status={
@@ -439,8 +437,7 @@ class MyDeliveries extends React.Component {
                           color: "#09864A",
                           fontFamily: "MoveTextBold, sans-serif",
                           fontSize: 20,
-                        }}
-                      >
+                        }}>
                         N${deliveryData.birdview_infos.fare}
                       </div>
                       <div
@@ -448,8 +445,7 @@ class MyDeliveries extends React.Component {
                         style={{
                           fontSize: 14,
                           fontFamily: "MoveTextRegular, sans-serif",
-                        }}
-                      >
+                        }}>
                         {`${new Date(deliveryData.birdview_infos.date_requested)
                           .toLocaleDateString()
                           .replace(/\//g, "-")} at ${new Date(
@@ -474,12 +470,10 @@ class MyDeliveries extends React.Component {
                           flexDirection: "column",
                           flex: 1,
                           justifyContent: "space-around",
-                        }}
-                      >
+                        }}>
                         <div
                           className={classes.pickupSide}
-                          style={{ marginBottom: 20 }}
-                        >
+                          style={{ marginBottom: 20 }}>
                           <div className={classes.labelDestination}>
                             Pickup at
                           </div>
@@ -539,8 +533,7 @@ class MyDeliveries extends React.Component {
                         </div>
                         <div
                           className={classes.pickupSide}
-                          style={{ position: "relative", top: 24 }}
-                        >
+                          style={{ position: "relative", top: 24 }}>
                           <div className={classes.labelDestination}>
                             Drop off at
                           </div>
@@ -549,8 +542,7 @@ class MyDeliveries extends React.Component {
                               display: "flex",
                               flex: 1,
                               flexDirection: "column",
-                            }}
-                          >
+                            }}>
                             {/* Single el */}
                             {deliveryData.birdview_infos.dropoff_details.map(
                               (location, index) => {
@@ -567,15 +559,13 @@ class MyDeliveries extends React.Component {
                                       display: "flex",
                                       flex: 1,
                                       paddingBottom: 15,
-                                    }}
-                                  >
+                                    }}>
                                     <div style={{ flex: 1 }}>
                                       <div className={classes.suburbName}>
                                         {location.suburb}
                                       </div>
                                       <div
-                                        className={classes.detailsLocationText}
-                                      >
+                                        className={classes.detailsLocationText}>
                                         {`${
                                           location.location_name !==
                                             undefined &&
@@ -613,8 +603,7 @@ class MyDeliveries extends React.Component {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                      }}
-                                    >
+                                      }}>
                                       <MdPlayArrow
                                         style={{
                                           width: 13,
@@ -624,8 +613,9 @@ class MyDeliveries extends React.Component {
                                       />
                                     </div>
                                     <div
-                                      className={classes.receiverBatchContainer}
-                                    >
+                                      className={
+                                        classes.receiverBatchContainer
+                                      }>
                                       {location.receiver_infos.receiver_name !==
                                         undefined &&
                                       location.receiver_infos.receiver_name
@@ -634,8 +624,7 @@ class MyDeliveries extends React.Component {
                                           <div
                                             className={
                                               classes.receiverBatchName
-                                            }
-                                          >
+                                            }>
                                             {
                                               location.receiver_infos
                                                 .receiver_name
@@ -644,8 +633,7 @@ class MyDeliveries extends React.Component {
                                           <div
                                             className={
                                               classes.receiverBatchPhone
-                                            }
-                                          >
+                                            }>
                                             {
                                               location.receiver_infos
                                                 .receiver_phone
@@ -659,8 +647,7 @@ class MyDeliveries extends React.Component {
                                             height: "100%",
                                             display: "flex",
                                             alignItems: "center",
-                                          }}
-                                        >
+                                          }}>
                                           No receiver specified
                                         </div>
                                       )}
@@ -697,8 +684,7 @@ class MyDeliveries extends React.Component {
                                 ? deliveryData.basicTripDetails.request_fp
                                 : false
                             );
-                          }}
-                        >
+                          }}>
                           <MdBlock
                             style={{
                               marginRight: 3,
@@ -731,8 +717,7 @@ class MyDeliveries extends React.Component {
                             this.confirmRiderDropoff(
                               deliveryData.trip_details.request_fp
                             )
-                          }
-                        >
+                          }>
                           <MdCheckCircle
                             style={{
                               marginRight: 3,
@@ -777,16 +762,14 @@ class MyDeliveries extends React.Component {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
-            }}
-          >
+            }}>
             <MdAutorenew style={{ width: 35, height: 35, marginBottom: 25 }} />
             No active deliveries, but feel free to make a new request.
             <div
               className={classes.formBasicSubmitBttnClassicsReceiverInfos}
               onClick={() => {
                 window.location.href = "/Delivery";
-              }}
-            >
+              }}>
               Make a delivery
             </div>
           </div>

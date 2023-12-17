@@ -37,8 +37,8 @@ import ReactMapGL, {
   WebMercatorViewport,
 } from "react-map-gl";
 import SOCKET_CORE from "../../Helper/managerNode";
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-import Loader from "react-loader-spinner";
+// import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import { TailSpin as Loader } from "react-loader-spinner";
 import PolylineOverlay from "../../Helper/PolylineOverlay";
 import TextField from "@mui/material/TextField";
 import DateAdapter from "@mui/lab/AdapterMoment";
@@ -427,12 +427,10 @@ class DeliveryNode extends React.Component {
       return (
         <div
           key={index.toString()}
-          className={classes.higherOrderPrimitiveContainer}
-        >
+          className={classes.higherOrderPrimitiveContainer}>
           <div
             className={classes.dropOffPrimitiveContainer}
-            style={{ display: "flex", flexDirection: "column" }}
-          >
+            style={{ display: "flex", flexDirection: "column" }}>
             <input
               key={index.toString()}
               type="text"
@@ -481,8 +479,7 @@ class DeliveryNode extends React.Component {
                   width: "100%",
                   bottom: 63,
                   left: 3,
-                }}
-              >
+                }}>
                 {this.renderSearchBar()}
               </div>
             ) : null}
@@ -520,15 +517,13 @@ class DeliveryNode extends React.Component {
                   }
                 }}
                 className={classes.accordionClassics}
-                style={{ boxShadow: "none" }}
-              >
+                style={{ boxShadow: "none" }}>
                 <AccordionSummary
                   expandIcon={
                     <FiChevronDown className={classes.accordionIcoClassics} />
                   }
                   aria-controls="panel1a-content"
-                  id="panel1a-header"
-                >
+                  id="panel1a-header">
                   {receiverName === undefined ||
                   receiverName.length === 0 ||
                   receiverPhone === undefined ||
@@ -746,8 +741,7 @@ class DeliveryNode extends React.Component {
                             //...
                             this.setState({ dropOff_destination: oldState });
                           }
-                        }}
-                      >
+                        }}>
                         Save
                       </div>
                     </div>
@@ -926,8 +920,7 @@ class DeliveryNode extends React.Component {
               }
               //? Call recenter map estimator
               this.recenterMapEstimator();
-            }}
-          >
+            }}>
             <AiFillEnvironment />
             <div className={classes.searchedInfosTextContainer}>
               <div className={classes.locationNameSearched}>
@@ -980,8 +973,7 @@ class DeliveryNode extends React.Component {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
-              }}
-            >
+              }}>
               <Loader
                 type="TailSpin"
                 color="#000"
@@ -1064,8 +1056,7 @@ class DeliveryNode extends React.Component {
             this.state.pickup_destination.data.locationData.coordinates[1]
           }
           offsetLeft={-20}
-          offsetTop={-10}
-        >
+          offsetTop={-10}>
           <svg
             height={25}
             viewBox="0 0 24 24"
@@ -1073,8 +1064,7 @@ class DeliveryNode extends React.Component {
               cursor: "pointer",
               fill: "#096ED4",
               stroke: "none",
-            }}
-          >
+            }}>
             <path d={ICON} />
           </svg>
         </Marker>
@@ -1099,8 +1089,7 @@ class DeliveryNode extends React.Component {
             latitude={location.data.locationData.coordinates[0]}
             longitude={location.data.locationData.coordinates[1]}
             offsetLeft={-20}
-            offsetTop={-10}
-          >
+            offsetTop={-10}>
             <svg
               height={25}
               viewBox="0 0 24 24"
@@ -1109,8 +1098,7 @@ class DeliveryNode extends React.Component {
                 fill: "red",
                 stroke: "none",
                 zIndex: 1000,
-              }}
-            >
+              }}>
               <path d={ICON} />
             </svg>
           </Marker>
@@ -1400,15 +1388,13 @@ class DeliveryNode extends React.Component {
             })
           }
           aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
+          aria-describedby="modal-modal-description">
           <Box sx={style}>
             <Typography
               id="modal-modal-title"
               variant="h6"
               component="h2"
-              style={{ fontWeight: "bold", fontSize: 15, color: "#b22222" }}
-            >
+              style={{ fontWeight: "bold", fontSize: 15, color: "#b22222" }}>
               Attention required
             </Typography>
             <Typography id="modal-modal-description" sx={{ mt: 2 }}>
@@ -1485,8 +1471,7 @@ class DeliveryNode extends React.Component {
                           onClick={() => {
                             this.resetCurrentPickupLocationToThis();
                             this.setState({ hasCustomPickupLocation: false });
-                          }}
-                        >
+                          }}>
                           <MdNearMe
                             style={{ width: 23, height: 23 }}
                             title={"Set to your current location"}
@@ -1523,8 +1508,7 @@ class DeliveryNode extends React.Component {
                       )
                         ? this.addAdditionalDestination()
                         : {}
-                    }
-                  >
+                    }>
                     <AiFillPlusCircle
                       style={{
                         color: "#0e8491",
@@ -1564,8 +1548,7 @@ class DeliveryNode extends React.Component {
                         display: "flex",
                         flexDirection: "row",
                         marginBottom: 5,
-                      }}
-                    >
+                      }}>
                       <Loader
                         type="TailSpin"
                         color="#000"
@@ -1578,8 +1561,7 @@ class DeliveryNode extends React.Component {
                           position: "relative",
                           marginLeft: 4,
                           color: "#0e8491",
-                        }}
-                      >
+                        }}>
                         Estimating your fare...
                       </span>
                     </div>
@@ -1593,8 +1575,7 @@ class DeliveryNode extends React.Component {
                         display: "flex",
                         flexDirection: "row",
                         marginBottom: 5,
-                      }}
-                    >
+                      }}>
                       <Loader
                         type="TailSpin"
                         color="#000"
@@ -1607,8 +1588,7 @@ class DeliveryNode extends React.Component {
                           position: "relative",
                           marginLeft: 4,
                           color: "#0e8491",
-                        }}
-                      >
+                        }}>
                         Estimating your ETA...
                       </span>
                     </div>
@@ -1639,8 +1619,7 @@ class DeliveryNode extends React.Component {
               <div className={classes.requestBtnContainer}>
                 <div
                   className={classes.elGlobalTripIfos2}
-                  style={{ fontSize: 13 }}
-                >
+                  style={{ fontSize: 13 }}>
                   <div className={classes.globalInfosPrimitiveContainer}>
                     <AiFillTag className={classes.icoGlobalTripsIfos2} />
                   </div>
@@ -1651,8 +1630,7 @@ class DeliveryNode extends React.Component {
                     display: "flex",
                     flexDirection: "row",
                     marginTop: 20,
-                  }}
-                >
+                  }}>
                   {/* <input
                 type="submit"
                 value="Request for delivery"
@@ -1684,8 +1662,7 @@ class DeliveryNode extends React.Component {
                         : this.state.isLoadingGeneral === false
                         ? this.makeDeliveryRequest()
                         : {}
-                    }
-                  >
+                    }>
                     {this.state.isLoadingGeneral === false ? (
                       <>
                         Request for delivery
@@ -1752,8 +1729,7 @@ class DeliveryNode extends React.Component {
                       //       showDateTimePicker: true,
                       //       scheduledTime: new Date(),
                       //     })
-                    }
-                  >
+                    }>
                     {this.state.showDateTimePicker ? (
                       <div
                         style={{
@@ -1761,8 +1737,7 @@ class DeliveryNode extends React.Component {
                           flexDirection: "column",
                           boxShadow: "0px 0px 15px 1px rgba(0, 0, 0, 0.14)",
                           marginBottom: 150,
-                        }}
-                      >
+                        }}>
                         <LocalizationProvider dateAdapter={DateAdapter}>
                           <StaticDateTimePicker
                             displayStaticWrapperAs="mobile"
@@ -1791,8 +1766,7 @@ class DeliveryNode extends React.Component {
                               showDateTimePicker: false,
                               isScheduledTrip: true,
                             });
-                          }}
-                        >
+                          }}>
                           Set delivery date
                         </div>
                       </div>
@@ -1807,6 +1781,7 @@ class DeliveryNode extends React.Component {
             </div>
             <div className={classes.mapContainer} ref="mapPrimitiveContainer">
               <ReactMapGL
+                mapLib={import("mapbox-gl")}
                 width={"100%"}
                 height={"100%"}
                 latitude={
@@ -1846,7 +1821,7 @@ class DeliveryNode extends React.Component {
                 }
                 mapStyle={"mapbox://styles/mapbox/streets-v11"}
                 mapboxApiAccessToken={
-                  "pk.eyJ1IjoiZG9taW5pcXVla3R0IiwiYSI6ImNrYXg0M3gyNDAybDgyem81cjZuMXp4dzcifQ.PpW6VnORUHYSYqNCD9n6Yg"
+                  "pk.eyJ1IjoiZG9taW5pcXVlLWt0dCIsImEiOiJjbG9ldXA2djIwbjloMmtwbDV5ZGU5ZTZwIn0.AqyhJNSuN2sMTr0vOOLSqA"
                 }
                 onViewportChange={(newArgs) => {
                   //   console.log(newArgs);
@@ -1859,8 +1834,7 @@ class DeliveryNode extends React.Component {
                 }}
                 // asyncRender={true}
                 dragPan={true}
-                scrollZoom={true}
-              >
+                scrollZoom={true}>
                 <GeolocateControl
                   style={{
                     top: 15,
@@ -1920,8 +1894,7 @@ class DeliveryNode extends React.Component {
               margin: "auto",
               width: "70%",
               textAlign: "center",
-            }}
-          >
+            }}>
             <MdCheckCircle
               style={{ width: 35, height: 35, marginBottom: 25 }}
               color={"#09864A"}
@@ -1933,8 +1906,7 @@ class DeliveryNode extends React.Component {
               style={{ marginTop: 60, borderRadius: 3 }}
               onClick={() => {
                 window.location.href = "/MyDeliveries";
-              }}
-            >
+              }}>
               Track my delivery
             </div>
             <div
@@ -1945,8 +1917,7 @@ class DeliveryNode extends React.Component {
                 cursor: "pointer",
                 fontWeight: "bold",
               }}
-              onClick={() => (window.location.href = "Delivery")}
-            >
+              onClick={() => (window.location.href = "Delivery")}>
               Or make another one{" "}
               <MdTrendingFlat
                 style={{ position: "relative", top: 2, marginLeft: 5 }}
@@ -1965,8 +1936,7 @@ class DeliveryNode extends React.Component {
               margin: "auto",
               width: "70%",
               textAlign: "center",
-            }}
-          >
+            }}>
             <MdReportProblem
               style={{ width: 35, height: 35, marginBottom: 25 }}
               color={"#b22222"}
@@ -1987,8 +1957,7 @@ class DeliveryNode extends React.Component {
                 )
                   ? (window.location.href = "/Settings")
                   : (window.location.href = "/Delivery")
-              }
-            >
+              }>
               {/Unable_to_make_the_request_unsufficient_funds/i.test(
                 this.state.error_onRequest_nature
               )

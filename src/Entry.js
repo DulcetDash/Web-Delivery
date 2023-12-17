@@ -33,11 +33,8 @@ class Entry extends React.Component {
   shouldBeRenderedBasedOnAccess() {
     let initialCond =
       this.props.App.userData.loginData !== null &&
-      this.props.App.userData.loginData.company_fp !== undefined &&
-      this.props.App.userData.loginData.company_fp !== null &&
-      this.props.App.userData.loginData.company_fp !== undefined &&
-      this.props.App.userData.loginData.company_name !== undefined &&
-      this.props.App.userData.loginData.company_name !== null;
+      this.props.App.userData.loginData.company_fp &&
+      this.props.App.userData.loginData.company_name;
 
     //...
     return (
@@ -56,8 +53,7 @@ class Entry extends React.Component {
           flexDirection: "column",
           overflow: "hidden",
           height: "100vh",
-        }}
-      >
+        }}>
         {this.shouldBeRenderedBasedOnAccess() ? <HeaderStd /> : <></>}
         <div className="mainParentNode">
           {this.shouldBeRenderedBasedOnAccess() ? (
@@ -71,6 +67,7 @@ class Entry extends React.Component {
             <Switch>
               <Route path="/" exact component={Home} />
               <Route path="/plans" component={PresentPlans} />
+              {/* <Route path="/plans" component={Plans} /> */}
               <Route path="/Delivery" component={Delivery} />
               <Route path="/MyDeliveries" component={MyDeliveries} />
               <Route path="/Purchase" component={Purchase} />

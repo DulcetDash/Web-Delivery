@@ -5,8 +5,8 @@ import { UpdateLoggingData } from "../Redux/HomeActionsCreators";
 import Header from "./Screens/Header";
 import Industries from "../Helper/Industries";
 import EmailValidator from "../Helper/EmailValidator";
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-import Loader from "react-loader-spinner";
+// import "react-loader-spinner/dist/css/react-spinner-loader.css";
+import { TailSpin as Loader } from "react-loader-spinner";
 import {
   AiTwotoneSafetyCertificate,
   AiOutlineLeft,
@@ -21,6 +21,7 @@ import Countdown from "react-countdown";
 import savingMoney from "../Images/saving-money.png";
 import workflow from "../Images/workflow.png";
 import analysis from "../Images/analysis.png";
+import axios from "axios";
 
 class Home extends React.PureComponent {
   constructor(props) {
@@ -38,14 +39,14 @@ class Home extends React.PureComponent {
       isLoadingResendSMS: false, //Whether the resend sms is working or not.
       shouldShowAccountCreated: false, //Whether or not to show when the account is created
       shouldShowChangePhoneNumber: false, //Whether to show the changing phone number window
-      firstname: "",
-      lastname: "",
-      email: "",
-      phone: "",
-      company_name: "",
-      industry: "",
-      password: "",
-      password_confirm: "",
+      firstname: "Dominique",
+      lastname: "Kanyik",
+      email: "dominique@test.com",
+      phone: "+264856997167",
+      company_name: "Test company",
+      industry: "Accounting",
+      password: "12345678",
+      password_confirm: "12345678",
       otp: "",
       //...
       firstname_error_color: "#d0d0d0", //white or red when error
@@ -111,181 +112,6 @@ class Home extends React.PureComponent {
     let globalObject = this;
 
     //Handle socket Events
-    this.SOCKET_CORE.on(
-      "opsOnCorpoDeliveryAccounts_io-response",
-      function (response) {
-        globalObject.state.isLoading = false;
-        if (
-          response !== undefined &&
-          response !== null &&
-          response.response !== undefined &&
-          response.response !== null
-        ) {
-          if (/error/i.test(response.response)) {
-            //An error occured
-            if (/alreadyExists/i.test(response.response)) {
-              //A similar account already exists
-              globalObject.setState({
-                error_text_reported: `Sorry it appears to us that a similar account already exists, if it yours maybe try to login or if you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
-                hasErrorHappened: true,
-              });
-            } else if (/error_creating_account/i.test(response.response)) {
-              //Error creating account
-              globalObject.setState({
-                error_text_reported: `Due to an unexpected error, we were unable to create your account, please try again later. Or if it
-              persists please refresh this page and give it a try again.`,
-                hasErrorHappened: true,
-              });
-            } else if (/^error_logging_in$/i.test(response.response)) {
-              //Error logging in
-              globalObject.setState({
-                error_text_reported: `Due to an unexpected error, we were unable to log you in, please try again later. Or if it
-              persists please refresh this page and give it a try again.`,
-                hasErrorHappened: true,
-              });
-            } else if (
-              /error_logging_in_notFoundAccount/i.test(response.response)
-            ) {
-              //Account not found
-              globalObject.setState({
-                error_text_reported: `Oups looks like you don't have yet an account with us? If that's the case, press on "Back", and "Log in" to create a fresh account for free. If you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
-                hasErrorHappened: true,
-              });
-            }
-            //Unknown error
-            else {
-              globalObject.setState({
-                error_text_reported: `An unexpected error occured, please try again later. Or if it
-          persists please refresh this page and give it a try again.`,
-                hasErrorHappened: true,
-              });
-            }
-          } //No error occured
-          else {
-            if (/successfully_created/i.test(response.response)) {
-              //SUCCESS
-              globalObject.props.UpdateLoggingData(response.metadata);
-              globalObject.setState({
-                shouldShowAccountCreated: true,
-              });
-            } else if (/successfully_logged_in/i.test(response.response)) {
-              //SUCCESS
-              globalObject.props.UpdateLoggingData(response.metadata);
-              globalObject.makeSoftResetOnCurrentState();
-              //Check if the number was already verified or not
-              if (
-                response.metadata.account === undefined ||
-                response.metadata.account === null ||
-                response.metadata.account.confirmations.isPhoneConfirmed ===
-                  false
-              ) {
-                globalObject.resendConfirmationSMSAgain();
-                //Phone not yet verified
-                globalObject.setState({
-                  shouldShowSMSAuth: true,
-                  hasErrorHappened: false,
-                });
-              }
-              //? Move forward
-              else {
-                globalObject.setState({
-                  isLoading: true,
-                });
-                //? move to plans or straight home based on if a package was purchased or not
-                if (
-                  response.metadata.plans.subscribed_plan !== false &&
-                  response.metadata.plans.isPlan_active
-                ) {
-                  //Has an active plans
-                  window.location.href = "/Delivery";
-                } //No active plans
-                else {
-                  window.location.href = "/plans";
-                }
-              }
-            }
-            //An error occured
-            else {
-              globalObject.setState({
-                error_text_reported: `An unexpected error occured, please try again later. Or if it
-          persists please refresh this page and give it a try again.`,
-                hasErrorHappened: true,
-              });
-            }
-          }
-        } //Unexpected error
-        else {
-          globalObject.setState({
-            error_text_reported: `An unexpected error occured, please try again later. Or if it
-          persists please refresh this page and give it a try again.`,
-            hasErrorHappened: true,
-          });
-        }
-      }
-    );
-
-    //Handle resend confirmation SMS
-    this.SOCKET_CORE.on(
-      "resetConfirmationSMSDeliveryWeb_io-response",
-      function (response) {
-        globalObject.setState({ isLoadingResendSMS: false });
-
-        if (
-          response !== undefined &&
-          response !== null &&
-          response.response !== undefined &&
-          response.response !== null
-        ) {
-          if (/successfully_sent/i.test(response.response)) {
-            //Success
-            //Do noting for now as well
-          } //An error occured
-          else {
-            //Do nothing for now
-          }
-        }
-      }
-    );
-
-    //Handle validating phone number via OTP SMS
-    this.SOCKET_CORE.on(
-      "validatePhoneNumberDeliveryWeb_io-response",
-      function (response) {
-        globalObject.setState({ isLoading: false });
-
-        if (
-          response !== undefined &&
-          response !== null &&
-          response.response !== undefined &&
-          response.response !== null
-        ) {
-          if (/successfully_validated/i.test(response.response)) {
-            //Success
-            //Do noting for now as well
-            globalObject.props.UpdateLoggingData(response.metadata);
-            //? Move forward
-            window.location.href = "/plans";
-          } //An error occured
-          else {
-            //Do nothing for now
-            if (/invalid_code/i.test(response.response)) {
-              //Wrong code
-              globalObject.setState({
-                error_text_reported: `Sorry the code that you've entered is not correct, please check through your SMS to get the valid 6-digits code sent from us, or press "Back" and send the code again, thank you.`,
-                hasErrorHappened: true,
-              });
-            } //Some other unexpected error
-            else {
-              globalObject.setState({
-                error_text_reported: `An unexpected error occured, please try again later. Or if it
-              persists please refresh this page and give it a try again.`,
-                hasErrorHappened: true,
-              });
-            }
-          }
-        }
-      }
-    );
 
     //Handle updating the phone number on mistake
     this.SOCKET_CORE.on(
@@ -323,10 +149,128 @@ class Home extends React.PureComponent {
     );
   }
 
+  opsOnCorpoDeliveryAccounts_io = async (response) => {
+    try {
+      this.state.isLoading = false;
+      if (
+        response !== undefined &&
+        response !== null &&
+        response.response !== undefined &&
+        response.response !== null
+      ) {
+        if (/error/i.test(response.response)) {
+          //An error occured
+          if (/alreadyExists/i.test(response.response)) {
+            //A similar account already exists
+            this.setState({
+              error_text_reported: `Sorry it appears to us that a similar account already exists, if it yours maybe try to login or if you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
+              hasErrorHappened: true,
+            });
+          } else if (/error_creating_account/i.test(response.response)) {
+            //Error creating account
+            this.setState({
+              error_text_reported: `Due to an unexpected error, we were unable to create your account, please try again later. Or if it
+              persists please refresh this page and give it a try again.`,
+              hasErrorHappened: true,
+            });
+          } else if (/^error_logging_in$/i.test(response.response)) {
+            //Error logging in
+            this.setState({
+              error_text_reported: `Due to an unexpected error, we were unable to log you in, please try again later. Or if it
+              persists please refresh this page and give it a try again.`,
+              hasErrorHappened: true,
+            });
+          } else if (
+            /error_logging_in_notFoundAccount/i.test(response.response)
+          ) {
+            //Account not found
+            this.setState({
+              error_text_reported: `Oups looks like you don't have yet an account with us? If that's the case, press on "Back", and "Log in" to create a fresh account for free. If you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
+              hasErrorHappened: true,
+            });
+          }
+          //Unknown error
+          else {
+            this.setState({
+              error_text_reported: `An unexpected error occured, please try again later. Or if it
+          persists please refresh this page and give it a try again.`,
+              hasErrorHappened: true,
+            });
+          }
+        } //No error occured
+        else {
+          if (/successfully_created/i.test(response.response)) {
+            //SUCCESS
+            this.props.UpdateLoggingData(response.metadata);
+            this.setState({
+              shouldShowAccountCreated: true,
+            });
+          } else if (/successfully_logged_in/i.test(response.response)) {
+            //SUCCESS
+            this.props.UpdateLoggingData(response.metadata);
+            this.makeSoftResetOnCurrentState();
+            //Check if the number was already verified or not
+            if (
+              response.metadata.account === undefined ||
+              response.metadata.account === null ||
+              response.metadata.account.confirmations.isPhoneConfirmed === false
+            ) {
+              await this.resendConfirmationSMSAgain();
+              //Phone not yet verified
+              this.setState({
+                shouldShowSMSAuth: true,
+                hasErrorHappened: false,
+              });
+            }
+            //? Move forward
+            else {
+              this.setState({
+                isLoading: true,
+              });
+              //? move to plans or straight home based on if a package was purchased or not
+              if (
+                response.metadata?.plans?.subscribed_plan !== false &&
+                response.metadata?.plans?.isPlan_active
+              ) {
+                //Has an active plans
+                window.location.href = "/Delivery";
+              } //No active plans
+              else {
+                window.location.href = "/plans";
+              }
+            }
+          }
+          //An error occured
+          else {
+            this.setState({
+              error_text_reported: `An unexpected error occured, please try again later. Or if it
+          persists please refresh this page and give it a try again.`,
+              hasErrorHappened: true,
+            });
+          }
+        }
+      } //Unexpected error
+      else {
+        this.setState({
+          error_text_reported: `An unexpected error occured, please try again later. Or if it
+          persists please refresh this page and give it a try again.`,
+          hasErrorHappened: true,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      this.setState({
+        error_text_reported: `An unexpected error occured, please try again later. Or if it
+        persists please refresh this page and give it a try again.`,
+        hasErrorHappened: true,
+      });
+    }
+  };
+
   /**
    * Render the proper actions based on the state of the form : login/sign up
    */
-  executeProperStateAction() {
+  executeProperStateAction = async () => {
     this.restoreBorderToNoErrorStatus();
 
     if (this.state.shouldShowLogin === false) {
@@ -363,17 +307,39 @@ class Home extends React.PureComponent {
                     if (this.state.password === this.state.password_confirm) {
                       //! ALL GOOD
                       //Good
-                      this.setState({ isLoading: true });
-                      this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-                        op: "signup",
-                        email: this.state.email,
-                        first_name: this.state.firstname,
-                        last_name: this.state.lastname,
-                        phone: this.state.phone,
-                        company_name: this.state.company_name,
-                        selected_industry: this.state.industry,
-                        password: this.state.password,
-                      });
+                      // this.setState({ isLoading: true });
+
+                      try {
+                        const response = await axios.post(
+                          `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+                          {
+                            op: "signup",
+                            email: this.state.email,
+                            first_name: this.state.firstname,
+                            last_name: this.state.lastname,
+                            phone: this.state.phone,
+                            company_name: this.state.company_name,
+                            selected_industry: this.state.industry,
+                            password: this.state.password,
+                          }
+                        );
+
+                        // opsOnCorpoDeliveryAccounts_io
+                        console.log(response.data);
+                        await this.opsOnCorpoDeliveryAccounts_io(response.data);
+                        // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+                        //   op: "signup",
+                        //   email: this.state.email,
+                        //   first_name: this.state.firstname,
+                        //   last_name: this.state.lastname,
+                        //   phone: this.state.phone,
+                        //   company_name: this.state.company_name,
+                        //   selected_industry: this.state.industry,
+                        //   password: this.state.password,
+                        // });
+                      } catch (error) {
+                        console.log(error);
+                      }
                     } //Not same passwords
                     else {
                       this.setState({ password_confirm_error_color: "red" });
@@ -416,11 +382,23 @@ class Home extends React.PureComponent {
         ) {
           //Good
           this.setState({ isLoading: true });
-          this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-            op: "login",
-            email: this.state.email,
-            password: this.state.password,
-          });
+          const response = await axios.post(
+            `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+            {
+              op: "login",
+              email: this.state.email,
+              password: this.state.password,
+            }
+          );
+
+          console.log(response.data);
+          await this.opsOnCorpoDeliveryAccounts_io(response.data);
+
+          // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+          //   op: "login",
+          //   email: this.state.email,
+          //   password: this.state.password,
+          // });
         } //Empty
         else {
           this.setState({ password_error_color: "red" });
@@ -430,7 +408,64 @@ class Home extends React.PureComponent {
         this.setState({ email_error_color: "red" });
       }
     }
-  }
+  };
+
+  //Handle resend confirmation SMS
+  resetConfirmationSMSDeliveryWeb_io = async (response) => {
+    this.setState({ isLoadingResendSMS: false });
+
+    if (
+      response !== undefined &&
+      response !== null &&
+      response.response !== undefined &&
+      response.response !== null
+    ) {
+      if (/successfully_sent/i.test(response.response)) {
+        //Success
+        //Do noting for now as well
+      } //An error occured
+      else {
+        //Do nothing for now
+      }
+    }
+  };
+
+  //Handle validating phone number via OTP SMS
+  validatePhoneNumberDeliveryWeb_io = (response) => {
+    this.setState({ isLoading: false });
+
+    if (
+      response !== undefined &&
+      response !== null &&
+      response.response !== undefined &&
+      response.response !== null
+    ) {
+      if (/successfully_validated/i.test(response.response)) {
+        //Success
+        //Do noting for now as well
+        this.props.UpdateLoggingData(response.metadata);
+        //? Move forward
+        window.location.href = "/plans";
+      } //An error occured
+      else {
+        //Do nothing for now
+        if (/invalid_code/i.test(response.response)) {
+          //Wrong code
+          this.setState({
+            error_text_reported: `Sorry the code that you've entered is not correct, please check through your SMS to get the valid 6-digits code sent from us, or press "Back" and send the code again, thank you.`,
+            hasErrorHappened: true,
+          });
+        } //Some other unexpected error
+        else {
+          this.setState({
+            error_text_reported: `An unexpected error occured, please try again later. Or if it
+            persists please refresh this page and give it a try again.`,
+            hasErrorHappened: true,
+          });
+        }
+      }
+    }
+  };
 
   /**
    * Responsible for resetting the borders to their normal color indicating no errors
@@ -581,7 +616,7 @@ class Home extends React.PureComponent {
   /**
    * Responsible to resend the confirmation code again.
    */
-  resendConfirmationSMSAgain() {
+  resendConfirmationSMSAgain = async () => {
     //!DEBUG
     // this.props.App.userData.loginData = {};
     // this.props.App.userData.loginData.company_fp =
@@ -596,16 +631,22 @@ class Home extends React.PureComponent {
       this.props.App.userData.loginData.company_fp !== undefined
     ) {
       this.setState({ isLoadingResendSMS: true });
-      this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-        op: "resendConfirmationSMS",
-        company_fp: this.props.App.userData.loginData.company_fp,
-        phone: this.props.App.userData.loginData.phone,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+        {
+          op: "resendConfirmationSMS",
+          company_fp: this.props.App.userData.loginData.company_fp,
+          phone: this.props.App.userData.loginData.phone,
+        }
+      );
+
+      console.log(response.data);
+      await this.resetConfirmationSMSDeliveryWeb_io(response.data);
     } //Invalid data found - go back to signup
     else {
       this.swicthContextForms();
     }
-  }
+  };
 
   // Renderer callback with condition
   renderer = ({ hours, minutes, seconds, completed }) => {
@@ -619,8 +660,7 @@ class Home extends React.PureComponent {
             marginTop: 30,
             cursor: "pointer",
           }}
-          onClick={() => this.resendConfirmationSMSAgain()}
-        >
+          onClick={() => this.resendConfirmationSMSAgain()}>
           Did not receive it? <strong>Send again</strong>.
         </div>
       );
@@ -632,8 +672,7 @@ class Home extends React.PureComponent {
             color: "#0e8491",
             fontSize: "15px",
             marginTop: 30,
-          }}
-        >
+          }}>
           <span>
             Resend the code in {minutes > 10 ? minutes : `0${minutes}`}:
             {seconds > 10 ? seconds : `0${seconds}`}
@@ -646,7 +685,7 @@ class Home extends React.PureComponent {
   /**
    * responsible for validating the otp
    */
-  validateOtp() {
+  validateOtp = async () => {
     //!DEBUG
     // this.props.App.userData.loginData = {};
     // this.props.App.userData.loginData.company_fp =
@@ -664,12 +703,25 @@ class Home extends React.PureComponent {
         ) {
           this.setState({ isLoading: true });
 
-          this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-            op: "validatePhoneNumber",
-            otp: this.state.otp,
-            company_fp: this.props.App.userData.loginData.company_fp,
-            phone: this.props.App.userData.loginData.phone,
-          });
+          const response = await axios.post(
+            `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+            {
+              op: "validatePhoneNumber",
+              otp: this.state.otp,
+              company_fp: this.props.App.userData.loginData.company_fp,
+              phone: this.props.App.userData.loginData.phone,
+            }
+          );
+
+          console.log(response.data);
+          this.validatePhoneNumberDeliveryWeb_io(response.data);
+
+          // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+          //   op: "validatePhoneNumber",
+          //   otp: this.state.otp,
+          //   company_fp: this.props.App.userData.loginData.company_fp,
+          //   phone: this.props.App.userData.loginData.phone,
+          // });
         } //Invalid account data
         else {
           this.swicthContextForms();
@@ -682,7 +734,7 @@ class Home extends React.PureComponent {
       // console.log(error);
       this.swicthContextForms();
     }
-  }
+  };
 
   /**
    * responsible for updating the changed phone number if valid
@@ -723,7 +775,7 @@ class Home extends React.PureComponent {
         <Header />
         <div className={classes.headerContainerSecond}>
           <div className={classes.headerTitleContainer}>
-            Discover a new way of delivery
+            Revolutionize Your Delivery Experience!
           </div>
           <div
             className={classes.formContainer}
@@ -735,8 +787,7 @@ class Home extends React.PureComponent {
                 this.state.shouldShowSMSAuth
                   ? 500
                   : 690,
-            }}
-          >
+            }}>
             {this.state.shouldShowChangePhoneNumber &&
             this.state.hasErrorHappened === false ? (
               <div className={classes.signupForm}>
@@ -771,8 +822,7 @@ class Home extends React.PureComponent {
                   className={classes.backButtonOnFail}
                   onClick={() => {
                     this.setState({ shouldShowChangePhoneNumber: false });
-                  }}
-                >
+                  }}>
                   <AiOutlineLeft /> Back
                 </div>
               </div>
@@ -791,8 +841,7 @@ class Home extends React.PureComponent {
                 </div>
                 <div
                   className={classes.backButtonOnFail}
-                  onClick={() => this.moveForwardAfterFreshSignup()}
-                >
+                  onClick={() => this.moveForwardAfterFreshSignup()}>
                   Next <AiOutlineRight />
                 </div>
               </div>
@@ -862,8 +911,7 @@ class Home extends React.PureComponent {
                   }}
                   onClick={() =>
                     this.setState({ shouldShowChangePhoneNumber: true })
-                  }
-                >
+                  }>
                   Wrong number?
                 </div>
               </div>
@@ -875,8 +923,7 @@ class Home extends React.PureComponent {
                   <div>Signup</div>
                   <div
                     className={classes.loginSignupOption}
-                    onClick={() => this.swicthContextForms()}
-                  >
+                    onClick={() => this.swicthContextForms()}>
                     or Log in
                   </div>
                 </div>
@@ -980,8 +1027,7 @@ class Home extends React.PureComponent {
                   }}
                   onChange={(event) =>
                     this.setState({ industry: event.target.value })
-                  }
-                >
+                  }>
                   {Industries.map((el) => {
                     return <option value={el.name}>{el.name}</option>;
                   })}
@@ -1048,8 +1094,7 @@ class Home extends React.PureComponent {
                   <div>Log in</div>
                   <div
                     className={classes.loginSignupOption}
-                    onClick={() => this.swicthContextForms()}
-                  >
+                    onClick={() => this.swicthContextForms()}>
                     or Signup
                   </div>
                 </div>
@@ -1129,8 +1174,7 @@ class Home extends React.PureComponent {
                     this.state.shouldShowSMSAuth === false
                       ? this.swicthContextForms()
                       : this.setState({ hasErrorHappened: false, otp: "" })
-                  }
-                >
+                  }>
                   <AiOutlineLeft /> Back
                 </div>
               </div>
@@ -1194,7 +1238,7 @@ class Home extends React.PureComponent {
         {/* Footer */}
         <div className={classes.footer}>
           <div className={classes.copyrightText}>
-            TaxiConnect © 2021. All rights reserved.
+            DulcetDash © 2023. All rights reserved.
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import Loader from "../../Helper/Loader/Loader";
 import classes from "../../styles/Plans.module.css";
 import { AiFillCheckCircle } from "react-icons/ai";
 
@@ -19,6 +20,7 @@ const PlanNode = ({
   isRecommended = false,
   isActive = false,
   actionGetStartedButton = null,
+  isLoading = false,
 }) => {
   return (
     <div style={{ marginRight: marginRight }}>
@@ -33,8 +35,7 @@ const PlanNode = ({
         style={{
           borderTopLeftRadius: isRecommended ? "0px" : "7px",
           borderTopRightRadius: isRecommended ? "0px" : "7px",
-        }}
-      >
+        }}>
         <div className={classes.planName}>{planName}</div>
         <div className={classes.subExplanation}>{description}</div>
         <div className={classes.feeContainer}>
@@ -57,9 +58,8 @@ const PlanNode = ({
             isActive
               ? classes.getStartedButton
               : classes.getStartedButtonInactive
-          }
-        >
-          {buttonTitle}
+          }>
+          {isLoading ? <Loader color="#fff" size={30} /> : buttonTitle}
         </div>
         <div className={classes.featuresList}>
           <div className={classes.titleFeaturesList}>{titleFeatures}</div>

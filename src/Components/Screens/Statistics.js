@@ -22,7 +22,7 @@ import {
 import classes from "../../styles/Statistics.module.css";
 import SOCKET_CORE from "../../Helper/managerNode";
 import { AiOutlineRight, AiTwotoneCalculator } from "react-icons/ai";
-import Loader from "react-loader-spinner";
+import { TailSpin as Loader } from "react-loader-spinner";
 import {
   XYPlot,
   XAxis,
@@ -248,8 +248,7 @@ class Statistics extends React.Component {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-              }}
-            >
+              }}>
               <Loader
                 type="TailSpin"
                 color="#000"
@@ -266,8 +265,7 @@ class Statistics extends React.Component {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-              }}
-            >
+              }}>
               No data to show
             </div>
           )}

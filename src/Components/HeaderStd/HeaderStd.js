@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { UpdateTripsData } from "../../Redux/HomeActionsCreators";
 import classes from "./Header.module.css";
-import logotaxiconnect from "../../Assets/logo_white.png";
+import logodd from "../../Assets/logo_white.png";
 import { AiOutlineUser, AiOutlineCaretDown } from "react-icons/ai";
 import Modal from "react-modal";
 
@@ -31,7 +31,7 @@ class HeaderStd extends React.PureComponent {
     return (
       <div className={classes.mainContainer}>
         <div className={classes.logoContainer}>
-          <img alt="logo" src={logotaxiconnect} className={classes.trueLogo} />
+          <img alt="logo" src={logodd} className={classes.trueLogo} />
         </div>
         <div></div>
         {/* <div className={classes.rightContainer}>
@@ -69,8 +69,7 @@ class HeaderStd extends React.PureComponent {
           onAfterOpen={() => {}}
           onRequestClose={() => {}}
           style={customStyles}
-          contentLabel="Example Modal"
-        >
+          contentLabel="Example Modal">
           <h2>Starter package</h2>
           <div></div>
           <form>

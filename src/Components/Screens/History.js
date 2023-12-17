@@ -22,7 +22,7 @@ import {
 import classes from "../../styles/History.module.css";
 import SOCKET_CORE from "../../Helper/managerNode";
 import { AiOutlineRight, AiTwotoneCalculator } from "react-icons/ai";
-import Loader from "react-loader-spinner";
+import { TailSpin as Loader } from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
 
 class History extends React.PureComponent {
@@ -85,8 +85,7 @@ class History extends React.PureComponent {
           History
           <div
             className={classes.historyEntryTitle}
-            onClick={() => (window.location.href = "/MyDeliveries")}
-          >
+            onClick={() => (window.location.href = "/MyDeliveries")}>
             Active deliveries
           </div>
         </div>
@@ -100,8 +99,7 @@ class History extends React.PureComponent {
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "column",
-            }}
-          >
+            }}>
             <div>
               <Loader
                 type="TailSpin"
@@ -123,8 +121,7 @@ class History extends React.PureComponent {
                       index + 1 === this.state.historyData.length
                         ? "#fff"
                         : "#d0d0d0",
-                  }}
-                >
+                  }}>
                   <AiTwotoneCalculator
                     style={{
                       width: 7,
@@ -163,8 +160,7 @@ class History extends React.PureComponent {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-            }}
-          >
+            }}>
             Your history is empty
           </div>
         )}

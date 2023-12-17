@@ -4,6 +4,7 @@ import { bindActionCreators } from "redux";
 import {
   UpdateCurrentLocationMetadat,
   UpdateTripsData,
+  UpdateLoggingData,
 } from "../../Redux/HomeActionsCreators";
 import {
   MdAccessTime,
@@ -24,8 +25,9 @@ import SOCKET_CORE from "../../Helper/managerNode";
 import DeliveryNode from "../DeliveryNode/DeliveryNode";
 import { geolocated } from "react-geolocated";
 import { AiTwotoneEnvironment, AiTwotoneSetting } from "react-icons/ai";
-import Loader from "react-loader-spinner";
+import { TailSpin as Loader } from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
+import axios from "axios";
 
 class Delivery extends React.Component {
   constructor(props) {
@@ -119,6 +121,14 @@ class Delivery extends React.Component {
     this.handlePermission();
   }
 
+  handleGeocodedResponse = (response) => {
+    // console.log(response);
+    if (response !== undefined && response !== false) {
+      this.props.UpdateCurrentLocationMetadat(response);
+      this.setState({ didGetTHeCurrentLocation: true });
+    }
+  };
+
   handlePermission() {
     let globalObject = this;
 
@@ -173,26 +183,61 @@ class Delivery extends React.Component {
       }
     );
 
-    this.intervalPersister = setInterval(function () {
-      //Unlock if a location is present
+    this.intervalPersister = setInterval(async () => {
+      try {
+        //Unlock if a location is present
+        const geocoding = await axios.post(
+          `${process.env.REACT_APP_URL}/geocode_this_point`,
+          {
+            latitude: globalObject.props.App.latitude,
+            longitude: globalObject.props.App.longitude,
+            user_fingerprint:
+              globalObject.props.App.userData?.loginData?.company_fp,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
+            },
+          }
+        );
 
-      globalObject.SOCKET_CORE.emit("geocode-this-point", {
-        latitude: globalObject.props.App.latitude,
-        longitude: globalObject.props.App.longitude,
-        user_fingerprint: globalObject.props.App.userData.loginData.company_fp,
-      });
+        console.log(geocoding.data);
+        this.handleGeocodedResponse(geocoding.data);
 
-      //! -----Get the requests data if any
-      let bundle = {
-        latitude: globalObject.props.App.latitude,
-        longitude: globalObject.props.App.longitude,
-        user_fingerprint: globalObject.props.App.userData.loginData.company_fp,
-        user_nature: "rider",
-        pushnotif_token: false,
-      };
-      // console.log(bundle);
-      globalObject.SOCKET_CORE.emit("update-passenger-location", bundle);
-    }, 2000);
+        // globalObject.SOCKET_CORE.emit("geocode-this-point", {
+        //   latitude: globalObject.props.App.latitude,
+        //   longitude: globalObject.props.App.longitude,
+        //   user_fingerprint:
+        //     globalObject.props.App.userData?.loginData?.company_fp,
+        // });
+
+        //! -----Get the requests data if any
+        let bundle = {
+          latitude: globalObject.props.App.latitude,
+          longitude: globalObject.props.App.longitude,
+          user_identifier:
+            globalObject.props.App.userData?.loginData?.company_fp,
+          user_nature: "rider",
+          pushnotif_token: false,
+        };
+
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/getShoppingData`,
+          bundle,
+          {
+            headers: {
+              Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
+            },
+          }
+        );
+
+        if (response?.data?.accountData) {
+          this.props.UpdateLoggingData(response?.data?.accountData);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }, 7000);
   }
 
   componentWillUnmount() {
@@ -212,8 +257,7 @@ class Delivery extends React.Component {
           width: "65%",
           margin: "auto",
           textAlign: "center",
-        }}
-      >
+        }}>
         <div style={{ fontFamily: "MoveBold, sans-serif", fontSize: 30 }}>
           Welcome!
         </div>
@@ -223,8 +267,7 @@ class Delivery extends React.Component {
             width: 400,
             height: 200,
             marginBottom: 20,
-          }}
-        >
+          }}>
           <img
             alt="greet"
             src={GreetingImage}
@@ -237,8 +280,7 @@ class Delivery extends React.Component {
           className={classes.formBasicSubmitBttnClassicsReceiverInfos}
           onClick={() => {
             window.location.href = "/plans";
-          }}
-        >
+          }}>
           Purchase a package
         </div>
       </div>
@@ -249,25 +291,31 @@ class Delivery extends React.Component {
     //! PLANS QUOTAS
     //! Batches
     let QUOTAS_BATCHES = {
-      STR: 1,
-      ITMD: 15,
-      PR: 50,
+      Starter: 1,
+      Intermediate: 15,
+      Pro: 50,
       PRSNLD: 100,
     };
+
+    console.log(this.props.App.userData?.loginData);
+    console.log(
+      this.state.didGetTHeCurrentLocation,
+      this.props.App?.tripsData.length,
+      QUOTAS_BATCHES[this.props.App.userData.loginData?.plans?.subscribed_plan]
+    );
 
     return (
       <div
         className={classes.mainContainer}
         style={{
           backgroundColor:
-            this.props.App.userData.loginData.plans.subscribed_plan === false ||
-            this.props.App.userData.loginData.plans.isPlan_active === false
+            !this.props.App.userData?.loginData?.plans?.subscribed_plan ||
+            !this.props.App.userData?.loginData?.plans?.isPlan_active
               ? "#fff"
               : "#f3f3f3",
-        }}
-      >
-        {this.props.App.userData.loginData.plans.subscribed_plan === false ||
-        this.props.App.userData.loginData.plans.isPlan_active === false ? (
+        }}>
+        {!this.props.App.userData?.loginData?.plans?.subscribed_plan ||
+        !this.props.App.userData?.loginData?.plans?.isPlan_active ? (
           this.renderNoPlansFound()
         ) : !this.props.isGeolocationAvailable ? (
           <div>Your browser does not support geolocation</div>
@@ -281,8 +329,7 @@ class Delivery extends React.Component {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-            }}
-          >
+            }}>
             <div className={classes.mainTitleNotice}>
               <AiTwotoneSetting
                 style={{
@@ -312,8 +359,7 @@ class Delivery extends React.Component {
                     this.setState({ geolocationState: "denied" });
                   }
                 )
-              }
-            >
+              }>
               <AiTwotoneEnvironment
                 style={{ position: "relative", marginRight: 3, bottom: 1 }}
               />
@@ -323,9 +369,9 @@ class Delivery extends React.Component {
         ) : (
           <>
             {this.state.didGetTHeCurrentLocation &&
-            this.props.App.tripsData.length <
+            this.props.App?.tripsData.length <
               QUOTAS_BATCHES[
-                this.props.App.userData.loginData.plans.subscribed_plan
+                this.props.App.userData.loginData?.plans?.subscribed_plan
               ] ? (
               <>
                 <div className={classes.mainScreenTitle}>
@@ -337,7 +383,7 @@ class Delivery extends React.Component {
               </>
             ) : this.props.App.tripsData.length >=
               QUOTAS_BATCHES[
-                this.props.App.userData.loginData.plans.subscribed_plan
+                this.props.App.userData.loginData?.plans?.subscribed_plan
               ] ? (
               <div
                 style={{
@@ -350,8 +396,7 @@ class Delivery extends React.Component {
                   width: "65%",
                   margin: "auto",
                   textAlign: "center",
-                }}
-              >
+                }}>
                 <MdWork style={{ width: 35, height: 35, marginBottom: 25 }} />
                 Hi, you've reached your maximum allowed number of individual
                 requests, please wait until your active deliveries are completed
@@ -360,8 +405,7 @@ class Delivery extends React.Component {
                   className={classes.formBasicSubmitBttnClassicsReceiverInfos}
                   onClick={() => {
                     window.location.href = "/MyDeliveries";
-                  }}
-                >
+                  }}>
                   Track your delivery here
                 </div>
               </div>
@@ -374,8 +418,7 @@ class Delivery extends React.Component {
                   alignItems: "center",
                   justifyContent: "center",
                   flexDirection: "column",
-                }}
-              >
+                }}>
                 <div>
                   <Loader
                     type="TailSpin"
@@ -404,6 +447,7 @@ const mapDispatchToProps = (dispatch) =>
     {
       UpdateCurrentLocationMetadat,
       UpdateTripsData,
+      UpdateLoggingData,
     },
     dispatch
   );

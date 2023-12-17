@@ -186,8 +186,7 @@ class Settings extends React.PureComponent {
           <div
             className={classes.formBasicButton}
             style={{ width: 200, marginBottom: 20 }}
-            onClick={() => (window.location.href = "/plans")}
-          >
+            onClick={() => (window.location.href = "/plans")}>
             <div>Change my package</div>
             <FiArrowRight />
           </div>
@@ -195,7 +194,7 @@ class Settings extends React.PureComponent {
 
         {/* Copyright */}
         <div className={classes.copyright}>
-          TaxiConnect © 2021. All rights reserved.
+          DulcetDash © 2023. All rights reserved.
         </div>
       </div>
     );

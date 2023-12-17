@@ -20,8 +20,9 @@ import bird from "../../Images/bird.png";
 import divide from "../../Images/divide.png";
 import layer from "../../Images/layer.png";
 import CreditCardInput from "react-credit-card-input";
-import Loader from "react-loader-spinner";
+import { TailSpin as Loader } from "react-loader-spinner";
 import SOCKET_CORE from "../../Helper/managerNode";
+import Pay from "./Payment/Payment";
 
 class Purchase extends React.PureComponent {
   constructor(props) {
@@ -219,13 +220,19 @@ class Purchase extends React.PureComponent {
             },
           }}
         />
+        <Pay
+          clientSecret={this.state.clientSecret}
+          priceId={this.state.selectedPlan?.priceInfo?.id}
+          selectedPlan={this.state.selectedPlan}
+          confirmSetupIntent={this.state.confirmSetupIntent}
+          // createDrySubscription={createDrySubscription}
+        />
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-          }}
-        >
+          }}>
           {this.state.showResultOperations === false ? (
             <div className={classes.contentContainer}>
               <div className={classes.mainTitle}>
@@ -234,8 +241,7 @@ class Purchase extends React.PureComponent {
               </div>
               <div
                 className={classes.subMainTitle}
-                onClick={() => (window.location.href = "/plans")}
-              >
+                onClick={() => (window.location.href = "/plans")}>
                 Or choose another package{" "}
                 <MdTrendingFlat
                   style={{ position: "relative", top: 1, marginLeft: 5 }}
@@ -301,8 +307,7 @@ class Purchase extends React.PureComponent {
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "flex-start",
-                      }}
-                    >
+                      }}>
                       <MdInfo
                         style={{
                           width: 25,
@@ -331,8 +336,7 @@ class Purchase extends React.PureComponent {
                         alignItems: "flex-start",
                         marginTop: 20,
                         color: "#000",
-                      }}
-                    >
+                      }}>
                       <MdHttps
                         style={{
                           width: 15,
@@ -347,7 +351,7 @@ class Purchase extends React.PureComponent {
                         All the information entered is secure.
                         <br />
                         <div style={{ fontWeight: "bold", marginTop: 5 }}>
-                          + 4% service fee.
+                          + 6% service fee.
                         </div>
                       </div>
                     </div>
@@ -355,8 +359,7 @@ class Purchase extends React.PureComponent {
 
                   <div
                     className={classes.formBasicSubmitBttn}
-                    onClick={() => this.execTopup()}
-                  >
+                    onClick={() => this.execTopup()}>
                     {this.state.isLoading === false ? (
                       <>
                         Purchase - N$
@@ -393,8 +396,7 @@ class Purchase extends React.PureComponent {
                 margin: "auto",
                 width: "50%",
                 textAlign: "center",
-              }}
-            >
+              }}>
               <MdCheckCircle
                 style={{ width: 55, height: 55, marginBottom: 25 }}
                 color={"#09864A"}
@@ -406,8 +408,7 @@ class Purchase extends React.PureComponent {
                   fontFamily: "MoveBold, sans-serif",
                   fontSize: "25px",
                   marginTop: 40,
-                }}
-              >
+                }}>
                 N${this.props.App.temporaryPackagePurchaseVars.amount}
               </div>
               <div
@@ -415,8 +416,7 @@ class Purchase extends React.PureComponent {
                 style={{ marginTop: 60, borderRadius: 3 }}
                 onClick={() => {
                   window.location.href = "/Delivery";
-                }}
-              >
+                }}>
                 Let's go
               </div>
             </div>
@@ -432,8 +432,7 @@ class Purchase extends React.PureComponent {
                 margin: "auto",
                 width: "50%",
                 textAlign: "center",
-              }}
-            >
+              }}>
               <MdReportProblem
                 style={{ width: 35, height: 35, marginBottom: 25 }}
                 color={"#b22222"}
@@ -446,8 +445,7 @@ class Purchase extends React.PureComponent {
                 style={{ marginTop: 60, borderRadius: 3 }}
                 onClick={() => {
                   window.location.href = "/Purchase";
-                }}
-              >
+                }}>
                 Retry
               </div>
             </div>
@@ -456,7 +454,7 @@ class Purchase extends React.PureComponent {
           {/* Footer */}
           <div className={classes.footer}>
             <div className={classes.copyrightText}>
-              TaxiConnect © 2021. All rights reserved.
+              DulcetDash © 2023. All rights reserved.
             </div>
           </div>
         </div>

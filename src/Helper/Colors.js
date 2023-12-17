@@ -1,0 +1,22 @@
+export const PRIMARY = "#11A05A";
+export const PRIMARY_DILUTED = "#096ed4";
+export const PRIMARY_COUSIN = "#669BBC";
+export const SECONDARY = "#00509D";
+export const SECONDARY_STRONG = "#FDC500";
+export const LIGHT_GRAY = "#fafafa";
+export const COOL_GRAY = "#F3F4F9";
+export const GENERIC_GRAY = "#D0D5E9";
+export const MEAN_GRAY = "#d0d0d0";
+export const MEAN_LIGHT_GRAY = "#f0f0f0";
+export const GRAY_1 = "#5c677d";
+export const GRAY_2 = "#33415c";
+export const DARK_GREEN = "rgb(20, 68, 31)";
+export const LIGHT_GREEN = "rgb(108, 205, 124)";
+export const BASIC_RADIUS = 7;
+export const GREEN = "#34B37E";
+export const CORAL_RED = "#C1121F";
+// Plans
+export const TOPUP_COLOR = "#FA8136";
+export const FREELANCE_COLOR = "#F0B21B";
+export const STARTUP_COLOR = "#00509D";
+export const BUSINESS_COLOR = "#30C0BB";

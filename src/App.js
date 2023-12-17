@@ -11,6 +11,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { parse, stringify } from "flatted";
 
 import Entry from "./Entry";
+import { Toaster } from "react-hot-toast";
 
 export const transformCircular = createTransform(
   (inboundState, key) => stringify(inboundState),
@@ -18,7 +19,7 @@ export const transformCircular = createTransform(
 );
 
 const persistConfig = {
-  key: "root",
+  key: "root-app",
   storage,
   stateReconciler: autoMergeLevel2,
   transforms: [transformCircular],
@@ -33,6 +34,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
+        <Toaster containerStyle={{ zIndex: 90000000000 }} />
         <Entry />
       </PersistGate>
     </Provider>
