@@ -24,6 +24,10 @@ import SOCKET_CORE from "../../Helper/managerNode";
 import { AiOutlineRight, AiTwotoneCalculator } from "react-icons/ai";
 import { TailSpin as Loader } from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
+import axios from "axios";
+import { formatDateGeneric } from "../../Helper/Utils";
+import { Tag } from "antd";
+import { CORAL_RED, PRIMARY } from "../../Helper/Colors";
 
 class History extends React.PureComponent {
   constructor(props) {
@@ -69,14 +73,30 @@ class History extends React.PureComponent {
 
   componentWillMount() {}
 
-  getHistoryFreshData() {
+  getHistoryFreshData = async () => {
     let bundleRequest = {
-      user_fingerprint: this.props.App.userData.loginData.company_fp,
+      user_identifier: this.props.App.userData.loginData.company_fp,
       ride_type: "past",
     };
     //...
-    this.SOCKET_CORE.emit("getRides_historyRiders_batchOrNot", bundleRequest);
-  }
+    const response = await axios.post(
+      `${process.env.REACT_APP_URL}/getRequestListRiders`,
+      bundleRequest,
+      {
+        headers: {
+          Authorization: `Bearer ${this.props.App.userData?.loginData?.company_fp}`,
+        },
+      }
+    );
+
+    console.log(response?.data);
+    if (response?.data?.response) {
+      this.setState({
+        isLoading: false,
+        historyData: response.data?.response,
+      });
+    }
+  };
 
   render() {
     return (
@@ -133,21 +153,21 @@ class History extends React.PureComponent {
                   />
                   <div style={{ flex: 1 }}>
                     <div className={classes.destinationLine}>
-                      {trip.destination_name}
+                      {`${trip?.locations?.dropoff.length} package${
+                        trip?.locations?.dropoff.length === 1 ? "" : "s"
+                      }`}
                     </div>
                     <div className={classes.dateRequestedLine}>
-                      {trip.date_requested}
+                      {formatDateGeneric(trip.createdAt)}
                     </div>
-                    <div className={classes.carBrandLine}>{trip.car_brand}</div>
+                    <div className={classes.carBrandLine}>
+                      <Tag color={!trip?.cancelled ? PRIMARY : CORAL_RED}>
+                        {!trip?.cancelled ? "Delivered" : "Cancelled"}
+                      </Tag>
+                    </div>
                   </div>
 
-                  <AiOutlineRight
-                    style={{
-                      position: "relative",
-                      top: 25,
-                      color: "#7c6e6ebb",
-                    }}
-                  />
+                  <div>{trip?.totals ? `N$${trip?.totals?.total}` : ""}</div>
                 </div>
               );
             })}

@@ -67,12 +67,10 @@ class Entry extends React.Component {
             <Switch>
               <Route path="/" exact component={Home} />
               <Route path="/plans" component={PresentPlans} />
-              {/* <Route path="/plans" component={Plans} /> */}
               <Route path="/Delivery" component={Delivery} />
               <Route path="/MyDeliveries" component={MyDeliveries} />
               <Route path="/Purchase" component={Purchase} />
               <Route path="/History" component={History} />
-              <Route path="/Statistics" component={Statistics} />
               <Route path="/Settings" component={Settings} />
             </Switch>
           </div>

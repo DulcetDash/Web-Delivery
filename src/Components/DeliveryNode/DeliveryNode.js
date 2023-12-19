@@ -31,25 +31,15 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-// import ReactMapGL, {
-//   GeolocateControl,
-//   Marker,
-//   // WebMercatorViewport,
-// } from "react-map-gl";
-// import WebMercatorViewport from "viewport-mercator-project";
 import SOCKET_CORE from "../../Helper/managerNode";
-// import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { TailSpin as Loader } from "react-loader-spinner";
 import PolylineOverlay from "../../Helper/PolylineOverlay";
-import TextField from "@mui/material/TextField";
-import DateAdapter from "@mui/lab/AdapterMoment";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import StaticDateTimePicker from "@mui/lab/StaticDateTimePicker";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import axios from "axios";
+import { Map, GeolocateControl } from "react-map-gl";
 
 const ICON = `M20.2,15.7L20.2,15.7c1.1-1.6,1.8-3.6,1.8-5.7c0-5.6-4.5-10-10-10S2,4.5,2,10c0,2,0.6,3.9,1.6,5.4c0,0.1,0.1,0.2,0.2,0.3
   c0,0,0.1,0.1,0.1,0.2c0.2,0.3,0.4,0.6,0.7,0.9c2.6,3.1,7.4,7.6,7.4,7.6s4.8-4.5,7.4-7.5c0.2-0.3,0.5-0.6,0.7-0.9
@@ -861,10 +851,6 @@ class DeliveryNode extends React.Component {
         shoudAllowRequest: false,
       });
       //..ask
-      // this.SOCKET_CORE.emit(
-      //   "getPricingForRideorDelivery",
-      //   deliveryPricingInputDataRaw
-      // );
       this.handlePricingForDeliveryResponse(
         this.state.dropOff_destination.map((destination) => ({ base_fare: 50 }))
       );
@@ -1336,7 +1322,6 @@ class DeliveryNode extends React.Component {
       else {
         receiversInOrder = false;
         globalObject.state.destinationNotCompleted.push(index + 1);
-        // globalObject.forceUpdate();
       }
     });
 
@@ -1348,78 +1333,6 @@ class DeliveryNode extends React.Component {
           tmpFare = fare.base_fare;
         }
       });
-      // globalObject.setState({
-      //   isLoadingGeneral: true,
-      //   didRequestJustBeenMade: false,
-      //   isThereRequestError: false,
-      // });
-      //Package all the data
-      let RIDE_OR_DELIVERY_BOOKING_DATA = {
-        user_fingerprint: globalObject.props.App.userData.loginData?.company_fp,
-        connectType: "ConnectUs",
-        country: globalObject.props.App.userCurrentLocationMetaData?.country,
-        isAllGoingToSameDestination: false, //If all the passengers are going to the same destination
-        isGoingUntilHome: false, //! Will double the fares for the Economy - Set to false for the DELIVERY
-        naturePickup: "PrivateLocation", //Force PrivateLocation type if nothing found or delivery request,  -Nature of the pickup location (privateLOcation,etc)
-        passengersNo: globalObject.state.dropOff_destination.length, //Force to 1 passenger for deliveries
-        actualRider: "me",
-        actualRiderPhone_number:
-          globalObject.props.App.userData.loginData.phone,
-        //DELIVERY SPECIFIC INFOS (receiver infos:name and phone)
-        receiverName_delivery: false,
-        receiverPhone_delivery: false,
-        packageSizeDelivery: "Small",
-        //...
-        rideType: "DELIVERY", //Ride or delivery
-        paymentMethod: "Wallet", //Payment method
-        timeScheduled: globalObject.state.isScheduledTrip
-          ? globalObject.state.scheduledTime
-          : "now",
-        pickupNote: false, //Additional note for the pickup
-        carTypeSelected: "carDelivery", //Ride selected, Economy normal taxis,etc
-        request_globality: "corporate", //!Extremely important
-        subscribed_plan:
-          globalObject.props.App.userData.loginData.plans.subscribed_plan, //!Extremely important
-        fareAmount: tmpFare, //Ride fare
-        pickupData: {
-          coordinates: [
-            globalObject.state.pickup_destination.data.locationData
-              .coordinates[0],
-            globalObject.state.pickup_destination.data.locationData
-              .coordinates[1],
-          ],
-          location_name:
-            globalObject.state.pickup_destination.data.locationData
-              .location_name,
-          street_name:
-            globalObject.state.pickup_destination.data.locationData.street,
-          city: globalObject.state.pickup_destination.data.locationData.city,
-        },
-        destinationData: {},
-      };
-
-      //Complete the destination data
-      globalObject.state.dropOff_destination.map((location, index) => {
-        let keyIndex = `passenger${index + 1}Destination`;
-        location.data.locationData["receiver_infos"] =
-          location.data.receiverInfos;
-        //...
-        RIDE_OR_DELIVERY_BOOKING_DATA.destinationData[keyIndex] =
-          location.data.locationData;
-      });
-      //...
-      // console.log(RIDE_OR_DELIVERY_BOOKING_DATA);
-      // {
-      //   user_identifier: 'ada5af56-e1ca-4e62-b1bd-0f73268c53ab',
-      //   payment_method: 'cash',
-      //   note: '',
-      //   dropOff_data: '[{"name":"Dominique","phone":"+264856997167","dropoff_location":{"query":"aca","suburb":"false","createdAt":"2023-11-29T01:03:17.190Z","country":"Namibia","state":"Khomas","city":"Windhoek","location_name":"Academia","indexSearch":0,"averageGeo":0,"updatedAt":"2023-11-29T01:03:17.190Z","location_id":"ChIJn8xVye4aCxwRKcworZ_nnuw","id":"00fd36a0-bf52-48ed-b2c1-d138b0836741","coordinates":[-22.6104205,17.0712807],"street":"Windhoek, Namibia","street_name":"Windhoek, Namibia"}}]',
-      //   totals: '{"delivery_fee":"50.00","service_fee":"0.00","total":"50.00"}',
-      //   pickup_location: '{"osm_id":11178801051,"country":"Namibia","city":"Windhoek","countrycode":"NA","postcode":"10012","type":"house","osm_type":"N","osm_key":"tourism","street":"Best Street","district":"Windhoek West","osm_value":"guest_house","name":"Sekira Guest House","state":"Khomas Region","isCity_supported":true,"location_name":"Best Street","coordinates":{"latitude":-22.560881,"longitude":17.0657552},"street_name":"Best Street","suburb":"Windhoek West"}',
-      //   ride_mode: 'delivery'
-      // }
-
-      // console.log(globalObject.state.dropOff_destination);
 
       const dropOff_data = globalObject.state.dropOff_destination.map(
         (destination) => {
@@ -1452,7 +1365,6 @@ class DeliveryNode extends React.Component {
         ride_mode: "delivery",
       };
 
-      console.log(bundleData);
       //! Make a single request - risky
       //Not yet request and no errors
       //Check wheher an answer was already received - if not keep requesting
@@ -1747,28 +1659,12 @@ class DeliveryNode extends React.Component {
                     flexDirection: "row",
                     marginTop: 20,
                   }}>
-                  {/* <input
-                type="submit"
-                value="Request for delivery"
-                className={classes.formBasicSubmitBttnClassics}
-                style={{
-                  marginRight: 25,
-                  opacity: this.state.shoudAllowRequest ? 1 : 0.2,
-                  width: "80%",
-                  fontSize: 17,
-                }}
-                onClick={() =>
-                  this.state.shoudAllowRequest === false
-                    ? {}
-                    : console.log("Request for delivery")
-                }
-              /> */}
                   <div
                     className={classes.formBasicSubmitBttnClassics}
                     style={{
                       marginRight: 25,
                       opacity: this.state.shoudAllowRequest ? 1 : 0.2,
-                      width: "80%",
+                      width: "100%",
                       fontSize: 17,
                       flexDirection: "column",
                     }}
@@ -1816,86 +1712,48 @@ class DeliveryNode extends React.Component {
                       />
                     )}
                   </div>
-
-                  <div
-                    className={classes.formBasicSubmitBttnClassics}
-                    style={{
-                      backgroundColor: "#d0d0d0",
-                      color: "black",
-                      borderColor: "#d0d0d0",
-                      //opacity: this.state.shoudAllowRequest ? 1 : 0.2,
-                      opacity: 0.2,
-                      width: 70,
-                      zIndex: 100000,
-                      cursor: "default",
-                    }}
-                    onClick={
-                      () => {}
-                      // this.state.shoudAllowRequest === false
-                      //   ? {}
-                      //   : this.state.isScheduledTrip
-                      //   ? this.setState({
-                      //       showDateTimePicker: false,
-                      //       scheduledTime: new Date(),
-                      //       isScheduledTrip: false,
-                      //     })
-                      //   : this.state.showDateTimePicker
-                      //   ? {}
-                      //   : this.setState({
-                      //       showDateTimePicker: true,
-                      //       scheduledTime: new Date(),
-                      //     })
-                    }>
-                    {this.state.showDateTimePicker ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          boxShadow: "0px 0px 15px 1px rgba(0, 0, 0, 0.14)",
-                          marginBottom: 150,
-                        }}>
-                        <LocalizationProvider dateAdapter={DateAdapter}>
-                          <StaticDateTimePicker
-                            displayStaticWrapperAs="mobile"
-                            toolbarTitle={"Select the delivery date"}
-                            value={this.state.scheduledTime}
-                            onChange={(newValue) => {
-                              this.setState({
-                                scheduledTime: new Date(newValue._d),
-                              });
-                            }}
-                            ampmInClock={false}
-                            ampm={false}
-                            renderInput={(params) => <TextField {...params} />}
-                          />
-                        </LocalizationProvider>
-                        <div
-                          className={classes.formBasicSubmitBttnClassics}
-                          style={{
-                            width: "99.45%",
-                            backgroundColor: "#096ED4",
-                            borderColor: "#096ED4",
-                            borderRadius: 0,
-                          }}
-                          onClick={() => {
-                            this.setState({
-                              showDateTimePicker: false,
-                              isScheduledTrip: true,
-                            });
-                          }}>
-                          Set delivery date
-                        </div>
-                      </div>
-                    ) : this.state.isScheduledTrip ? (
-                      <MdDeleteSweep style={{ width: 28, height: 28 }} />
-                    ) : (
-                      <MdAccessTime style={{ width: 28, height: 28 }} />
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
             <div className={classes.mapContainer} ref="mapPrimitiveContainer">
+              {/* <Map
+                mapLib={import("mapbox-gl")}
+                initialViewState={{
+                  // longitude: -100,
+                  // latitude: 40,
+                  latitude: this.state.pickup_destination?.data?.locationData
+                    ?.coordinates
+                    ? this.state.pickup_destination.data.locationData
+                        .coordinates[0]
+                    : this.state.latitude,
+                  longitude: this.state.pickup_destination?.data?.locationData
+                    ?.coordinates
+                    ? this.state.pickup_destination.data.locationData
+                        .coordinates[1]
+                    : this.state.longitude,
+                  zoom: 14.5,
+                }}
+                width={"100%"}
+                height={"100%"}
+                mapStyle="mapbox://styles/mapbox/streets-v11"
+                mapboxAccessToken="pk.eyJ1IjoiZG9taW5pcXVlLWt0dCIsImEiOiJjbG9ldXA2djIwbjloMmtwbDV5ZGU5ZTZwIn0.AqyhJNSuN2sMTr0vOOLSqA"
+                attributionControl={false}>
+                <GeolocateControl
+                  style={{
+                    top: 15,
+                    left: 15,
+                    opacity: 1,
+                  }}
+                  positionOptions={{ enableHighAccuracy: true }}
+                  trackUserLocation={true}
+                  showAccuracyCircle={true}
+                  showUserLocation={true}
+                  auto
+                  onGeolocate={(position) => {
+                    console.log(position);
+                  }}
+                />
+              </Map> */}
               {/* <ReactMapGL
                 mapLib={import("mapbox-gl")}
                 width={"100%"}

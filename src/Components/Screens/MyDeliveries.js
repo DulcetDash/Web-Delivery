@@ -40,6 +40,10 @@ import SOCKET_CORE from "../../Helper/managerNode";
 import { TailSpin as Loader } from "react-loader-spinner";
 import "rc-steps/assets/index.css";
 import Steps from "rc-steps";
+import { formatDateGeneric } from "../../Helper/Utils";
+import axios from "axios";
+import { CheckCircleFilled, InfoCircleFilled } from "@ant-design/icons";
+import { GRAY_1, PRIMARY, SECONDARY_STRONG } from "../../Helper/Colors";
 
 class MyDeliveries extends React.Component {
   constructor(props) {
@@ -56,60 +60,6 @@ class MyDeliveries extends React.Component {
     let globalObject = this;
 
     this.getCurrentLocationFrequently();
-
-    /**
-     * @socket trackdriverroute-response
-     * Get route tracker response
-     * Responsible for redirecting updates to map graphics data based on if the status of the request is: pending, in route to pickup, in route to drop off or completed
-     */
-    this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
-      try {
-        if (
-          response !== null &&
-          response !== undefined &&
-          /no_rides/i.test(response.request_status) === false &&
-          response.length > 0
-        ) {
-          globalObject.props.UpdateTripsData(response);
-          //1. Trip in progress: in route to pickup or in route to drop off
-          if (
-            response.response === undefined &&
-            response.routePoints !== undefined &&
-            /(inRouteToPickup|inRouteToDestination)/i.test(
-              response.request_status
-            )
-          ) {
-            //Update route to destination var - request status: inRouteToPickup, inRouteToDestination
-            if (/inRouteToPickup/i.test(response.request_status)) {
-              // console.log("In route to pickup");
-            } else if (response.request_status === "inRouteToDestination") {
-              // console.log("In route to destination");
-            }
-            //...
-          } else if (/pending/i.test(response.request_status)) {
-            // console.log("Pending");
-            globalObject.props.UpdateTripsData(response);
-          } else if (
-            response.request_status !== undefined &&
-            response.request_status !== null &&
-            /riderDropoffConfirmation_left/i.test(response.request_status)
-          ) {
-            // console.log("Confirm dropoff left");
-            globalObject.props.UpdateTripsData(response);
-          } else if (response.request_status === "no_rides") {
-            // console.log("No rides");
-            globalObject.props.UpdateTripsData([]);
-          }
-        } //No rides
-        else {
-          // console.log("No rides");
-          globalObject.props.UpdateTripsData([]);
-        }
-      } catch (error) {
-        console.error(error);
-        globalObject.props.UpdateTripsData([]);
-      }
-    });
 
     //2 Handle cancel request response
     this.SOCKET_CORE.on(
@@ -149,11 +99,10 @@ class MyDeliveries extends React.Component {
    * Responsible for cancelling any current request as selected by the user
    * @param reason: the reason of cancelling the request.
    */
-  cancelRequest_rider(request_fp, reason = false) {
+  cancelRequest_rider = async (request_fp, reason = false) => {
     // console.log("Cancellation");
     if (
-      this.props.App.tripsData !== undefined &&
-      this.props.App.tripsData !== null &&
+      this.props.App.tripsData &&
       this.props.App.tripsData !== false &&
       this.props.App.tripsData.length > 0
     ) {
@@ -162,34 +111,57 @@ class MyDeliveries extends React.Component {
       //Bundle the cancel input
       let bundleData = {
         request_fp: request_fp,
-        user_fingerprint: this.props.App.userData.loginData.company_fp,
+        user_identifier: this.props.App.userData.loginData.company_fp,
         reason: reason,
       };
       ///...
-      this.SOCKET_CORE.emit("cancelRiders_request_io", bundleData);
+      // this.SOCKET_CORE.emit("cancelRiders_request_io", bundleData);
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/cancel_request_user`,
+        bundleData,
+        {
+          headers: {
+            Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+          },
+        }
+      );
+
+      if (response.data[0]?.response === "success") {
+        console.log(response.data);
+      }
+      this.setState({ isLoadingCancellation: false });
     } //Invalid request fp - close the modal
     else {
       //   this.props.UpdateErrorModalLog(false, false, "any"); //Close modal
     }
-  }
+  };
 
   /**
    * @func confirmRiderDropoff
    * @param request_fp: the request fingerprint
    * Responsible for bundling the request data and requesting for a rider's drop off confirmation.
    */
-  confirmRiderDropoff(request_fp) {
+  confirmRiderDropoff = async (request_fp) => {
     this.setState({ isLoadingCancellation: true }); //Activate the loader - and lock the rating, compliment, done button and additional note input
     let dropoff_bundle = {
       user_fingerprint: this.props.App.userData.loginData.company_fp,
-      dropoff_compliments: false,
-      dropoff_personal_note: false,
-      rating_score: 4.9,
-      request_fp: request_fp,
+      badges: [],
+      note: "",
+      rating: 4.9,
+      request_fp,
     };
     //..
-    this.SOCKET_CORE.emit("confirmRiderDropoff_requests_io", dropoff_bundle);
-  }
+    // this.SOCKET_CORE.emit("confirmRiderDropoff_requests_io", dropoff_bundle);
+    const response = await axios.post(
+      `${process.env.REACT_APP_URL}/submitRiderOrClientRating`,
+      dropoff_bundle,
+      {
+        headers: {
+          Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+        },
+      }
+    );
+  };
 
   /**
    * Get the current location of the user
@@ -225,8 +197,8 @@ class MyDeliveries extends React.Component {
             History
           </div>
         </div>
-        {this.props.App.tripsData.length > 0 &&
-        this.props.App.tripsData[0].birdview_infos !== undefined ? (
+        {this.props.App.tripsData.length > 0 ? (
+          // && this.props.App.tripsData[0].birdview_infos !== undefined ?
           this.props.App.tripsData.map((deliveryData, index) => {
             return (
               <div style={{ marginTop: index === 0 ? 30 : 60 }}>
@@ -237,8 +209,8 @@ class MyDeliveries extends React.Component {
                   <div className={classes.containterTracking}>
                     {/* Header */}
                     <div className={classes.headerTracking}>
-                      {/pending/i.test(deliveryData.request_status) ? (
-                        <div>Hi, give us a moment</div>
+                      {/pending/i.test(deliveryData?.status) ? (
+                        <div>Finding a courier...</div>
                       ) : (
                         <>
                           {/* driver side if any */}
@@ -247,23 +219,16 @@ class MyDeliveries extends React.Component {
                               <img
                                 alt="drv"
                                 src={
-                                  /riderDropoffConfirmation_left/i.test(
-                                    deliveryData.request_status
-                                  )
-                                    ? deliveryData.driver_details
-                                        .profile_picture
-                                    : deliveryData.driverDetails.profile_picture
+                                  deliveryData?.driver_details?.picture ??
+                                  "/user.png"
                                 }
                                 className={classes.profilePicDriver_linked}
                               />
                             </div>
                             <div className={classes.namePlateNoHeader}>
                               <div className={classes.nameDriverHeader}>
-                                {/riderDropoffConfirmation_left/i.test(
-                                  deliveryData.request_status
-                                )
-                                  ? deliveryData.driver_details.name
-                                  : deliveryData.driverDetails.name}
+                                {deliveryData?.driver_details?.name ??
+                                  "Courier"}
                                 <div className={classes.ratingContainer}>
                                   <MdStar
                                     style={{
@@ -274,21 +239,18 @@ class MyDeliveries extends React.Component {
                                       color: "#FFC043",
                                     }}
                                   />{" "}
-                                  4.9
+                                  {deliveryData?.driver_details?.rating ??
+                                    "4.9"}
                                 </div>
                               </div>
                               <div className={classes.plateNoText}>
-                                {/riderDropoffConfirmation_left/i.test(
-                                  deliveryData.request_status
-                                )
-                                  ? deliveryData.driver_details.car_brand
-                                  : deliveryData.carDetails.car_brand}
+                                {/completed/i.test(deliveryData.status)
+                                  ? deliveryData.driver_details?.car_brand
+                                  : deliveryData.carDetails?.car_brand}
                                 <span style={{ marginLeft: 12 }}>
-                                  {/riderDropoffConfirmation_left/i.test(
-                                    deliveryData.request_status
-                                  )
-                                    ? deliveryData.driver_details.plate_number
-                                    : deliveryData.carDetails.plate_number}
+                                  {/completed/i.test(deliveryData.status)
+                                    ? deliveryData.driver_details?.plate_number
+                                    : deliveryData.carDetails?.plate_number}
                                 </span>
                               </div>
                             </div>
@@ -302,11 +264,7 @@ class MyDeliveries extends React.Component {
                                 color: "#096ED4",
                               }}
                             />{" "}
-                            {/riderDropoffConfirmation_left/i.test(
-                              deliveryData.request_status
-                            )
-                              ? deliveryData.driver_details.phone_number
-                              : deliveryData.driverDetails.phone_number}
+                            {deliveryData.driver_details?.phone ?? ""}
                           </div>
                         </>
                       )}
@@ -320,7 +278,7 @@ class MyDeliveries extends React.Component {
                           <Steps.Step
                             title=""
                             status={
-                              /pending/i.test(deliveryData.request_status)
+                              /pending/i.test(deliveryData?.status)
                                 ? "process"
                                 : "finish"
                             }
@@ -329,12 +287,10 @@ class MyDeliveries extends React.Component {
                           <Steps.Step
                             title=""
                             status={
-                              /inRouteToPickup/i.test(
-                                deliveryData.request_status
-                              )
+                              /started/i.test(deliveryData.status)
                                 ? "process"
-                                : /(inRouteToDestination|riderDropoffConfirmation_left)/i.test(
-                                    deliveryData.request_status
+                                : /(shipping|completed)/i.test(
+                                    deliveryData.status
                                   )
                                 ? "finish"
                                 : "wait"
@@ -344,13 +300,9 @@ class MyDeliveries extends React.Component {
                           <Steps.Step
                             title=""
                             status={
-                              /riderDropoffConfirmation_left/i.test(
-                                deliveryData.request_status
-                              )
+                              /completed/i.test(deliveryData.status)
                                 ? "finish"
-                                : /(pending|inRouteToPickup)/i.test(
-                                    deliveryData.request_status
-                                  )
+                                : /(pending|started)/i.test(deliveryData.status)
                                 ? "wait"
                                 : "process"
                             }
@@ -359,9 +311,7 @@ class MyDeliveries extends React.Component {
                           <Steps.Step
                             title=""
                             status={
-                              /riderDropoffConfirmation_left/i.test(
-                                deliveryData.request_status
-                              )
+                              /completed/i.test(deliveryData.status)
                                 ? "finish"
                                 : "wait"
                             }
@@ -371,30 +321,22 @@ class MyDeliveries extends React.Component {
                       </div>
                       <div className={classes.statusReportTxt}>
                         <span>
-                          {/pending/i.test(deliveryData.request_status)
-                            ? "Finding you a driver"
-                            : /inRouteToPickup/i.test(
-                                deliveryData.request_status
-                              )
+                          {/pending/i.test(deliveryData.status)
+                            ? "Finding you a courier"
+                            : /started/i.test(deliveryData.status)
                             ? "In route to pickup your package"
-                            : /inRouteToDestination/i.test(
-                                deliveryData.request_status
-                              )
+                            : /shipping/i.test(deliveryData.status)
                             ? "In route to drop off your package"
-                            : /riderDropoffConfirmation_left/i.test(
-                                deliveryData.request_status
-                              )
+                            : /completed/i.test(deliveryData.status)
                             ? `${
-                                deliveryData.birdview_infos.dropoff_details
-                                  .length === 1
+                                deliveryData?.trip_locations?.dropoff.length ===
+                                1
                                   ? "Package"
                                   : "Packages"
                               } dropped off successfully`
                             : "..."}
                         </span>
-                        {/riderDropoffConfirmation_left/i.test(
-                          deliveryData.request_status
-                        ) ? (
+                        {/completed/i.test(deliveryData.status) ? (
                           <></>
                         ) : (
                           <div style={{ marginLeft: 10 }}>
@@ -409,12 +351,10 @@ class MyDeliveries extends React.Component {
                         )}
                       </div>
                       <div className={classes.etaReport}>
-                        {/pending/i.test(deliveryData.request_status)
+                        {/pending/i.test(deliveryData.status)
                           ? deliveryData.eta
-                          : /(inRouteToPickup|inRouteToDestination)/i.test(
-                              deliveryData.request_status
-                            )
-                          ? deliveryData.ETA_toDestination
+                          : /(started|shipping)/i.test(deliveryData.status)
+                          ? deliveryData?.ETA_toDestination
                           : ""}
                       </div>
                     </div>
@@ -422,14 +362,13 @@ class MyDeliveries extends React.Component {
                     <div className={classes.globalTripDataContainer}>
                       <div className={classes.globalTElDefault}>
                         <FiBox style={{ marginRight: 3 }} />{" "}
-                        {parseInt(
-                          deliveryData.birdview_infos.number_of_packages
-                        ) > 1 ||
-                        parseInt(
-                          deliveryData.birdview_infos.number_of_packages
-                        ) === 0
-                          ? `${deliveryData.birdview_infos.number_of_packages} packages`
-                          : `${deliveryData.birdview_infos.number_of_packages} package`}
+                        {`${
+                          deliveryData?.trip_locations?.dropoff.length
+                        } package${
+                          deliveryData?.trip_locations?.dropoff.length > 1
+                            ? "s"
+                            : ""
+                        }`}
                       </div>
                       <div
                         className={classes.globalTElDefault}
@@ -438,7 +377,7 @@ class MyDeliveries extends React.Component {
                           fontFamily: "MoveTextBold, sans-serif",
                           fontSize: 20,
                         }}>
-                        N${deliveryData.birdview_infos.fare}
+                        N${deliveryData.totals_request?.total}
                       </div>
                       <div
                         className={classes.globalTElDefault}
@@ -446,11 +385,7 @@ class MyDeliveries extends React.Component {
                           fontSize: 14,
                           fontFamily: "MoveTextRegular, sans-serif",
                         }}>
-                        {`${new Date(deliveryData.birdview_infos.date_requested)
-                          .toLocaleDateString()
-                          .replace(/\//g, "-")} at ${new Date(
-                          deliveryData.birdview_infos.date_requested
-                        ).toLocaleTimeString()}`}
+                        {formatDateGeneric(deliveryData?.date_requested)}
                       </div>
                     </div>
                     {/* Pickup and drop off location details */}
@@ -481,52 +416,12 @@ class MyDeliveries extends React.Component {
                             {/* Pickup */}
                             <div>
                               <div className={classes.suburbName}>
-                                {
-                                  deliveryData.birdview_infos.pickup_details
-                                    .suburb
-                                }
+                                {deliveryData?.trip_locations?.pickup?.street ??
+                                  deliveryData?.trip_locations?.pickup
+                                    ?.district}
                               </div>
                               <div className={classes.detailsLocationText}>
-                                {`${
-                                  deliveryData.birdview_infos.pickup_details
-                                    .location_name !== undefined &&
-                                  deliveryData.birdview_infos.pickup_details
-                                    .location_name !== false &&
-                                  deliveryData.birdview_infos.pickup_details
-                                    .location_name !== null &&
-                                  deliveryData.birdview_infos.pickup_details
-                                    .location_name !==
-                                    deliveryData.birdview_infos.pickup_details
-                                      .street_name &&
-                                  deliveryData.birdview_infos.pickup_details
-                                    .location_name !==
-                                    deliveryData.birdview_infos.pickup_details
-                                      .suburb
-                                    ? `${deliveryData.birdview_infos.pickup_details.location_name}, `
-                                    : ""
-                                }${
-                                  deliveryData.birdview_infos.pickup_details
-                                    .street_name !== undefined &&
-                                  deliveryData.birdview_infos.pickup_details
-                                    .street_name !== false &&
-                                  deliveryData.birdview_infos.pickup_details
-                                    .street_name !== null
-                                    ? `${
-                                        deliveryData.birdview_infos
-                                          .pickup_details.street_name.length >
-                                        20
-                                          ? `${deliveryData.birdview_infos.pickup_details.street_name.substring(
-                                              0,
-                                              20
-                                            )}.`
-                                          : deliveryData.birdview_infos
-                                              .pickup_details.street_name
-                                      }, `
-                                    : ""
-                                }${
-                                  deliveryData.birdview_infos.pickup_details
-                                    .city
-                                }`}
+                                {`${deliveryData?.trip_locations?.pickup?.state}, ${deliveryData?.trip_locations?.pickup?.country}`}
                               </div>
                             </div>
                           </div>
@@ -544,7 +439,7 @@ class MyDeliveries extends React.Component {
                               flexDirection: "column",
                             }}>
                             {/* Single el */}
-                            {deliveryData.birdview_infos.dropoff_details.map(
+                            {deliveryData?.trip_locations?.dropoff.map(
                               (location, index) => {
                                 return (
                                   <div
@@ -552,8 +447,8 @@ class MyDeliveries extends React.Component {
                                       marginBottom: 20,
                                       borderBottom:
                                         index + 1 !==
-                                        deliveryData.birdview_infos
-                                          .dropoff_details.length
+                                        deliveryData?.birdview_infos
+                                          ?.dropoff_details.length
                                           ? "1px solid #f3f3f3"
                                           : "none",
                                       display: "flex",
@@ -562,38 +457,39 @@ class MyDeliveries extends React.Component {
                                     }}>
                                     <div style={{ flex: 1 }}>
                                       <div className={classes.suburbName}>
-                                        {location.suburb}
+                                        {location?.dropoff_location
+                                          ?.location_name ??
+                                          location?.dropoff_location?.district}
                                       </div>
                                       <div
                                         className={classes.detailsLocationText}>
-                                        {`${
-                                          location.location_name !==
-                                            undefined &&
-                                          location.location_name !== false &&
-                                          location.location_name !== "false" &&
-                                          location.location_name !== null &&
-                                          location.location_name !==
-                                            location.street_name &&
-                                          location.location_name !==
-                                            location.suburb
-                                            ? `${location.location_name}, `
-                                            : ""
-                                        }${
-                                          location.street_name !== undefined &&
-                                          location.street_name !== false &&
-                                          location.street_name !== "false" &&
-                                          location.street_name !== null
-                                            ? `${
-                                                location.street_name.length > 20
-                                                  ? `${location.street_name.substring(
-                                                      0,
-                                                      20
-                                                    )}.`
-                                                  : location.street_name
-                                              }, `
-                                            : ""
-                                        }${location.city}`}
+                                        {`${location?.dropoff_location?.state}, ${location?.dropoff_location?.country}`}
                                       </div>
+
+                                      {!/(cancelled|pending)/i.test(
+                                        deliveryData?.status
+                                      ) && (
+                                        <div
+                                          style={{
+                                            fontSize: 14,
+                                            color: location?.isCompleted
+                                              ? PRIMARY
+                                              : SECONDARY_STRONG,
+                                            marginTop: 10,
+                                          }}>
+                                          <CheckCircleFilled
+                                            style={{
+                                              color: location?.isCompleted
+                                                ? PRIMARY
+                                                : SECONDARY_STRONG,
+                                              marginRight: 5,
+                                            }}
+                                          />
+                                          {location?.isCompleted
+                                            ? "Package dropped off"
+                                            : "Delivery in progress"}
+                                        </div>
+                                      )}
                                     </div>
                                     {/* Receiver's side */}
                                     <div
@@ -616,28 +512,19 @@ class MyDeliveries extends React.Component {
                                       className={
                                         classes.receiverBatchContainer
                                       }>
-                                      {location.receiver_infos.receiver_name !==
-                                        undefined &&
-                                      location.receiver_infos.receiver_name
-                                        .length > 0 ? (
+                                      {location?.name ? (
                                         <>
                                           <div
                                             className={
                                               classes.receiverBatchName
                                             }>
-                                            {
-                                              location.receiver_infos
-                                                .receiver_name
-                                            }
+                                            {location?.name}
                                           </div>
                                           <div
                                             className={
                                               classes.receiverBatchPhone
                                             }>
-                                            {
-                                              location.receiver_infos
-                                                .receiver_phone
-                                            }
+                                            {location?.phone}
                                           </div>
                                         </>
                                       ) : (
@@ -663,9 +550,7 @@ class MyDeliveries extends React.Component {
 
                     {/* Cancellation side */}
                     <div className={classes.cancelRegionContainer}>
-                      {/(inRouteToPickup|pending)/i.test(
-                        deliveryData.request_status
-                      ) ? (
+                      {/(started|pending)/i.test(deliveryData.status) ? (
                         <div
                           style={{
                             // border: "1px solid black",
@@ -675,14 +560,9 @@ class MyDeliveries extends React.Component {
                             cursor: "pointer",
                             fontFamily: "MoveTextMedium, sans-serif",
                           }}
-                          onClick={() => {
-                            this.cancelRequest_rider(
-                              deliveryData.request_fp !== undefined
-                                ? deliveryData.request_fp
-                                : deliveryData.basicTripDetails.request_fp !==
-                                  undefined
-                                ? deliveryData.basicTripDetails.request_fp
-                                : false
+                          onClick={async () => {
+                            await this.cancelRequest_rider(
+                              deliveryData?.request_fp
                             );
                           }}>
                           <MdBlock
@@ -700,9 +580,7 @@ class MyDeliveries extends React.Component {
                             </div>
                           </div>
                         </div>
-                      ) : /riderDropoffConfirmation_left/i.test(
-                          deliveryData.request_status
-                        ) ? (
+                      ) : /completed/i.test(deliveryData?.status) ? (
                         <div
                           style={{
                             // border: "1px solid black",
@@ -714,9 +592,7 @@ class MyDeliveries extends React.Component {
                             color: "#09864A",
                           }}
                           onClick={() =>
-                            this.confirmRiderDropoff(
-                              deliveryData.trip_details.request_fp
-                            )
+                            this.confirmRiderDropoff(deliveryData?.request_fp)
                           }>
                           <MdCheckCircle
                             style={{
@@ -745,7 +621,12 @@ class MyDeliveries extends React.Component {
                           timeout={300000000} //3 secs
                         />
                       ) : (
-                        <></>
+                        !/completed/i.test(deliveryData?.status) && (
+                          <div style={{ color: GRAY_1, fontSize: 14 }}>
+                            <InfoCircleFilled /> You can't cancel a delivery
+                            once it's been picked up.
+                          </div>
+                        )
                       )}
                     </div>
                   </div>

@@ -28,6 +28,8 @@ import { AiTwotoneEnvironment, AiTwotoneSetting } from "react-icons/ai";
 import { TailSpin as Loader } from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
 import axios from "axios";
+import { Tag } from "antd";
+import { PRIMARY_DILUTED } from "../../Helper/Colors";
 
 class Delivery extends React.Component {
   constructor(props) {
@@ -203,36 +205,33 @@ class Delivery extends React.Component {
 
         this.handleGeocodedResponse(geocoding.data);
 
-        // globalObject.SOCKET_CORE.emit("geocode-this-point", {
+        //! -----Get the requests data if any
+        // let bundle = {
         //   latitude: globalObject.props.App.latitude,
         //   longitude: globalObject.props.App.longitude,
-        //   user_fingerprint:
+        //   user_identifier:
         //     globalObject.props.App.userData?.loginData?.company_fp,
-        // });
+        //   user_nature: "rider",
+        //   pushnotif_token: false,
+        // };
 
-        //! -----Get the requests data if any
-        let bundle = {
-          latitude: globalObject.props.App.latitude,
-          longitude: globalObject.props.App.longitude,
-          user_identifier:
-            globalObject.props.App.userData?.loginData?.company_fp,
-          user_nature: "rider",
-          pushnotif_token: false,
-        };
+        // const response = await axios.post(
+        //   `${process.env.REACT_APP_URL}/getShoppingData`,
+        //   bundle,
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
+        //     },
+        //   }
+        // );
 
-        const response = await axios.post(
-          `${process.env.REACT_APP_URL}/getShoppingData`,
-          bundle,
-          {
-            headers: {
-              Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
-            },
-          }
-        );
+        // if (response?.data?.accountData) {
+        //   this.props.UpdateLoggingData(response?.data?.accountData);
+        // }
 
-        if (response?.data?.accountData) {
-          this.props.UpdateLoggingData(response?.data?.accountData);
-        }
+        // if (response?.data?.requests) {
+        //   this.props.UpdateTripsData(response?.data?.requests);
+        // }
       } catch (error) {
         console.log(error);
       }
@@ -295,6 +294,8 @@ class Delivery extends React.Component {
       Pro: 50,
       PRSNLD: 100,
     };
+
+    const balance = this.props.App.userData?.loginData?.plans?.balance;
 
     return (
       <div
@@ -367,7 +368,13 @@ class Delivery extends React.Component {
               ] ? (
               <>
                 <div className={classes.mainScreenTitle}>
-                  Make your delivery
+                  Make your delivery{" "}
+                  <Tag
+                    color={PRIMARY_DILUTED}
+                    style={{ position: "relative", top: 2, marginLeft: 20 }}>
+                    Balance:{" "}
+                    {balance !== undefined ? `N$${balance}` : "Checking"}
+                  </Tag>
                 </div>
                 <div className={classes.contentContainer}>
                   <DeliveryNode />

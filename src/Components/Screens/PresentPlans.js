@@ -34,10 +34,7 @@ class PresentPlans extends React.PureComponent {
     if (this.state.isLoadingPlanSelected) return;
 
     this.setState({ isLoadingPlanSelected: true });
-    // setIsLoading(true);
-    // if (!plan?.priceInfo?.id) window.location.reload();
 
-    // if (!profileData?.customerId) window.location.href = "/login";
     const userData = this.props.App.userData.loginData;
 
     try {
@@ -46,6 +43,11 @@ class PresentPlans extends React.PureComponent {
         {
           customerId: userData?.stripe_customerId,
           priceId: priceId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userData?.company_fp}`,
+          },
         }
       );
 
@@ -54,21 +56,16 @@ class PresentPlans extends React.PureComponent {
       if (
         subscription?.data?.status === "success" &&
         subscription?.data?.clientSecret
-        // &&
-        // subscription?.data?.state !== "alreadyHaveSubscriptionGivePaymentChoice"
       ) {
         this.setState({
           clientSecret: subscription?.data?.clientSecret,
           isLoadingPlanSelected: false,
         });
-        // setStep("payment");
-        // setIsLoading(false);
+      } else {
+        this.setState({ isLoadingPlanSelected: false });
       }
-
-      this.setState({ isLoadingPlanSelected: false });
     } catch (error) {
       console.error(error);
-      // window.location.reload();
       this.setState({ isLoadingPlanSelected: false });
     }
   };
@@ -100,7 +97,7 @@ class PresentPlans extends React.PureComponent {
                       fontSize: "1.5em",
                       marginBottom: 15,
                     }}>
-                    ${this.state.plan?.amount}
+                    N${this.state.plan?.amount}
                   </div>
                   <div style={{ color: "black", marginBottom: 20 }}>
                     {this.state.plan?.planName}
@@ -241,8 +238,6 @@ class PresentPlans extends React.PureComponent {
                   await this.createSubscriptionIntent(
                     "price_1OO4POJC0K1CI7I6ASG1AGaq"
                   );
-                  // console.log(this.props.App.temporaryPackagePurchaseVars);
-                  // window.location.href = "/Purchase";
                 }}
               />
               <PlanNode

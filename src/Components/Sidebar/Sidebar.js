@@ -7,6 +7,7 @@ import {
   UpdateCurrentLocationMetadat,
   LogOut,
   UpdateLoggingData,
+  UpdateTripsData,
 } from "../../Redux/HomeActionsCreators";
 import SOCKET_CORE from "../../Helper/managerNode";
 import "react-pro-sidebar/dist/css/styles.css";
@@ -20,18 +21,9 @@ import {
   AiOutlineLineChart,
   AiTwotoneBuild,
 } from "react-icons/ai";
-import {
-  ImUserPlus,
-  ImMap,
-  ImBlocked,
-  ImUserCheck,
-  ImUsers,
-  ImPower,
-  ImEarth,
-  ImPieChart,
-  ImShare2,
-} from "react-icons/im";
 import { MdApps, MdExtension } from "react-icons/md";
+import axios from "axios";
+import { PRIMARY } from "../../Helper/Colors";
 
 const iconStyle = {
   width: 35,
@@ -80,14 +72,38 @@ class Sidebar extends React.PureComponent {
   updateBackgroundData() {
     let globalObject = this;
 
-    this.intervalPersister = setInterval(function () {
+    this.intervalPersister = setInterval(async () => {
       //! Get the account data
-      globalObject.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-        op: "getAccountData",
-        company_fp: globalObject.props.App.userData.loginData.company_fp,
-      });
+      let bundle = {
+        latitude: globalObject.props.App.latitude,
+        longitude: globalObject.props.App.longitude,
+        user_identifier: globalObject.props.App.userData?.loginData?.company_fp,
+        user_nature: "rider",
+        pushnotif_token: false,
+      };
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/getShoppingData`,
+        bundle,
+        {
+          headers: {
+            Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
+          },
+        }
+      );
+
+      if (response?.data?.accountData) {
+        this.props.UpdateLoggingData(response?.data?.accountData);
+      }
+
+      if (response?.data?.requests) {
+        console.log(response?.data?.requests);
+        this.props.UpdateTripsData(response?.data?.requests);
+      }
+
+      console.log("Runner data updated");
       globalObject.shouldBeRenderedBasedOnAccess();
-    }, 2000);
+    }, 7000);
   }
 
   componentDidUpdate() {
@@ -117,6 +133,23 @@ class Sidebar extends React.PureComponent {
     }
   }
 
+  getRightColorForSelectedMenu(menuName) {
+    const route = window.location.href
+      .split("/")
+      [window.location.href.split("/").length - 1].toLowerCase()
+      .trim();
+
+    if (route === menuName.toLowerCase().trim()) {
+      return PRIMARY;
+    } else {
+      return "#4b5158";
+    }
+  }
+
+  handleClick = () => {
+    window.location.reload();
+  };
+
   render() {
     this.shouldBeRenderedBasedOnAccess();
     ///...
@@ -127,38 +160,75 @@ class Sidebar extends React.PureComponent {
             Dashboard
           </div>
           <MenuItem className="menuItemSideBar">
-            <Link to="/Delivery">
-              <AiTwotoneBuild style={iconStyle} />
-              <span className="menuText">Make a delivery</span>
-            </Link>
+            <a href="/Delivery">
+              <AiTwotoneBuild
+                style={{
+                  ...iconStyle,
+                  color: this.getRightColorForSelectedMenu("delivery"),
+                }}
+              />
+              <span
+                className="menuText"
+                style={{
+                  color: this.getRightColorForSelectedMenu("delivery"),
+                }}>
+                Make a delivery
+              </span>
+            </a>
           </MenuItem>
 
           <MenuItem className="menuItemSideBar">
-            <Link to="/MyDeliveries">
-              <MdApps style={iconStyle} />
-              <span className="menuText">My deliveries</span>
-            </Link>
+            <a href="/MyDeliveries">
+              <MdApps
+                style={{
+                  ...iconStyle,
+                  color: this.getRightColorForSelectedMenu("mydeliveries"),
+                }}
+              />
+              <span
+                className="menuText"
+                style={{
+                  color: this.getRightColorForSelectedMenu("mydeliveries"),
+                }}>
+                My deliveries
+              </span>
+            </a>
           </MenuItem>
 
           <MenuItem className="menuItemSideBar">
-            <Link to="/Statistics">
-              <AiOutlineLineChart style={iconStyle} />
-              <span className="menuText">Statistics</span>
-            </Link>
+            <a href="/plans">
+              <MdExtension
+                style={{
+                  ...iconStyle,
+                  color: this.getRightColorForSelectedMenu("plans"),
+                }}
+              />
+              <span
+                className="menuText"
+                style={{
+                  color: this.getRightColorForSelectedMenu("plans"),
+                }}>
+                Subscriptions
+              </span>
+            </a>
           </MenuItem>
 
           <MenuItem className="menuItemSideBar">
-            <Link onClick={() => (window.location.href = "/plans")}>
-              <MdExtension style={iconStyle} />
-              <span className="menuText">Packages</span>
-            </Link>
-          </MenuItem>
-
-          <MenuItem className="menuItemSideBar">
-            <Link to="/Settings">
-              <AiOutlineSetting style={iconStyle} />
-              <span className="menuText">Settings</span>
-            </Link>
+            <a href="/Settings">
+              <AiOutlineSetting
+                style={{
+                  ...iconStyle,
+                  color: this.getRightColorForSelectedMenu("settings"),
+                }}
+              />
+              <span
+                className="menuText"
+                style={{
+                  color: this.getRightColorForSelectedMenu("settings"),
+                }}>
+                Settings
+              </span>
+            </a>
           </MenuItem>
 
           <MenuItem className="menuItemSideBar">
@@ -169,7 +239,7 @@ class Sidebar extends React.PureComponent {
                   window.location.href = "/";
                 }, 1000);
               }}
-            >
+              reloadDocument>
               <AiOutlineLogout style={iconStyle} />
               <span className="menuText">Log out</span>
             </Link>
@@ -210,6 +280,7 @@ const mapDispatchToProps = (dispatch) =>
       UpdateCurrentLocationMetadat,
       LogOut,
       UpdateLoggingData,
+      UpdateTripsData,
     },
     dispatch
   );

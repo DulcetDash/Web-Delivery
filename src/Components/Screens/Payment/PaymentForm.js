@@ -142,7 +142,7 @@ const PaymentForm = ({
             <Loader size={30} color="white" />
           ) : (
             <>
-              {`Pay now - $${selectedPlan?.amount}`}
+              {`Pay now - N$${selectedPlan?.amount}`}
               <span
                 style={{
                   fontWeight: "normal",
