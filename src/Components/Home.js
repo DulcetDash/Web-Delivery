@@ -42,14 +42,14 @@ class Home extends React.PureComponent {
       isLoadingResendSMS: false, //Whether the resend sms is working or not.
       shouldShowAccountCreated: false, //Whether or not to show when the account is created
       shouldShowChangePhoneNumber: false, //Whether to show the changing phone number window
-      firstname: "Dominique",
-      lastname: "Kanyik",
-      email: "dominique@dulcetdash.com",
-      phone: "+264856997167",
-      company_name: "Test company",
-      industry: "Accounting",
-      password: "12345678",
-      password_confirm: "12345678",
+      firstname: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      company_name: "",
+      industry: "",
+      password: "",
+      password_confirm: "",
       otp: "",
       //...
       firstname_error_color: "#d0d0d0", //white or red when error
