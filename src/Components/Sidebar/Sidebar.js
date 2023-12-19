@@ -240,7 +240,7 @@ class Sidebar extends React.PureComponent {
                 this.props.LogOut();
                 setTimeout(function () {
                   window.location.href = "/";
-                }, 1000);
+                }, 500);
               }}>
               <AiOutlineLogout style={iconStyle} />
               <span className="menuText">Log out</span>

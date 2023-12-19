@@ -55,7 +55,7 @@ class HeaderStd extends React.PureComponent {
               }}
             >
               <AiOutlineUser
-                style={{ width: 20, height: 20, color: "#0e8491" }}
+                style={{ width: 20, height: 20, color: "#11A05A" }}
               />
             </div>
             <AiOutlineCaretDown

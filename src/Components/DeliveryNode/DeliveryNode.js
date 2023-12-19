@@ -1528,7 +1528,7 @@ class DeliveryNode extends React.Component {
                     }>
                     <AiFillPlusCircle
                       style={{
-                        color: "#0e8491",
+                        color: "#11A05A",
                         marginRight: 5,
                         position: "relative",
                         bottom: 1,
@@ -1576,7 +1576,7 @@ class DeliveryNode extends React.Component {
                         style={{
                           position: "relative",
                           marginLeft: 4,
-                          color: "#0e8491",
+                          color: "#11A05A",
                         }}>
                         Estimating your fare...
                       </span>
@@ -1603,7 +1603,7 @@ class DeliveryNode extends React.Component {
                         style={{
                           position: "relative",
                           marginLeft: 4,
-                          color: "#0e8491",
+                          color: "#11A05A",
                         }}>
                         Estimating your ETA...
                       </span>

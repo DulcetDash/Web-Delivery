@@ -17,6 +17,7 @@ import Pay from "./Payment/Payment";
 import { MdCheckCircle, MdTrendingFlat } from "react-icons/md";
 import { Button, Result } from "antd";
 import { PRIMARY, SECONDARY } from "../../Helper/Colors";
+import Promotion from "../../Helper/Plans/Promotion";
 
 class PresentPlans extends React.PureComponent {
   constructor(props) {
@@ -158,7 +159,7 @@ class PresentPlans extends React.PureComponent {
               <PlanNode
                 planName={"Starter"}
                 description={"Powerful logistic with easy setup"}
-                priceSmallBreakdown={"Get about 3 deliveries."}
+                priceSmallBreakdown={"Get about 2 deliveries."}
                 price={"N$100"}
                 isSubscribed={subscribedPlan === "starter"}
                 icon={jigsaw}
@@ -334,6 +335,9 @@ class PresentPlans extends React.PureComponent {
                     title: "Advanced analytics",
                   },
                 ]}
+                actionGetStartedButton={() =>
+                  (window.location = "mailto:support@dulcetdash.com")
+                }
               />
             </div>
             {/* Footer */}

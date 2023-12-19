@@ -22,6 +22,9 @@ import savingMoney from "../Images/saving-money.png";
 import workflow from "../Images/workflow.png";
 import analysis from "../Images/analysis.png";
 import axios from "axios";
+import Promotion from "../Helper/Plans/Promotion";
+import { CORAL_RED, PRIMARY } from "../Helper/Colors";
+import { MdOutlineArrowForward } from "react-icons/md";
 
 class Home extends React.PureComponent {
   constructor(props) {
@@ -641,7 +644,7 @@ class Home extends React.PureComponent {
       return (
         <div
           style={{
-            color: "#0e8491",
+            color: "#11A05A",
             fontSize: "15px",
             marginTop: 30,
             cursor: "pointer",
@@ -655,7 +658,7 @@ class Home extends React.PureComponent {
       return (
         <div
           style={{
-            color: "#0e8491",
+            color: "#11A05A",
             fontSize: "15px",
             marginTop: 30,
           }}>
@@ -809,18 +812,47 @@ class Home extends React.PureComponent {
               <div className={classes.errorContainer}>
                 <div>
                   <AiFillShop
-                    style={{ width: 55, height: 55, color: "#0e8491" }}
+                    style={{ width: 55, height: 55, color: "#11A05A" }}
                   />
                 </div>
+                <Promotion
+                  marginTop="2em"
+                  marginBottom="0em"
+                  content={
+                    <div style={{ fontSize: 14 }}>
+                      You've got{" "}
+                      <strong style={{ marginLeft: 5, marginRight: 5 }}>
+                        <span style={{ color: CORAL_RED, marginRight: 5 }}>
+                          N$100
+                        </span>
+                        credits
+                      </strong>
+                      for just signing up!
+                    </div>
+                  }
+                />
                 <div className={classes.textWarning}>
                   Your account has been successfully created!
                   <br />
-                  Click on "Next" to complete the verification steps.
+                  Click on <strong>Next</strong> to complete the verification
+                  steps.
                 </div>
                 <div
                   className={classes.backButtonOnFail}
+                  style={{
+                    color: "#fff",
+                    border: "1px solid black",
+                    padding: "10px",
+                    backgroundColor: "black",
+                    width: 100,
+                    textAlign: "center",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                   onClick={() => this.moveForwardAfterFreshSignup()}>
-                  Next <AiOutlineRight />
+                  Next
                 </div>
               </div>
             ) : this.state.shouldShowSMSAuth &&
@@ -882,7 +914,7 @@ class Home extends React.PureComponent {
                 <div
                   className={classes.termsReview}
                   style={{
-                    color: "#0e8491",
+                    color: "#11A05A",
                     fontSize: "15px",
                     marginTop: 30,
                     cursor: "pointer",
