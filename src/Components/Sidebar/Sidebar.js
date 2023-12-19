@@ -235,7 +235,7 @@ class Sidebar extends React.PureComponent {
           </MenuItem>
 
           <MenuItem className="menuItemSideBar">
-            <Link
+            <a
               onClick={() => {
                 this.props.LogOut();
                 setTimeout(function () {
@@ -244,7 +244,7 @@ class Sidebar extends React.PureComponent {
               }}>
               <AiOutlineLogout style={iconStyle} />
               <span className="menuText">Log out</span>
-            </Link>
+            </a>
           </MenuItem>
 
           <MenuItem className="menuTextVersionNo">
