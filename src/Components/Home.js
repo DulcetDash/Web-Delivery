@@ -5,15 +5,12 @@ import { UpdateLoggingData } from "../Redux/HomeActionsCreators";
 import Header from "./Screens/Header";
 import Industries from "../Helper/Industries";
 import EmailValidator from "../Helper/EmailValidator";
-// import "react-loader-spinner/dist/css/react-spinner-loader.css";
 import { TailSpin as Loader } from "react-loader-spinner";
 import {
   AiTwotoneSafetyCertificate,
   AiOutlineLeft,
   AiFillShop,
-  AiOutlineRight,
 } from "react-icons/ai";
-import SOCKET_CORE from "../Helper/managerNode";
 import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import classes from "../styles/Home.module.css";
@@ -23,16 +20,13 @@ import workflow from "../Images/workflow.png";
 import analysis from "../Images/analysis.png";
 import axios from "axios";
 import Promotion from "../Helper/Plans/Promotion";
-import { CORAL_RED, PRIMARY } from "../Helper/Colors";
-import { MdOutlineArrowForward } from "react-icons/md";
+import { CORAL_RED } from "../Helper/Colors";
 
 class Home extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.redirectBasedOnState();
-
-    this.SOCKET_CORE = SOCKET_CORE;
 
     this.state = {
       shouldShowLogin: false, //If to render the login form
