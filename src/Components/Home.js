@@ -271,142 +271,142 @@ class Home extends React.PureComponent {
    * Render the proper actions based on the state of the form : login/sign up
    */
   executeProperStateAction = async () => {
-    this.restoreBorderToNoErrorStatus();
+    try {
+      this.restoreBorderToNoErrorStatus();
 
-    if (this.state.shouldShowLogin === false) {
-      //Signup
-      if (
-        this.state.firstname.length > 0 &&
-        this.state.firstname !== undefined
-      ) {
-        //Good
+      if (this.state.shouldShowLogin === false) {
+        //Signup
         if (
-          this.state.lastname.length > 0 &&
-          this.state.lastname !== undefined
+          this.state.firstname.length > 0 &&
+          this.state.firstname !== undefined
         ) {
           //Good
-          if (isValidPhoneNumber(this.state.phone)) {
-            //Valid phone
-            if (
-              this.state.company_name.length > 0 &&
-              this.state.company_name !== undefined
-            ) {
-              //All good
-              if (EmailValidator(this.state.email)) {
-                if (
-                  this.state.industry !== "Industry" &&
-                  this.state.industry.length > 0 &&
-                  this.state.industry !== undefined
-                ) {
-                  //Good
-                  //Good
+          if (
+            this.state.lastname.length > 0 &&
+            this.state.lastname !== undefined
+          ) {
+            //Good
+            if (isValidPhoneNumber(this.state.phone)) {
+              //Valid phone
+              if (
+                this.state.company_name.length > 0 &&
+                this.state.company_name !== undefined
+              ) {
+                //All good
+                if (EmailValidator(this.state.email)) {
                   if (
-                    this.state.password.length > 0 &&
-                    this.state.password !== undefined
+                    this.state.industry !== "Industry" &&
+                    this.state.industry.length > 0 &&
+                    this.state.industry !== undefined
                   ) {
-                    if (this.state.password === this.state.password_confirm) {
-                      //! ALL GOOD
-                      //Good
-                      // this.setState({ isLoading: true });
+                    //Good
+                    //Good
+                    if (
+                      this.state.password.length > 0 &&
+                      this.state.password !== undefined
+                    ) {
+                      if (this.state.password === this.state.password_confirm) {
+                        //! ALL GOOD
+                        //Good
+                        // this.setState({ isLoading: true });
 
-                      try {
-                        const response = await axios.post(
-                          `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
-                          {
-                            op: "signup",
-                            email: this.state.email,
-                            first_name: this.state.firstname,
-                            last_name: this.state.lastname,
-                            phone: this.state.phone,
-                            company_name: this.state.company_name,
-                            selected_industry: this.state.industry,
-                            password: this.state.password,
-                          }
-                        );
+                        try {
+                          const response = await axios.post(
+                            `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+                            {
+                              op: "signup",
+                              email: this.state.email,
+                              first_name: this.state.firstname,
+                              last_name: this.state.lastname,
+                              phone: this.state.phone,
+                              company_name: this.state.company_name,
+                              selected_industry: this.state.industry,
+                              password: this.state.password,
+                            }
+                          );
 
-                        // opsOnCorpoDeliveryAccounts_io
-                        console.log(response.data);
-                        await this.opsOnCorpoDeliveryAccounts_io(response.data);
-                        // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-                        //   op: "signup",
-                        //   email: this.state.email,
-                        //   first_name: this.state.firstname,
-                        //   last_name: this.state.lastname,
-                        //   phone: this.state.phone,
-                        //   company_name: this.state.company_name,
-                        //   selected_industry: this.state.industry,
-                        //   password: this.state.password,
-                        // });
-                      } catch (error) {
-                        console.log(error);
+                          // opsOnCorpoDeliveryAccounts_io
+                          console.log(response.data);
+                          await this.opsOnCorpoDeliveryAccounts_io(
+                            response.data
+                          );
+                          // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
+                          //   op: "signup",
+                          //   email: this.state.email,
+                          //   first_name: this.state.firstname,
+                          //   last_name: this.state.lastname,
+                          //   phone: this.state.phone,
+                          //   company_name: this.state.company_name,
+                          //   selected_industry: this.state.industry,
+                          //   password: this.state.password,
+                          // });
+                        } catch (error) {
+                          console.log(error);
+                        }
+                      } //Not same passwords
+                      else {
+                        this.setState({ password_confirm_error_color: "red" });
                       }
-                    } //Not same passwords
+                    } //Empty
                     else {
-                      this.setState({ password_confirm_error_color: "red" });
+                      this.setState({ password_error_color: "red" });
                     }
-                  } //Empty
+                  } //No industry selected
                   else {
-                    this.setState({ password_error_color: "red" });
+                    this.setState({ industry_error_color: "red" });
                   }
-                } //No industry selected
+                } //Invalid
                 else {
-                  this.setState({ industry_error_color: "red" });
+                  this.setState({ email_error_color: "red" });
                 }
-              } //Invalid
+              } //No company name entered
               else {
-                this.setState({ email_error_color: "red" });
+                this.setState({ company_name_error_color: "red" });
               }
-            } //No company name entered
+            } //Invalid phone
             else {
-              this.setState({ company_name_error_color: "red" });
+              this.setState({ phone_error_color: "red" });
             }
-          } //Invalid phone
+          } //Empty
           else {
-            this.setState({ phone_error_color: "red" });
+            this.setState({ lastname_error_color: "red" });
           }
         } //Empty
         else {
-          this.setState({ lastname_error_color: "red" });
+          this.setState({ firstname_error_color: "red" });
         }
-      } //Empty
+      } //? Log in
       else {
-        this.setState({ firstname_error_color: "red" });
-      }
-    } //? Log in
-    else {
-      if (EmailValidator(this.state.email)) {
-        //Good
-        if (
-          this.state.password.length > 0 &&
-          this.state.password !== undefined
-        ) {
+        if (EmailValidator(this.state.email)) {
           //Good
-          this.setState({ isLoading: true });
-          const response = await axios.post(
-            `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
-            {
-              op: "login",
-              email: this.state.email,
-              password: this.state.password,
-            }
-          );
+          if (
+            this.state.password.length > 0 &&
+            this.state.password !== undefined
+          ) {
+            //Good
+            this.setState({ isLoading: true });
+            const response = await axios.post(
+              `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+              {
+                op: "login",
+                email: this.state.email,
+                password: this.state.password,
+              }
+            );
 
-          console.log(response.data);
-          await this.opsOnCorpoDeliveryAccounts_io(response.data);
-
-          // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-          //   op: "login",
-          //   email: this.state.email,
-          //   password: this.state.password,
-          // });
-        } //Empty
+            console.log(response.data);
+            await this.opsOnCorpoDeliveryAccounts_io(response.data);
+          } //Empty
+          else {
+            this.setState({ password_error_color: "red" });
+          }
+        } //Invalid
         else {
-          this.setState({ password_error_color: "red" });
+          this.setState({ email_error_color: "red" });
         }
-      } //Invalid
-      else {
-        this.setState({ email_error_color: "red" });
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -617,34 +617,31 @@ class Home extends React.PureComponent {
    * Responsible to resend the confirmation code again.
    */
   resendConfirmationSMSAgain = async () => {
-    //!DEBUG
-    // this.props.App.userData.loginData = {};
-    // this.props.App.userData.loginData.company_fp =
-    //   "27f3650a56a80a080d5326783161c2275bd4ea9a98f0b0e8d59f020f491d94cb062d4e827cfdd3397db70673a2d18a9b39696f0761f24ef540f59f059afb669d";
-    // this.props.App.userData.loginData.phone = "264856997167";
-    //!----
+    try {
+      if (
+        this.props.App.userData.loginData !== null &&
+        this.props.App.userData.loginData.phone !== undefined &&
+        this.props.App.userData.loginData.phone !== null &&
+        this.props.App.userData.loginData.company_fp !== undefined
+      ) {
+        this.setState({ isLoadingResendSMS: true });
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+          {
+            op: "resendConfirmationSMS",
+            company_fp: this.props.App.userData.loginData.company_fp,
+            phone: this.props.App.userData.loginData.phone,
+          }
+        );
 
-    if (
-      this.props.App.userData.loginData !== null &&
-      this.props.App.userData.loginData.phone !== undefined &&
-      this.props.App.userData.loginData.phone !== null &&
-      this.props.App.userData.loginData.company_fp !== undefined
-    ) {
-      this.setState({ isLoadingResendSMS: true });
-      const response = await axios.post(
-        `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
-        {
-          op: "resendConfirmationSMS",
-          company_fp: this.props.App.userData.loginData.company_fp,
-          phone: this.props.App.userData.loginData.phone,
-        }
-      );
-
-      console.log(response.data);
-      await this.resetConfirmationSMSDeliveryWeb_io(response.data);
-    } //Invalid data found - go back to signup
-    else {
-      this.swicthContextForms();
+        console.log(response.data);
+        await this.resetConfirmationSMSDeliveryWeb_io(response.data);
+      } //Invalid data found - go back to signup
+      else {
+        this.swicthContextForms();
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -686,12 +683,6 @@ class Home extends React.PureComponent {
    * responsible for validating the otp
    */
   validateOtp = async () => {
-    //!DEBUG
-    // this.props.App.userData.loginData = {};
-    // this.props.App.userData.loginData.company_fp =
-    //   "27f3650a56a80a080d5326783161c2275bd4ea9a98f0b0e8d59f020f491d94cb062d4e827cfdd3397db70673a2d18a9b39696f0761f24ef540f59f059afb669d";
-    // this.props.App.userData.loginData.phone = "264856997167";
-    //!----
     try {
       if (this.state.otp !== undefined && this.state.otp.length > 0) {
         //Not empty
@@ -715,13 +706,6 @@ class Home extends React.PureComponent {
 
           console.log(response.data);
           this.validatePhoneNumberDeliveryWeb_io(response.data);
-
-          // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-          //   op: "validatePhoneNumber",
-          //   otp: this.state.otp,
-          //   company_fp: this.props.App.userData.loginData.company_fp,
-          //   phone: this.props.App.userData.loginData.phone,
-          // });
         } //Invalid account data
         else {
           this.swicthContextForms();

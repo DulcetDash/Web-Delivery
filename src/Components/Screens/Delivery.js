@@ -29,7 +29,11 @@ import { TailSpin as Loader } from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
 import axios from "axios";
 import { Tag } from "antd";
-import { PRIMARY_DILUTED } from "../../Helper/Colors";
+import {
+  PRIMARY_DILUTED,
+  SECONDARY,
+  SECONDARY_STRONG,
+} from "../../Helper/Colors";
 
 class Delivery extends React.Component {
   constructor(props) {
@@ -204,34 +208,6 @@ class Delivery extends React.Component {
         );
 
         this.handleGeocodedResponse(geocoding.data);
-
-        //! -----Get the requests data if any
-        // let bundle = {
-        //   latitude: globalObject.props.App.latitude,
-        //   longitude: globalObject.props.App.longitude,
-        //   user_identifier:
-        //     globalObject.props.App.userData?.loginData?.company_fp,
-        //   user_nature: "rider",
-        //   pushnotif_token: false,
-        // };
-
-        // const response = await axios.post(
-        //   `${process.env.REACT_APP_URL}/getShoppingData`,
-        //   bundle,
-        //   {
-        //     headers: {
-        //       Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
-        //     },
-        //   }
-        // );
-
-        // if (response?.data?.accountData) {
-        //   this.props.UpdateLoggingData(response?.data?.accountData);
-        // }
-
-        // if (response?.data?.requests) {
-        //   this.props.UpdateTripsData(response?.data?.requests);
-        // }
       } catch (error) {
         console.log(error);
       }
@@ -285,16 +261,12 @@ class Delivery extends React.Component {
     );
   }
 
-  render() {
-    //! PLANS QUOTAS
-    //! Batches
-    let QUOTAS_BATCHES = {
-      Starter: 1,
-      Intermediate: 15,
-      Pro: 50,
-      PRSNLD: 100,
-    };
+  isBalanceHealthy() {
+    const balance = this.props.App.userData?.loginData?.plans?.balance;
+    return balance !== undefined && balance > 50;
+  }
 
+  render() {
     const balance = this.props.App.userData?.loginData?.plans?.balance;
 
     return (
@@ -363,27 +335,45 @@ class Delivery extends React.Component {
           <>
             {this.state.didGetTHeCurrentLocation &&
             this.props.App?.tripsData.length <
-              QUOTAS_BATCHES[
-                this.props.App.userData.loginData?.plans?.subscribed_plan
-              ] ? (
+              this.props.App.userData.loginData?.plans?.delivery_limit ? (
               <>
                 <div className={classes.mainScreenTitle}>
                   Make your delivery{" "}
                   <Tag
-                    color={PRIMARY_DILUTED}
-                    style={{ position: "relative", top: 2, marginLeft: 20 }}>
+                    color={
+                      this.isBalanceHealthy()
+                        ? PRIMARY_DILUTED
+                        : SECONDARY_STRONG
+                    }
+                    style={{
+                      position: "relative",
+                      top: 2,
+                      marginLeft: 20,
+                      color: this.isBalanceHealthy() ? "#fff" : "#000",
+                    }}>
                     Balance:{" "}
-                    {balance !== undefined ? `N$${balance}` : "Checking"}
+                    <strong>
+                      {balance !== undefined ? `N$${balance}` : "Checking"}
+                    </strong>
                   </Tag>
+                  {!this.isBalanceHealthy() && (
+                    <Tag
+                      style={{
+                        position: "relative",
+                        top: 2,
+                        cursor: "pointer",
+                      }}
+                      onClick={() => (window.location.href = "/settings")}>
+                      Top-up your balance
+                    </Tag>
+                  )}
                 </div>
                 <div className={classes.contentContainer}>
                   <DeliveryNode />
                 </div>
               </>
             ) : this.props.App.tripsData.length >=
-              QUOTAS_BATCHES[
-                this.props.App.userData.loginData?.plans?.subscribed_plan
-              ] ? (
+              this.props.App.userData.loginData?.plans?.delivery_limit ? (
               <div
                 style={{
                   // border: "1px solid black",

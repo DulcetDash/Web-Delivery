@@ -124,10 +124,11 @@ class DeliveryNode extends React.Component {
         <>
           Sorry we were unable to make this request due to an unexpected error,
           please refresh you web page and try again. If it persists please
-          contact us at <strong>support@taxiconnectna.com</strong>
+          contact us at <strong>support@dulcetdash.com</strong>
         </>
       ), //THe merror message to show
       error_onRequest_nature: "error", //The type of error that happended after the request
+      isUnsufficientFunds: false,
     };
   }
 
@@ -199,86 +200,70 @@ class DeliveryNode extends React.Component {
         });
       }
     );
-
-    /**
-     * CHECK IF A RIDE WAS ACCEPTED
-     * @event: requestRideOrDeliveryForThis
-     * ? Responsible for handling the request ride or wallet response after booking
-     * ? to know whether the request was successfully dispatched or not.
-     */
-    this.SOCKET_CORE.on(
-      "requestRideOrDeliveryForThis-response",
-      function (response) {
-        if (
-          response !== false &&
-          response.response !== undefined &&
-          /successfully_requested/i.test(response.response)
-        ) {
-          globalObject.setState({
-            isLoadingGeneral: false,
-            didRequestJustBeenMade: true,
-            isThereRequestError: false,
-          });
-        } else if (
-          response !== false &&
-          response.response !== undefined &&
-          /Unable_to_make_the_request_unsufficient_funds/i.test(
-            response.response
-          )
-        ) {
-          globalObject.setState({
-            isLoadingGeneral: false,
-            didRequestJustBeenMade: true,
-            isThereRequestError: true,
-            error_message_onRequest: (
-              <>
-                Sorry you don't have enough funds in your wallet to perform this
-                request, please purchase a package and try again. For more
-                assistance please contact us at{" "}
-                <strong>support@taxiconnectna.com</strong>
-              </>
-            ),
-            error_onRequest_nature:
-              "Unable_to_make_the_request_unsufficient_funds",
-          });
-        }
-        //An unxepected error occured
-        else if (
-          response !== false &&
-          response.response !== undefined &&
-          /already_have_a_pending_request/i.test(response.response)
-        ) {
-          globalObject.setState({
-            isLoadingGeneral: false,
-            didRequestJustBeenMade: true,
-            isThereRequestError: true,
-            error_message_onRequest: (
-              <>
-                Sorry we were unable to make this request due to an unexpected
-                error, please refresh you web page and try again. If it persists
-                please contact us at <strong>support@taxiconnectna.com</strong>
-              </>
-            ),
-            error_onRequest_nature: "already_have_a_pending_request",
-          });
-        } else {
-          globalObject.setState({
-            isLoadingGeneral: false,
-            didRequestJustBeenMade: true,
-            isThereRequestError: true,
-            error_message_onRequest: (
-              <>
-                Sorry we were unable to make this request due to an unexpected
-                error, please refresh you web page and try again. If it persists
-                please contact us at <strong>support@taxiconnectna.com</strong>
-              </>
-            ),
-            error_onRequest_nature: "error",
-          });
-        }
-      }
-    );
   }
+
+  /**
+   * CHECK IF A RIDE WAS ACCEPTED
+   * @event: requestRideOrDeliveryForThis
+   * ? Responsible for handling the request ride or wallet response after booking
+   * ? to know whether the request was successfully dispatched or not.
+   */
+  handleMakeNewDelivery = (response) => {
+    if (/successful/i.test(response?.response)) {
+      this.setState({
+        isLoadingGeneral: false,
+        didRequestJustBeenMade: true,
+        isThereRequestError: false,
+      });
+    } else if (
+      /unable_to_request_insufficient_balance/i.test(response?.response)
+    ) {
+      this.setState({
+        isLoadingGeneral: false,
+        didRequestJustBeenMade: true,
+        isThereRequestError: true,
+        error_message_onRequest: (
+          <>
+            Sorry you don't have enough funds in your wallet to perform this
+            request, please purchase a package and try again. For more
+            assistance please contact us at{" "}
+            <strong>support@dulcetdash.com</strong>
+          </>
+        ),
+        error_onRequest_nature: "unable_to_request_insufficient_balance",
+      });
+    }
+    //An unxepected error occured
+    else if (/has_a_pending_shopping/i.test(response.response)) {
+      this.setState({
+        isLoadingGeneral: false,
+        didRequestJustBeenMade: true,
+        isThereRequestError: true,
+        error_message_onRequest: (
+          <>
+            Sorry we were unable to make this request due to an unexpected
+            error, please refresh you web page and try again. If it persists
+            please contact us at <strong>support@dulcetdash.com</strong>
+          </>
+        ),
+        error_onRequest_nature: "has_a_pending_shopping",
+      });
+    } else {
+      this.setState({
+        isLoadingGeneral: false,
+        didRequestJustBeenMade: true,
+        isThereRequestError: true,
+        error_message_onRequest: (
+          <>
+            Sorry we were unable to make this request due to an unexpected
+            error, please refresh you web page and try again. If it persists
+            please contact us at <strong>support@dulcetdash.com</strong>
+          </>
+        ),
+        error_onRequest_nature: "error",
+      });
+    }
+  };
 
   /**
    * Reset current pickup location to the default one
@@ -1010,63 +995,56 @@ class DeliveryNode extends React.Component {
    * Responsible for launching the server request for a specific query props.App typed by the user.
    */
   _searchForThisQuery = async (query, inputFieldIndex) => {
-    this.search_time_requested = new Date();
-    this.state.search_querySearch = query.trim();
+    try {
+      this.search_time_requested = new Date();
+      this.state.search_querySearch = query.trim();
 
-    //! Disable default pickup location - activate custom one
-    if (inputFieldIndex === -1) {
-      if (this.state.hasCustomPickupLocation === false) {
-        this.setState({ hasCustomPickupLocation: true });
+      //! Disable default pickup location - activate custom one
+      if (inputFieldIndex === -1) {
+        if (this.state.hasCustomPickupLocation === false) {
+          this.setState({ hasCustomPickupLocation: true });
+        }
       }
-    }
-    //! -----
-    if (query.length > 0) {
-      if (this.state.search_querySearch.length !== 0) {
-        //Has some query
-        //Alright
-        let requestPackage = {};
-        requestPackage.user_fp = this.props.App.userData.loginData.company_fp;
-        requestPackage.query = this.state.search_querySearch;
-        requestPackage.city = "Windhoek"; //Default city to windhoek
-        requestPackage.country = "Namibia"; //Default country to Namibia
+      //! -----
+      if (query.length > 0) {
+        if (this.state.search_querySearch.length !== 0) {
+          //Has some query
+          //Alright
+          let requestPackage = {};
+          requestPackage.user_fp = this.props.App.userData.loginData.company_fp;
+          requestPackage.query = this.state.search_querySearch;
+          requestPackage.city = "Windhoek"; //Default city to windhoek
+          requestPackage.country = "Namibia"; //Default country to Namibia
 
-        const response = await axios.post(
-          `${process.env.REACT_APP_URL}/getSearchedLocations`,
-          {
-            city: "Windhoek",
-            country: "Namibia",
-            query: this.state.search_querySearch,
-            state: "Khomas",
-            user_fp: this.props.App.userData.loginData.company_fp,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+          const response = await axios.post(
+            `${process.env.REACT_APP_URL}/getSearchedLocations`,
+            {
+              city: "Windhoek",
+              country: "Namibia",
+              query: this.state.search_querySearch,
+              state: "Khomas",
+              user_fp: this.props.App.userData.loginData.company_fp,
             },
-          }
-        );
+            {
+              headers: {
+                Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+              },
+            }
+          );
 
-        console.log(response.data);
+          console.log(response.data);
 
-        this.processLocationSearchResults(response.data);
-
-        //Submit to API
-        //! Disable the ability to request temporarily as well
-        // this.setState({
-        //   loaderStateSearch: true,
-        //   shouldShowSearch: true,
-        //   shoudAllowRequest: false,
-        //   fareETAEstimations: {},
-        // });
-
-        // this.SOCKET_CORE.emit("getLocations", requestPackage);
-      } //NO queries to process
+          this.processLocationSearchResults(response.data);
+        } //NO queries to process
+        else {
+          this.setState({ loaderStateSearch: false, searchResults: [] });
+        }
+      } //Empty search
       else {
         this.setState({ loaderStateSearch: false, searchResults: [] });
       }
-    } //Empty search
-    else {
-      this.setState({ loaderStateSearch: false, searchResults: [] });
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -1307,81 +1285,98 @@ class DeliveryNode extends React.Component {
    * Responsible for making the request
    */
   makeDeliveryRequest = async () => {
-    let globalObject = this;
-    //Check that all the receivers had been specified
-    let receiversInOrder = true;
-    this.state.dropOff_destination.map((tmpLocation, index) => {
-      if (
-        tmpLocation.data?.receiverInfos?.receiver_name &&
-        tmpLocation.data?.receiverInfos?.receiver_name?.length > 0 &&
-        tmpLocation.data?.receiverInfos?.receiver_phone &&
-        tmpLocation.data?.receiverInfos?.receiver_phone?.length > 0
-      ) {
-        //Okay
-      } //Details not detected
-      else {
-        receiversInOrder = false;
-        globalObject.state.destinationNotCompleted.push(index + 1);
-      }
-    });
+    if (this.state.isLoadingGeneral) return;
 
-    if (receiversInOrder) {
-      //...Get fare
-      let tmpFare = 0;
-      globalObject.state.fareETAEstimations?.fareData.map((fare) => {
-        if (/carDelivery/i.test(fare.car_type)) {
-          tmpFare = fare.base_fare;
+    try {
+      let globalObject = this;
+      //Check that all the receivers had been specified
+      let receiversInOrder = true;
+      this.state.dropOff_destination.map((tmpLocation, index) => {
+        if (
+          tmpLocation.data?.receiverInfos?.receiver_name &&
+          tmpLocation.data?.receiverInfos?.receiver_name?.length > 0 &&
+          tmpLocation.data?.receiverInfos?.receiver_phone &&
+          tmpLocation.data?.receiverInfos?.receiver_phone?.length > 0
+        ) {
+          //Okay
+        } //Details not detected
+        else {
+          receiversInOrder = false;
+          globalObject.state.destinationNotCompleted.push(index + 1);
         }
       });
 
-      const dropOff_data = globalObject.state.dropOff_destination.map(
-        (destination) => {
-          return {
-            name: destination.data.receiverInfos.receiver_name,
-            phone: destination.data.receiverInfos.receiver_phone,
-            dropoff_location: {
-              ...destination.data.locationData,
-              receiver_infos: undefined,
-            },
-          };
-        }
-      );
+      if (receiversInOrder) {
+        this.setState({
+          isLoadingGeneral: true,
+        });
+        //...Get fare
+        let tmpFare = 0;
+        globalObject.state.fareETAEstimations?.fareData.map((fare) => {
+          if (/carDelivery/i.test(fare.car_type)) {
+            tmpFare = fare.base_fare;
+          }
+        });
 
-      const deliveryFee =
-        globalObject.state.fareETAEstimations.fareData.length * 50;
+        const dropOff_data = globalObject.state.dropOff_destination.map(
+          (destination) => {
+            return {
+              name: destination.data.receiverInfos.receiver_name,
+              phone: destination.data.receiverInfos.receiver_phone,
+              dropoff_location: {
+                ...destination.data.locationData,
+                receiver_infos: undefined,
+              },
+            };
+          }
+        );
 
-      const bundleData = {
-        user_identifier: globalObject.props.App.userData.loginData?.company_fp,
-        passengers_number: dropOff_data.length,
-        payment_method: "wallet",
-        note: "",
-        dropOff_data: dropOff_data,
-        totals: {
-          delivery_fee: deliveryFee,
-          service_fee: "0.00",
-          total: deliveryFee,
-        },
-        pickup_location: globalObject.props.App.userCurrentLocationMetaData,
-        ride_mode: "delivery",
-      };
+        const deliveryFee =
+          globalObject.state.fareETAEstimations.fareData.length * 50;
 
-      //! Make a single request - risky
-      //Not yet request and no errors
-      //Check wheher an answer was already received - if not keep requesting
-      const response = await axios.post(
-        `${process.env.REACT_APP_URL}/requestForRideOrDelivery`,
-        bundleData,
-        {
-          headers: {
-            Authorization: `Bearer ${globalObject.props.App.userData.loginData?.company_fp}`,
+        const bundleData = {
+          user_identifier:
+            globalObject.props.App.userData.loginData?.company_fp,
+          passengers_number: dropOff_data.length,
+          payment_method: "wallet",
+          note: "",
+          dropOff_data: dropOff_data,
+          totals: {
+            delivery_fee: deliveryFee,
+            service_fee: "0.00",
+            total: deliveryFee,
           },
-        }
-      );
+          pickup_location: globalObject.props.App.userCurrentLocationMetaData,
+          ride_mode: "delivery",
+        };
 
-      console.log(response.data);
-    } //!Receivers infos not in order
-    else {
-      this.setState({ shouldShowModal: true });
+        //! Make a single request - risky
+        //Not yet request and no errors
+        //Check wheher an answer was already received - if not keep requesting
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/requestForRideOrDelivery`,
+          bundleData,
+          {
+            headers: {
+              Authorization: `Bearer ${globalObject.props.App.userData.loginData?.company_fp}`,
+            },
+          }
+        );
+
+        console.log(response.data);
+
+        this.handleMakeNewDelivery(response.data);
+      } //!Receivers infos not in order
+      else {
+        this.setState({ shouldShowModal: true });
+      }
+    } catch (error) {
+      console.log(error);
+      this.setState({
+        isLoadingGeneral: false,
+        didRequestJustBeenMade: true,
+        isThereRequestError: true,
+      });
     }
   };
 
@@ -1467,12 +1462,7 @@ class DeliveryNode extends React.Component {
                             this.setState({ focusedInput: -1 });
                           }}
                           value={
-                            this.state.pickup_destination !== undefined &&
-                            this.state.pickup_destination !== null &&
-                            this.state.pickup_destination.data !== null &&
-                            this.state.pickup_destination.data !== undefined &&
-                            this.state.pickup_destination.data.locationData !==
-                              null
+                            this.state.pickup_destination?.data?.locationData
                               ? this.state.pickup_destination.data.locationData
                                   .location_name
                               : ""
@@ -1491,8 +1481,6 @@ class DeliveryNode extends React.Component {
                           style={{
                             position: "relative",
                             left: "3px",
-                            // paddingRight: "60px",
-                            // width: "77.8%",
                           }}
                         />
                         <div
@@ -1676,32 +1664,7 @@ class DeliveryNode extends React.Component {
                         : {}
                     }>
                     {this.state.isLoadingGeneral === false ? (
-                      <>
-                        Request for delivery
-                        {this.state.isScheduledTrip ? (
-                          <div className={classes.dateExtrDeliveryBtn}>
-                            {`${
-                              this.state.scheduledTime
-                                .toDateString()
-                                .split(" ")[0]
-                            }, ${this.state.scheduledTime
-                              .toLocaleDateString()
-                              .replaceAll("/", "-")} at ${
-                              this.state.scheduledTime
-                                .toLocaleString()
-                                .split(", ")[1]
-                                .split(":")[0]
-                            }:${
-                              this.state.scheduledTime
-                                .toLocaleString()
-                                .split(", ")[1]
-                                .split(":")[1]
-                            }`}
-                          </div>
-                        ) : (
-                          <></>
-                        )}
-                      </>
+                      <>Request for delivery</>
                     ) : (
                       <Loader
                         type="TailSpin"
@@ -1715,8 +1678,8 @@ class DeliveryNode extends React.Component {
                 </div>
               </div>
             </div>
-            <div className={classes.mapContainer} ref="mapPrimitiveContainer">
-              {/* <Map
+            {/* <div className={classes.mapContainer} ref="mapPrimitiveContainer"> */}
+            {/* <Map
                 mapLib={import("mapbox-gl")}
                 initialViewState={{
                   // longitude: -100,
@@ -1754,7 +1717,7 @@ class DeliveryNode extends React.Component {
                   }}
                 />
               </Map> */}
-              {/* <ReactMapGL
+            {/* <ReactMapGL
                 mapLib={import("mapbox-gl")}
                 width={"100%"}
                 height={"100%"}
@@ -1854,7 +1817,7 @@ class DeliveryNode extends React.Component {
               ]}
             /> 
               </ReactMapGL> */}
-            </div>
+            {/* </div> */}
           </>
         ) : this.state.isThereRequestError === false ? (
           <div
@@ -1926,13 +1889,13 @@ class DeliveryNode extends React.Component {
                 color: "#096ED4",
               }}
               onClick={() =>
-                /Unable_to_make_the_request_unsufficient_funds/i.test(
+                /unable_to_request_insufficient_balance/i.test(
                   this.state.error_onRequest_nature
                 )
                   ? (window.location.href = "/Settings")
                   : (window.location.href = "/Delivery")
               }>
-              {/Unable_to_make_the_request_unsufficient_funds/i.test(
+              {/unable_to_request_insufficient_balance/i.test(
                 this.state.error_onRequest_nature
               )
                 ? "Profile"

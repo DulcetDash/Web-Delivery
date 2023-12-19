@@ -35,7 +35,7 @@ class Settings extends React.PureComponent {
 
     this.state = {
       isLoading: true, //If something is loading or not
-      showTopupModal: true,
+      showTopupModal: false,
       showTopUpPayment: false, //The part where the customer has to enter card details.
       isTopUpPaymentLoading: false, //If the top up payment is loading or not
       isPaymentSuccessful: false, //If the top up payment was successful or not
@@ -177,7 +177,7 @@ class Settings extends React.PureComponent {
                   : "inline-block",
             },
           }}
-          onCancel={() => {}}
+          onCancel={() => this.setState({ showTopupModal: false })}
           style={{
             position: "absolute",
             top: "10%",
@@ -393,7 +393,11 @@ class Settings extends React.PureComponent {
                 backgroundColor: PRIMARY,
                 borderColor: PRIMARY,
               }}
-              onClick={() => (window.location.href = "/plans")}>
+              onClick={() =>
+                this.setState({
+                  showTopupModal: true,
+                })
+              }>
               <div>Top-up your balance</div>
               <FiArrowRight />
             </div>

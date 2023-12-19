@@ -56,43 +56,7 @@ class MyDeliveries extends React.Component {
     };
   }
 
-  componentDidMount() {
-    let globalObject = this;
-
-    this.getCurrentLocationFrequently();
-
-    //2 Handle cancel request response
-    this.SOCKET_CORE.on(
-      "cancelRiders_request_io-response",
-      function (response) {
-        //Stop the loader and restore
-        globalObject.setState({ isLoadingCancellation: false });
-      }
-    );
-
-    //3. Handle request dropoff request response
-    this.SOCKET_CORE.on(
-      "confirmRiderDropoff_requests_io-response",
-      function (response) {
-        // globalObject.setState({ isLoadingCancellation: false });
-        // setTimeout(function () {
-        //   window.location.href = "/MyDeliveries";
-        // }, 3000);
-
-        if (
-          response !== false &&
-          response.response !== undefined &&
-          response.response !== null
-        ) {
-        } //error - close the modal
-        else {
-          //Stop the loader and restore
-          // globalObject.setState({isLoading_something: false});
-          // globalObject.props.UpdateErrorModalLog(false, false, 'any'); //Close modal
-        }
-      }
-    );
-  }
+  componentDidMount() {}
 
   /**
    * @func cancelRequest_rider
@@ -100,39 +64,43 @@ class MyDeliveries extends React.Component {
    * @param reason: the reason of cancelling the request.
    */
   cancelRequest_rider = async (request_fp, reason = false) => {
-    // console.log("Cancellation");
-    if (
-      this.props.App.tripsData &&
-      this.props.App.tripsData !== false &&
-      this.props.App.tripsData.length > 0
-    ) {
-      // console.log("Inside");
-      this.setState({ isLoadingCancellation: true }); //Activate the loader
-      //Bundle the cancel input
-      let bundleData = {
-        request_fp: request_fp,
-        user_identifier: this.props.App.userData.loginData.company_fp,
-        reason: reason,
-      };
-      ///...
-      // this.SOCKET_CORE.emit("cancelRiders_request_io", bundleData);
-      const response = await axios.post(
-        `${process.env.REACT_APP_URL}/cancel_request_user`,
-        bundleData,
-        {
-          headers: {
-            Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
-          },
-        }
-      );
+    try {
+      // console.log("Cancellation");
+      if (
+        this.props.App.tripsData &&
+        this.props.App.tripsData !== false &&
+        this.props.App.tripsData.length > 0
+      ) {
+        // console.log("Inside");
+        this.setState({ isLoadingCancellation: true }); //Activate the loader
+        //Bundle the cancel input
+        let bundleData = {
+          request_fp: request_fp,
+          user_identifier: this.props.App.userData.loginData.company_fp,
+          reason: reason,
+        };
+        ///...
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/cancel_request_user`,
+          bundleData,
+          {
+            headers: {
+              Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+            },
+          }
+        );
 
-      if (response.data[0]?.response === "success") {
-        console.log(response.data);
+        if (response.data[0]?.response === "success") {
+          console.log(response.data);
+        }
+        this.setState({ isLoadingCancellation: false });
+      } //Invalid request fp - close the modal
+      else {
+        //   this.props.UpdateErrorModalLog(false, false, "any"); //Close modal
       }
+    } catch (error) {
+      console.log(error);
       this.setState({ isLoadingCancellation: false });
-    } //Invalid request fp - close the modal
-    else {
-      //   this.props.UpdateErrorModalLog(false, false, "any"); //Close modal
     }
   };
 
@@ -142,55 +110,35 @@ class MyDeliveries extends React.Component {
    * Responsible for bundling the request data and requesting for a rider's drop off confirmation.
    */
   confirmRiderDropoff = async (request_fp) => {
-    this.setState({ isLoadingCancellation: true }); //Activate the loader - and lock the rating, compliment, done button and additional note input
-    let dropoff_bundle = {
-      user_fingerprint: this.props.App.userData.loginData.company_fp,
-      badges: [],
-      note: "",
-      rating: 4.9,
-      request_fp,
-    };
-    //..
-    // this.SOCKET_CORE.emit("confirmRiderDropoff_requests_io", dropoff_bundle);
-    const response = await axios.post(
-      `${process.env.REACT_APP_URL}/submitRiderOrClientRating`,
-      dropoff_bundle,
-      {
-        headers: {
-          Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
-        },
-      }
-    );
-  };
-
-  /**
-   * Get the current location of the user
-   */
-  getCurrentLocationFrequently() {
-    let globalObject = this;
-
-    this.intervalPersister = setInterval(function () {
-      //! -----Get the requests data if any
-      let bundle = {
-        latitude: globalObject.props.App.latitude,
-        longitude: globalObject.props.App.longitude,
-        user_fingerprint: globalObject.props.App.userData.loginData.company_fp,
-        user_nature: "rider",
-        pushnotif_token: false,
+    try {
+      this.setState({ isLoadingCancellation: true }); //Activate the loader - and lock the rating, compliment, done button and additional note input
+      let dropoff_bundle = {
+        user_fingerprint: this.props.App.userData.loginData.company_fp,
+        badges: [],
+        note: "",
+        rating: 4.9,
+        request_fp,
       };
-      globalObject.SOCKET_CORE.emit("update-passenger-location", bundle);
-    }, 2000);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.intervalPersister);
-  }
+      //..
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/submitRiderOrClientRating`,
+        dropoff_bundle,
+        {
+          headers: {
+            Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   render() {
     return (
       <div className={classes.mainContainer}>
         <div className={classes.mainScreenTitle}>
-          Active deliveries
+          Active deliveries ({(this.props.App.tripsData ?? []).length})
           <div
             className={classes.historyEntryTitle}
             onClick={() => (window.location.href = "/History")}>
@@ -198,10 +146,11 @@ class MyDeliveries extends React.Component {
           </div>
         </div>
         {this.props.App.tripsData.length > 0 ? (
-          // && this.props.App.tripsData[0].birdview_infos !== undefined ?
           this.props.App.tripsData.map((deliveryData, index) => {
             return (
-              <div style={{ marginTop: index === 0 ? 30 : 60 }}>
+              <div
+                key={deliveryData?.request_fp}
+                style={{ marginTop: index === 0 ? 30 : 60 }}>
                 <div style={{ fontSize: 13, color: "#7c6e6ebb" }}>
                   DELIVERY {index + 1}
                 </div>
@@ -447,8 +396,8 @@ class MyDeliveries extends React.Component {
                                       marginBottom: 20,
                                       borderBottom:
                                         index + 1 !==
-                                        deliveryData?.birdview_infos
-                                          ?.dropoff_details.length
+                                        deliveryData?.trip_locations?.dropoff
+                                          .length
                                           ? "1px solid #f3f3f3"
                                           : "none",
                                       display: "flex",
@@ -621,7 +570,9 @@ class MyDeliveries extends React.Component {
                           timeout={300000000} //3 secs
                         />
                       ) : (
-                        !/completed/i.test(deliveryData?.status) && (
+                        !/(completed|pending|started)/i.test(
+                          deliveryData?.status
+                        ) && (
                           <div style={{ color: GRAY_1, fontSize: 14 }}>
                             <InfoCircleFilled /> You can't cancel a delivery
                             once it's been picked up.

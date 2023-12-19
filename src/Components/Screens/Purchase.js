@@ -439,7 +439,7 @@ class Purchase extends React.PureComponent {
               />
               Sorry we were unable to process your purchase due to an unexpected
               error, please refresh you web page and try again. If it persists
-              please contact us at <strong>support@taxiconnectna.com</strong>
+              please contact us at <strong>support@dulcetdash.com</strong>
               <div
                 className={classes.formBasicSubmitBttnClassicsReceiverInfos}
                 style={{ marginTop: 60, borderRadius: 3 }}

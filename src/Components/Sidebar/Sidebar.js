@@ -73,36 +73,39 @@ class Sidebar extends React.PureComponent {
     let globalObject = this;
 
     this.intervalPersister = setInterval(async () => {
-      //! Get the account data
-      let bundle = {
-        latitude: globalObject.props.App.latitude,
-        longitude: globalObject.props.App.longitude,
-        user_identifier: globalObject.props.App.userData?.loginData?.company_fp,
-        user_nature: "rider",
-        pushnotif_token: false,
-      };
+      try {
+        //! Get the account data
+        let bundle = {
+          latitude: globalObject.props.App.latitude,
+          longitude: globalObject.props.App.longitude,
+          user_identifier:
+            globalObject.props.App.userData?.loginData?.company_fp,
+          user_nature: "rider",
+          pushnotif_token: false,
+        };
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_URL}/getShoppingData`,
-        bundle,
-        {
-          headers: {
-            Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
-          },
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/getShoppingData`,
+          bundle,
+          {
+            headers: {
+              Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
+            },
+          }
+        );
+
+        if (response?.data?.accountData) {
+          this.props.UpdateLoggingData(response?.data?.accountData);
         }
-      );
 
-      if (response?.data?.accountData) {
-        this.props.UpdateLoggingData(response?.data?.accountData);
+        if (response?.data?.requests) {
+          this.props.UpdateTripsData(response?.data?.requests);
+        }
+
+        globalObject.shouldBeRenderedBasedOnAccess();
+      } catch (error) {
+        console.log(error);
       }
-
-      if (response?.data?.requests) {
-        console.log(response?.data?.requests);
-        this.props.UpdateTripsData(response?.data?.requests);
-      }
-
-      console.log("Runner data updated");
-      globalObject.shouldBeRenderedBasedOnAccess();
     }, 7000);
   }
 
@@ -238,8 +241,7 @@ class Sidebar extends React.PureComponent {
                 setTimeout(function () {
                   window.location.href = "/";
                 }, 1000);
-              }}
-              reloadDocument>
+              }}>
               <AiOutlineLogout style={iconStyle} />
               <span className="menuText">Log out</span>
             </Link>

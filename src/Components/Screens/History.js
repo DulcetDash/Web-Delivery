@@ -74,27 +74,31 @@ class History extends React.PureComponent {
   componentWillMount() {}
 
   getHistoryFreshData = async () => {
-    let bundleRequest = {
-      user_identifier: this.props.App.userData.loginData.company_fp,
-      ride_type: "past",
-    };
-    //...
-    const response = await axios.post(
-      `${process.env.REACT_APP_URL}/getRequestListRiders`,
-      bundleRequest,
-      {
-        headers: {
-          Authorization: `Bearer ${this.props.App.userData?.loginData?.company_fp}`,
-        },
-      }
-    );
+    try {
+      let bundleRequest = {
+        user_identifier: this.props.App.userData.loginData.company_fp,
+        ride_type: "past",
+      };
+      //...
+      const response = await axios.post(
+        `${process.env.REACT_APP_URL}/getRequestListRiders`,
+        bundleRequest,
+        {
+          headers: {
+            Authorization: `Bearer ${this.props.App.userData?.loginData?.company_fp}`,
+          },
+        }
+      );
 
-    console.log(response?.data);
-    if (response?.data?.response) {
-      this.setState({
-        isLoading: false,
-        historyData: response.data?.response,
-      });
+      console.log(response?.data);
+      if (response?.data?.response) {
+        this.setState({
+          isLoading: false,
+          historyData: response.data?.response,
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
