@@ -65,27 +65,23 @@ class Home extends React.PureComponent {
    * ! Redirect pages based on state
    */
   redirectBasedOnState() {
-    if (
-      this.props.App.userData.loginData === null ||
-      this.props.App.userData.loginData === undefined ||
-      this.props.App.userData.loginData.company_fp === undefined ||
-      this.props.App.userData.loginData.company_fp === null
-    ) {
+    if (this.props.App.userData?.loginData?.company_fp) {
       //stay
     } else if (
-      this.props.App.userData.loginData.account.confirmations
-        .isPhoneConfirmed === false
+      this.props.App.userData?.loginData?.account?.confirmations
+        ?.isPhoneConfirmed === false
     ) {
       //Leave like that
     } else if (
-      this.props.App.userData.loginData.company_fp !== undefined &&
-      this.props.App.userData.loginData.account.confirmations.isPhoneConfirmed
+      this.props.App.userData?.loginData?.company_fp &&
+      this.props.App.userData?.loginData?.account?.confirmations
+        ?.isPhoneConfirmed
     ) {
       //Move to plans
       //? move to plans or straight home based on if a package was purchased or not
       if (
-        this.props.App.userData.loginData.plans.subscribed_plan !== false &&
-        this.props.App.userData.loginData.plans.isPlan_active
+        this.props.App.userData.loginData?.plans?.subscribed_plan !== false &&
+        this.props.App.userData.loginData?.plans?.isPlan_active
       ) {
         //Has an active plans
         window.location.href = "/Delivery";

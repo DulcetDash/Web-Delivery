@@ -9,7 +9,6 @@ import {
   UpdateLoggingData,
   UpdateTripsData,
 } from "../../Redux/HomeActionsCreators";
-import SOCKET_CORE from "../../Helper/managerNode";
 import "react-pro-sidebar/dist/css/styles.css";
 import "./sidebar.scss";
 import {
@@ -23,7 +22,7 @@ import {
 } from "react-icons/ai";
 import { MdApps, MdExtension } from "react-icons/md";
 import axios from "axios";
-import { PRIMARY } from "../../Helper/Colors";
+import { CORAL_RED, PRIMARY } from "../../Helper/Colors";
 
 const iconStyle = {
   width: 35,
@@ -37,36 +36,14 @@ class Sidebar extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.SOCKET_CORE = SOCKET_CORE;
-
     this.intervalPersister = null;
 
     this.shouldBeRenderedBasedOnAccess();
   }
 
   componentDidMount() {
-    let globalObject = this;
-
     this.shouldBeRenderedBasedOnAccess();
     this.updateBackgroundData();
-
-    /**
-     * Handle the updating of the account data
-     */
-    this.SOCKET_CORE.on(
-      "getAccountDataDeliveryWeb_io-response",
-      function (response) {
-        if (
-          response !== undefined &&
-          response !== null &&
-          response.response !== undefined &&
-          response.response !== null &&
-          /authed/i.test(response.response)
-        ) {
-          globalObject.props.UpdateLoggingData(response.metadata);
-        }
-      }
-    );
   }
 
   updateBackgroundData() {
@@ -120,13 +97,8 @@ class Sidebar extends React.PureComponent {
    */
   shouldBeRenderedBasedOnAccess() {
     if (
-      (this.props.App.userData.loginData === null ||
-        this.props.App.userData.loginData.company_fp === undefined ||
-        this.props.App.userData.loginData.company_fp === null ||
-        this.props.App.userData.loginData.company_fp === undefined ||
-        this.props.App.userData.loginData.company_name === true ||
-        this.props.App.userData.loginData.company_name === undefined ||
-        this.props.App.userData.loginData.company_name === null) &&
+      (!this.props.App.userData?.loginData?.company_fp ||
+        !this.props.App.userData?.loginData?.company_name) &&
       /\/$/.test(window.location.href) === false
     ) {
       this.props.LogOut();
@@ -235,7 +207,7 @@ class Sidebar extends React.PureComponent {
           </MenuItem>
 
           <MenuItem className="menuItemSideBar">
-            <a
+            <span
               onClick={() => {
                 this.props.LogOut();
                 setTimeout(function () {
@@ -244,7 +216,7 @@ class Sidebar extends React.PureComponent {
               }}>
               <AiOutlineLogout style={iconStyle} />
               <span className="menuText">Log out</span>
-            </a>
+            </span>
           </MenuItem>
 
           <MenuItem className="menuTextVersionNo">
@@ -258,7 +230,7 @@ class Sidebar extends React.PureComponent {
                   color: /Development/i.test(
                     String(process.env.REACT_APP_ENVIRONMENT)
                   )
-                    ? "red"
+                    ? CORAL_RED
                     : "#01101f",
                 }}
               />
