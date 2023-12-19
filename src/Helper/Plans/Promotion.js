@@ -7,6 +7,8 @@ const Promotion = ({
   actuator,
   marginTop = "2em",
   marginBottom = "2em",
+  backgroundColor = "none",
+  cursor = "pointer",
 }) => {
   return (
     <div
@@ -23,9 +25,10 @@ const Promotion = ({
         justifyContent: "center",
         width: "100%",
         height: 50,
-        // margin: "auto",
+        backgroundColor,
         borderRadius: BASIC_RADIUS * 7,
         zIndex: 1000,
+        cursor,
       }}>
       {content}
     </div>

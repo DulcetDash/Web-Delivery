@@ -748,6 +748,24 @@ class Home extends React.PureComponent {
         <div className={classes.headerContainerSecond}>
           <div className={classes.headerTitleContainer}>
             Revolutionizing Your Delivery Experience!
+            <Promotion
+              marginTop="1em"
+              backgroundColor="#fff"
+              actuator={() => {}}
+              cursor="default"
+              content={
+                <div style={{ fontSize: 15.5, color: "#01101f" }}>
+                  Get
+                  <strong style={{ marginLeft: 5, marginRight: 5 }}>
+                    <span style={{ color: CORAL_RED, marginRight: 5 }}>
+                      N$100
+                    </span>
+                    free credits
+                  </strong>
+                  for just signing up.
+                </div>
+              }
+            />
           </div>
           <div
             className={classes.formContainer}
@@ -809,6 +827,8 @@ class Home extends React.PureComponent {
                 <Promotion
                   marginTop="2em"
                   marginBottom="0em"
+                  actuator={() => {}}
+                  cursor="default"
                   content={
                     <div style={{ fontSize: 14 }}>
                       You've got{" "}
