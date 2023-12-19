@@ -266,6 +266,14 @@ class Delivery extends React.Component {
     return balance !== undefined && balance > 50;
   }
 
+  shouldAllowRequests() {
+    return (
+      (!this.props.App.userData?.loginData?.plans?.subscribed_plan ||
+        !this.props.App.userData?.loginData?.plans?.isPlan_active) &&
+      this.props.App.userData?.loginData?.plans?.balance <= 0
+    );
+  }
+
   render() {
     const balance = this.props.App.userData?.loginData?.plans?.balance;
 
@@ -273,14 +281,9 @@ class Delivery extends React.Component {
       <div
         className={classes.mainContainer}
         style={{
-          backgroundColor:
-            !this.props.App.userData?.loginData?.plans?.subscribed_plan ||
-            !this.props.App.userData?.loginData?.plans?.isPlan_active
-              ? "#fff"
-              : "#f3f3f3",
+          backgroundColor: this.shouldAllowRequests() ? "#fff" : "#f3f3f3",
         }}>
-        {!this.props.App.userData?.loginData?.plans?.subscribed_plan ||
-        !this.props.App.userData?.loginData?.plans?.isPlan_active ? (
+        {this.shouldAllowRequests() ? (
           this.renderNoPlansFound()
         ) : !this.props.isGeolocationAvailable ? (
           <div>Your browser does not support geolocation</div>
@@ -350,6 +353,7 @@ class Delivery extends React.Component {
                       top: 2,
                       marginLeft: 20,
                       color: this.isBalanceHealthy() ? "#fff" : "#000",
+                      fontSize: 16,
                     }}>
                     Balance:{" "}
                     <strong>
@@ -362,6 +366,7 @@ class Delivery extends React.Component {
                         position: "relative",
                         top: 2,
                         cursor: "pointer",
+                        fontSize: 16,
                       }}
                       onClick={() => (window.location.href = "/Settings")}>
                       Top-up your balance

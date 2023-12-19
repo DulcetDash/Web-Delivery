@@ -13,7 +13,7 @@ import bird from "../../Images/bird.png";
 import divide from "../../Images/divide.png";
 import layer from "../../Images/layer.png";
 import { CORAL_RED, PRIMARY, SECONDARY } from "../../Helper/Colors";
-import { Button, Input, InputNumber, Modal, Result } from "antd";
+import { Button, Input, InputNumber, Modal, Result, Tag } from "antd";
 import { InfoCircleFilled } from "@ant-design/icons";
 import Pay from "./Payment/Payment";
 import axios from "axios";
@@ -333,7 +333,19 @@ class Settings extends React.PureComponent {
 
         {/* Plans infos */}
         <div className={classes.globalInfosData}>
-          <div className={classes.genericBigTitle}>Your plan</div>
+          <div className={classes.genericBigTitle}>
+            Your plan{" "}
+            {this.props.App.userData.loginData?.plans?.subscribed_plan !==
+              false &&
+            this.props.App.userData.loginData?.plans?.isPlan_active ? (
+              ""
+            ) : (
+              <Tag style={{ fontSize: 16 }}>
+                Balance: N$
+                {this.props.App.userData.loginData?.plans?.balance}
+              </Tag>
+            )}
+          </div>
           {this.props.App.userData.loginData.plans.subscribed_plan !== false &&
           this.props.App.userData.loginData.plans.isPlan_active ? (
             <div className={classes.planBubbleData}>
@@ -381,7 +393,12 @@ class Settings extends React.PureComponent {
               className={classes.formBasicButton}
               style={{ width: 200, marginBottom: 20 }}
               onClick={() => (window.location.href = "/plans")}>
-              <div>Change my subscription</div>
+              <div>
+                {this.props.App.userData.loginData.plans.subscribed_plan !==
+                  false && this.props.App.userData.loginData.plans.isPlan_active
+                  ? "Change my subscription"
+                  : "Add a subscription"}
+              </div>
               <FiArrowRight />
             </div>
             <div

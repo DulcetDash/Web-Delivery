@@ -227,11 +227,7 @@ class Sidebar extends React.PureComponent {
                   height: 15,
                   position: "relative",
                   top: "2px",
-                  color: /Development/i.test(
-                    String(process.env.REACT_APP_ENVIRONMENT)
-                  )
-                    ? CORAL_RED
-                    : "#01101f",
+                  color: "#01101f",
                 }}
               />
               <span className="menuTextVersionNo">v1.0.1</span>

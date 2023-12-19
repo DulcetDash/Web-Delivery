@@ -665,7 +665,8 @@ class Home extends React.PureComponent {
    * responsible for validating the otp
    */
   validateOtp = async () => {
-    if (this.state.isLoading) return;
+    console.log(this.state.otp);
+    console.log(this.props.App.userData.loginData);
 
     try {
       if (this.state.otp !== undefined && this.state.otp.length > 0) {
@@ -673,7 +674,7 @@ class Home extends React.PureComponent {
         //Not empty
         if (
           this.props.App.userData.loginData?.email &&
-          this.props.App.userData.loginData.company_fp
+          this.props.App.userData.loginData?.company_fp
         ) {
           const response = await axios.post(
             `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
