@@ -363,7 +363,7 @@ class Delivery extends React.Component {
                         top: 2,
                         cursor: "pointer",
                       }}
-                      onClick={() => (window.location.href = "/settings")}>
+                      onClick={() => (window.location.href = "/Settings")}>
                       Top-up your balance
                     </Tag>
                   )}

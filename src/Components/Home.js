@@ -41,7 +41,7 @@ class Home extends React.PureComponent {
       shouldShowChangePhoneNumber: false, //Whether to show the changing phone number window
       firstname: "Dominique",
       lastname: "Kanyik",
-      email: "dominique@test.com",
+      email: "dominique@dulcetdash.com",
       phone: "+264856997167",
       company_name: "Test company",
       industry: "Accounting",
@@ -112,42 +112,39 @@ class Home extends React.PureComponent {
     let globalObject = this;
 
     //Handle socket Events
-
-    //Handle updating the phone number on mistake
-    this.SOCKET_CORE.on(
-      "updatePhoneNumberDeliveryWeb_io-response",
-      function (response) {
-        globalObject.setState({ isLoading: false });
-
-        if (
-          response !== undefined &&
-          response !== null &&
-          response.response !== undefined &&
-          response.response !== null
-        ) {
-          if (/successfully_updated/i.test(response.response)) {
-            //Success
-            //Do noting for now as well
-            globalObject.props.UpdateLoggingData(response.metadata);
-            //? Send new code and back to SMS auth
-            globalObject.resendConfirmationSMSAgain();
-            globalObject.setState({
-              hasErrorHappened: false,
-              shouldShowSMSAuth: true,
-            });
-          } //An error occured
-          else {
-            //Do nothing for now
-            globalObject.setState({
-              error_text_reported: `An unexpected error occured, please try again later. Or if it
-            persists please refresh this page and give it a try again.`,
-              hasErrorHappened: true,
-            });
-          }
-        }
-      }
-    );
   }
+
+  //Handle updating the phone number on mistake
+  updatePhoneNumberDeliveryWeb_io = (response) => {
+    this.setState({ isLoading: false });
+
+    if (
+      response !== undefined &&
+      response !== null &&
+      response.response !== undefined &&
+      response.response !== null
+    ) {
+      if (/successfully_updated/i.test(response.response)) {
+        //Success
+        //Do noting for now as well
+        this.props.UpdateLoggingData(response.metadata);
+        //? Send new code and back to SMS auth
+        this.resendConfirmationSMSAgain();
+        this.setState({
+          hasErrorHappened: false,
+          shouldShowSMSAuth: true,
+        });
+      } //An error occured
+      else {
+        //Do nothing for now
+        this.setState({
+          error_text_reported: `An unexpected error occured, please try again later. Or if it
+          persists please refresh this page and give it a try again.`,
+          hasErrorHappened: true,
+        });
+      }
+    }
+  };
 
   opsOnCorpoDeliveryAccounts_io = async (response) => {
     try {
@@ -308,7 +305,7 @@ class Home extends React.PureComponent {
                       if (this.state.password === this.state.password_confirm) {
                         //! ALL GOOD
                         //Good
-                        // this.setState({ isLoading: true });
+                        this.setState({ isLoading: true });
 
                         try {
                           const response = await axios.post(
@@ -330,16 +327,6 @@ class Home extends React.PureComponent {
                           await this.opsOnCorpoDeliveryAccounts_io(
                             response.data
                           );
-                          // this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-                          //   op: "signup",
-                          //   email: this.state.email,
-                          //   first_name: this.state.firstname,
-                          //   last_name: this.state.lastname,
-                          //   phone: this.state.phone,
-                          //   company_name: this.state.company_name,
-                          //   selected_industry: this.state.industry,
-                          //   password: this.state.password,
-                          // });
                         } catch (error) {
                           console.log(error);
                         }
@@ -617,6 +604,8 @@ class Home extends React.PureComponent {
    * Responsible to resend the confirmation code again.
    */
   resendConfirmationSMSAgain = async () => {
+    if (this.state.isLoadingResendSMS) return;
+
     try {
       if (
         this.props.App.userData.loginData !== null &&
@@ -658,7 +647,7 @@ class Home extends React.PureComponent {
             cursor: "pointer",
           }}
           onClick={() => this.resendConfirmationSMSAgain()}>
-          Did not receive it? <strong>Send again</strong>.
+          Did not receive it? <strong>Resend</strong>.
         </div>
       );
     } else {
@@ -683,17 +672,16 @@ class Home extends React.PureComponent {
    * responsible for validating the otp
    */
   validateOtp = async () => {
+    if (this.state.isLoading) return;
+
     try {
       if (this.state.otp !== undefined && this.state.otp.length > 0) {
+        this.setState({ isLoading: true });
         //Not empty
         if (
-          this.props.App.userData.loginData !== null &&
-          this.props.App.userData.loginData.phone !== undefined &&
-          this.props.App.userData.loginData.phone !== null &&
-          this.props.App.userData.loginData.company_fp !== undefined
+          this.props.App.userData.loginData?.email &&
+          this.props.App.userData.loginData.company_fp
         ) {
-          this.setState({ isLoading: true });
-
           const response = await axios.post(
             `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
             {
@@ -715,7 +703,7 @@ class Home extends React.PureComponent {
         this.setState({ otp_error_color: "red" });
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       this.swicthContextForms();
     }
   };
@@ -723,7 +711,7 @@ class Home extends React.PureComponent {
   /**
    * responsible for updating the changed phone number if valid
    */
-  updatePhoneNumber() {
+  updatePhoneNumber = async () => {
     try {
       if (
         this.props.App.userData.loginData !== null &&
@@ -734,11 +722,17 @@ class Home extends React.PureComponent {
         if (isValidPhoneNumber(this.state.phone)) {
           //Valid phone
           this.setState({ isLoading: true });
-          this.SOCKET_CORE.emit("opsOnCorpoDeliveryAccounts_io", {
-            op: "updatePhoneNumber",
-            company_fp: this.props.App.userData.loginData.company_fp,
-            phone: this.state.phone,
-          });
+
+          const response = await axios.post(
+            `${process.env.REACT_APP_URL}/performOpsCorporateDeliveryAccount`,
+            {
+              op: "updatePhoneNumber",
+              email: this.props.App.userData.loginData?.email,
+            }
+          );
+
+          console.log(response.data);
+          this.updatePhoneNumberDeliveryWeb_io(response.data);
         } //Invalid phone
         else {
           this.setState({ phone_error_color: "red" });
@@ -751,7 +745,7 @@ class Home extends React.PureComponent {
       // console.log(error);
       this.swicthContextForms();
     }
-  }
+  };
 
   render() {
     return (
@@ -759,7 +753,7 @@ class Home extends React.PureComponent {
         <Header />
         <div className={classes.headerContainerSecond}>
           <div className={classes.headerTitleContainer}>
-            Revolutionize Your Delivery Experience!
+            Revolutionizing Your Delivery Experience!
           </div>
           <div
             className={classes.formContainer}
@@ -776,7 +770,7 @@ class Home extends React.PureComponent {
             this.state.hasErrorHappened === false ? (
               <div className={classes.signupForm}>
                 <div className={classes.mainTitle}>
-                  <div>Change your phone number</div>
+                  <div>Change your email</div>
                 </div>
                 <PhoneInput
                   defaultCountry="NA"
@@ -792,12 +786,12 @@ class Home extends React.PureComponent {
                 />
                 <br />
                 <div className={classes.termsReview}>
-                  You will be <strong>receiving SMS</strong> from us only
+                  You will be <strong>receiving emails</strong> from us only
                   related to the activities from your account.
                 </div>
                 <input
                   type="submit"
-                  value="Update phone number"
+                  value="Update email"
                   onClick={() => this.updatePhoneNumber()}
                   className={classes.formBasicSubmitBttn}
                 />
@@ -833,7 +827,7 @@ class Home extends React.PureComponent {
               this.state.hasErrorHappened === false ? (
               <div className={classes.signupForm}>
                 <div className={classes.mainTitle}>
-                  <div>Verify your phone number</div>
+                  <div>Verify your email</div>
                 </div>
                 <input
                   type="text"
@@ -854,10 +848,10 @@ class Home extends React.PureComponent {
                 <br />
                 <div className={classes.termsReview}>
                   Please fill in the <strong>6-digits code</strong> sent to your
-                  phone number at{" "}
+                  email address at{" "}
                   <strong>
                     {this.props.App.userData.loginData !== null
-                      ? this.props.App.userData.loginData.phone
+                      ? this.props.App.userData.loginData.email
                       : null}
                   </strong>
                   .{" "}
@@ -881,7 +875,7 @@ class Home extends React.PureComponent {
                 <input
                   type="submit"
                   value="Next"
-                  onClick={() => this.validateOtp()}
+                  onClick={async () => await this.validateOtp()}
                   className={classes.formBasicSubmitBttn}
                 />
                 <br />
@@ -896,7 +890,7 @@ class Home extends React.PureComponent {
                   onClick={() =>
                     this.setState({ shouldShowChangePhoneNumber: true })
                   }>
-                  Wrong number?
+                  Wrong email?
                 </div>
               </div>
             ) : this.state.shouldShowLogin === false &&
@@ -1060,8 +1054,10 @@ class Home extends React.PureComponent {
                   agree that you have read and understood our terms & conditions
                   and also reviewed our privacy statement.
                   <br />
-                  You also agree to <strong>opt-in to receive SMS</strong> from
-                  us only related to the activities from this account.
+                  You also agree to <strong>
+                    opt-in to receive emails
+                  </strong>{" "}
+                  from us only related to the activities from this account.
                 </div>
                 <input
                   type="submit"
@@ -1119,7 +1115,7 @@ class Home extends React.PureComponent {
                 />
                 <br />
                 <div className={classes.termsReview}>
-                  You will be <strong>receiving SMS</strong> from us only
+                  You will be <strong>receiving emails</strong> from us only
                   related to the activities from your account.
                 </div>
                 <input

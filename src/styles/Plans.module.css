@@ -8,6 +8,28 @@ body {
   height: 100%;
 }
 
+.subMainTitleX {
+  border: 1px solid #d0d0d0;
+  padding: 10px;
+  border-radius: 500px;
+  text-align: center;
+  font-size: 16px;
+  font-family: "MoveTextMedium", sans-serif;
+  margin: auto;
+  margin-top: 1%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: #096ed4;
+  width: 260px;
+  cursor: pointer;
+}
+
+.subMainTitleX:hover {
+  background-color: #f0f0f0;
+}
+
 .mainTitle {
   /* border: 1px solid red; */
   margin-top: 5%;

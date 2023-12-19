@@ -7,7 +7,6 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK);
 
 const Pay = ({
   clientSecret,
-  priceId,
   selectedPlan,
   confirmSetupIntent,
   parentState,
@@ -23,7 +22,6 @@ const Pay = ({
   return (
     <Elements options={options} stripe={stripePromise}>
       <PaymentForm
-        selectedPriceId={priceId}
         selectedPlan={selectedPlan}
         confirmSetupIntent={confirmSetupIntent}
         parentState={parentState}

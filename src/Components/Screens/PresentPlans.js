@@ -14,7 +14,7 @@ import divide from "../../Images/divide.png";
 import layer from "../../Images/layer.png";
 import axios from "axios";
 import Pay from "./Payment/Payment";
-import { MdCheckCircle } from "react-icons/md";
+import { MdCheckCircle, MdTrendingFlat } from "react-icons/md";
 import { Button, Result } from "antd";
 import { PRIMARY, SECONDARY } from "../../Helper/Colors";
 
@@ -120,7 +120,7 @@ class PresentPlans extends React.PureComponent {
                     width: 200,
                     marginTop: 20,
                   }}
-                  onClick={() => (window.location.href = "/dashboard")}
+                  onClick={() => (window.location.href = "/Delivery")}
                   key="console">
                   Go to Dashboard
                 </Button>,
@@ -128,13 +128,26 @@ class PresentPlans extends React.PureComponent {
             />
           </div>
         ) : this.state.clientSecret ? (
-          <Pay
-            clientSecret={this.state.clientSecret}
-            priceId={"price_1OO4OYJC0K1CI7I681txuXu0"}
-            selectedPlan={this.state.plan}
-            confirmSetupIntent={""}
-            parentState={this}
-          />
+          <>
+            <div
+              className={classes.subMainTitleX}
+              onClick={() =>
+                this.setState({
+                  clientSecret: null,
+                })
+              }>
+              Or choose another package{" "}
+              <MdTrendingFlat
+                style={{ position: "relative", top: 1, marginLeft: 5 }}
+              />
+            </div>
+            <Pay
+              clientSecret={this.state.clientSecret}
+              selectedPlan={this.state.plan}
+              confirmSetupIntent={""}
+              parentState={this}
+            />
+          </>
         ) : (
           <>
             <div className={classes.mainTitle}>Business friendly pricing</div>

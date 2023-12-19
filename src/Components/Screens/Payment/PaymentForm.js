@@ -13,7 +13,6 @@ import { CORAL_RED, GREEN } from "../../../Helper/Colors";
 import { MdError } from "react-icons/md";
 
 const PaymentForm = ({
-  selectedPriceId,
   // setStep,
   selectedPlan,
   confirmSetupIntent,
