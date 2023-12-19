@@ -27,6 +27,7 @@ body {
 .plansContainer {
   /* border: 1px solid red; */
   margin-top: 5%;
+  padding-bottom: 15%;
   padding-left: 5%;
   padding-right: 5%;
   display: flex;
@@ -71,7 +72,6 @@ body {
 .planNode {
   border: 1px solid #f0f0f0;
   flex: 1;
-  max-width: 300px;
   padding: 15px;
   padding-left: 20px;
   padding-right: 20px;
@@ -87,6 +87,7 @@ body {
   font-size: 25px;
   /* border: 1px solid red; */
   text-align: center;
+  width: 200px;
 }
 
 .subExplanation {
@@ -206,7 +207,6 @@ body {
 
 .footer {
   /* border: 1px solid black; */
-  margin-top: 15%;
   height: 150px;
   display: flex;
   flex-direction: row;

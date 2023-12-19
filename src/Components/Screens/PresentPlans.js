@@ -51,8 +51,6 @@ class PresentPlans extends React.PureComponent {
         }
       );
 
-      console.log(subscription?.data);
-
       if (
         subscription?.data?.status === "success" &&
         subscription?.data?.clientSecret
@@ -71,12 +69,17 @@ class PresentPlans extends React.PureComponent {
   };
 
   render() {
+    const subscribedPlan =
+      this.props.App?.userData?.loginData?.plans?.subscribed_plan?.toLowerCase() ??
+      "noplan";
     return (
       <div className={classes.mainContainer}>
         <Header
           customButton={{
             show: true,
-            title: "Skip for now",
+            title: this.props.App?.userData?.loginData?.plans?.isPlan_active
+              ? "Back to Dashboard"
+              : "Skip for now",
             action: () => {
               window.location.href = "/Delivery";
             },
@@ -144,6 +147,7 @@ class PresentPlans extends React.PureComponent {
                 description={"Powerful logistic with easy setup"}
                 priceSmallBreakdown={"Get about 3 deliveries."}
                 price={"N$100"}
+                isSubscribed={subscribedPlan === "starter"}
                 icon={jigsaw}
                 paymentPeriod={""}
                 marginRight={20}
@@ -153,9 +157,8 @@ class PresentPlans extends React.PureComponent {
                   this.state.isLoadingPlanSelected
                 }
                 featuresList={[
-                  { title: "1 batch delivery" },
+                  { title: "Unlimited deliveries" },
                   { title: "5 destinations at once" },
-                  { title: "Deliveries graph" },
                   { title: "SMS notification to clients" },
                   { title: "Tracking" },
                   { title: "24/7h support" },
@@ -189,6 +192,7 @@ class PresentPlans extends React.PureComponent {
                 description={"Grow your business with minimal setup"}
                 price={"N$2500"}
                 icon={bird}
+                isSubscribed={subscribedPlan === "intermediate"}
                 titleFeatures={
                   <span>
                     All features from{" "}
@@ -208,14 +212,11 @@ class PresentPlans extends React.PureComponent {
                   this.state.isLoadingPlanSelected
                 }
                 featuresList={[
-                  { title: "15 batch deliveries" },
+                  { title: "Unlimited deliveries" },
                   { title: "10 destinations at once" },
-                  // {
-                  //   title: "Demand predictions",
-                  // },
-                  // {
-                  //   title: "Advanced historical analytics",
-                  // },
+                  {
+                    title: "Invoices",
+                  },
                 ]}
                 actionGetStartedButton={async () => {
                   //! Update the redux corresponding vars - temporaryPackagePurchaseVars
@@ -245,6 +246,7 @@ class PresentPlans extends React.PureComponent {
                 description={"Scale your business seamlessly"}
                 price={"N$15000"}
                 icon={divide}
+                isSubscribed={subscribedPlan === "pro"}
                 isActive
                 isLoading={
                   this.state.plan?.planName === "Pro" &&
@@ -263,10 +265,10 @@ class PresentPlans extends React.PureComponent {
                 paymentPeriod={""}
                 marginRight={20}
                 featuresList={[
-                  { title: "50 batch deliveries" },
+                  { title: "Unlimited deliveries" },
                   { title: "15 destinations at once" },
                   {
-                    title: "Financial forecasting",
+                    title: "Invoices",
                   },
                 ]}
                 actionGetStartedButton={async () => {
@@ -313,10 +315,10 @@ class PresentPlans extends React.PureComponent {
                 }
                 buttonTitle={"Contact sales"}
                 featuresList={[
-                  { title: "100+ batch deliveries" },
+                  { title: "Unlimited deliveries" },
                   { title: "30+ destinations at once" },
                   {
-                    title: "Custom tools made for you",
+                    title: "Advanced analytics",
                   },
                 ]}
               />

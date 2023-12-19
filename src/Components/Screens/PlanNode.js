@@ -1,3 +1,4 @@
+import { PRIMARY } from "../../Helper/Colors";
 import Loader from "../../Helper/Loader/Loader";
 import classes from "../../styles/Plans.module.css";
 import { AiFillCheckCircle } from "react-icons/ai";
@@ -21,6 +22,7 @@ const PlanNode = ({
   isActive = false,
   actionGetStartedButton = null,
   isLoading = false,
+  isSubscribed = false,
 }) => {
   return (
     <div style={{ marginRight: marginRight }}>
@@ -53,13 +55,24 @@ const PlanNode = ({
           <img alt="planIco" src={icon} className={classes.planIcoTrue} />
         </div>
         <div
-          onClick={isActive ? actionGetStartedButton : null}
+          onClick={isActive && !isSubscribed ? actionGetStartedButton : null}
           className={
             isActive
               ? classes.getStartedButton
               : classes.getStartedButtonInactive
-          }>
-          {isLoading ? <Loader color="#fff" size={30} /> : buttonTitle}
+          }
+          style={{
+            cursor: isSubscribed ? "default" : "pointer",
+            backgroundColor: isSubscribed ? PRIMARY : "#000",
+            borderColor: isSubscribed ? PRIMARY : "#000",
+          }}>
+          {isSubscribed ? (
+            "Subscribed"
+          ) : isLoading ? (
+            <Loader color="#fff" size={30} />
+          ) : (
+            buttonTitle
+          )}
         </div>
         <div className={classes.featuresList}>
           <div className={classes.titleFeaturesList}>{titleFeatures}</div>
