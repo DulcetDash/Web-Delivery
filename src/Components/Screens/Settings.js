@@ -6,7 +6,6 @@ import {
   UpdateTripsData,
 } from "../../Redux/HomeActionsCreators";
 import classes from "../../styles/Settings.module.css";
-import SOCKET_CORE from "../../Helper/managerNode";
 import { FiArrowRight } from "react-icons/fi";
 import jigsaw from "../../Images/jigsaw.png";
 import bird from "../../Images/bird.png";
@@ -23,8 +22,6 @@ import { MdCheckCircle } from "react-icons/md";
 class Settings extends React.PureComponent {
   constructor(props) {
     super(props);
-
-    this.SOCKET_CORE = SOCKET_CORE;
 
     this.planCodes = {
       STR: "Starter",

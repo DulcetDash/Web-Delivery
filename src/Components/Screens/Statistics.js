@@ -5,23 +5,7 @@ import {
   UpdateCurrentLocationMetadat,
   UpdateTripsData,
 } from "../../Redux/HomeActionsCreators";
-import {
-  MdAccessTime,
-  MdDeleteSweep,
-  MdNearMe,
-  MdPhone,
-  MdBrightness1,
-  MdCheckCircle,
-  MdBlock,
-  MdAutorenew,
-  MdArrowForward,
-  MdPlayArrow,
-  MdStar,
-  MdWork,
-} from "react-icons/md";
 import classes from "../../styles/Statistics.module.css";
-import SOCKET_CORE from "../../Helper/managerNode";
-import { AiOutlineRight, AiTwotoneCalculator } from "react-icons/ai";
 import { TailSpin as Loader } from "react-loader-spinner";
 import {
   XYPlot,
@@ -30,8 +14,6 @@ import {
   VerticalGridLines,
   HorizontalGridLines,
   VerticalBarSeries,
-  LineSeries,
-  LabelSeries,
   makeWidthFlexible,
   DiscreteColorLegend,
   Crosshair,
@@ -44,8 +26,6 @@ const FlexibleXYPlot = makeWidthFlexible(XYPlot);
 class Statistics extends React.Component {
   constructor(props) {
     super(props);
-
-    this.SOCKET_CORE = SOCKET_CORE;
 
     this.intervalPersister = null;
 
@@ -90,56 +70,12 @@ class Statistics extends React.Component {
   };
 
   componentDidMount() {
-    let globalObject = this;
-
     this.getStatisticsFreshData();
-
-    //Handle socket io events
-    this.SOCKET_CORE.on(
-      "getTripsObservabilityStatsDeliveryWeb_io-response",
-      function (response) {
-        if (
-          response !== undefined &&
-          response.stateHash !== undefined &&
-          response.response !== undefined &&
-          response.response.daily_view !== undefined &&
-          /(error|no_data)/i.test(response.response) === false
-        ) {
-          //?Optimized
-          if (
-            response.stateHash !== globalObject.state.statisticalData.stateHash
-          ) {
-            globalObject.setState({
-              statisticalData: response,
-              isLoading: false,
-            });
-          }
-        } //Clear data
-        else {
-          globalObject.setState({ statisticalData: {}, isLoading: false });
-        }
-      }
-    );
   }
 
   componentWillMount() {}
 
-  getStatisticsFreshData() {
-    let globalObject = this;
-
-    this.intervalPersister = setInterval(function () {
-      let bundleRequest = {
-        user_fp: globalObject.props.App.userData.loginData.company_fp,
-        isolation_factor: "generic_view|daily_view",
-        make_graphReady: true,
-      };
-      //...
-      globalObject.SOCKET_CORE.emit(
-        "getTripsObservabilityStatsDeliveryWeb_io",
-        bundleRequest
-      );
-    }, 2000);
-  }
+  getStatisticsFreshData() {}
 
   /**
    * Responsible for returning a valid value or zero if the value does not exist

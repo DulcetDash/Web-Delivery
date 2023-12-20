@@ -31,7 +31,6 @@ import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import "react-phone-number-input/style.css";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import SOCKET_CORE from "../../Helper/managerNode";
 import { TailSpin as Loader } from "react-loader-spinner";
 import PolylineOverlay from "../../Helper/PolylineOverlay";
 import Box from "@mui/material/Box";
@@ -83,7 +82,7 @@ class DeliveryNode extends React.Component {
   constructor(props) {
     super(props);
 
-    this.SOCKET_CORE = SOCKET_CORE;
+    this.searchDebounce = null;
 
     this.state = {
       //Will contain all the drop off destination data as they also increase
@@ -138,68 +137,6 @@ class DeliveryNode extends React.Component {
     //! Update current location to the current one by default --------------
     this.resetCurrentPickupLocationToThis();
     //! ---------------------------------------------------------------------
-
-    //Handle socket events
-    this.SOCKET_CORE.on("getLocations-response", function (response) {
-      // console.log(response);
-      //...
-      if (
-        response !== false &&
-        response.result !== undefined &&
-        response.result !== false
-      ) {
-        if (globalObject.state.search_querySearch.length !== 0) {
-          globalObject.setState({
-            searchResults: response.result.result,
-            loaderStateSearch: false,
-            shouldShowSearch: true,
-            // search_querySearch: "",
-          });
-        } //No queries to be processed
-        else {
-          globalObject.setState({
-            searchResults: [],
-            loaderStateSearch: false,
-            shouldShowSearch: false,
-            // search_querySearch: "",
-          });
-        }
-      } else {
-        //If the search results contained previous results, leave that
-        if (globalObject.state.searchResults.length > 0) {
-          globalObject.setState({
-            loaderStateSearch: false,
-            shouldShowSearch: true,
-          }); //? Stop the animation loader
-        } else {
-          globalObject.setState({
-            loaderStateSearch: false,
-            shouldShowSearch: false,
-            // search_querySearch: "",
-          }); //? Stop the animation loader
-        }
-      }
-    });
-
-    /**
-     * GET ROUTE SNAPSHOTS RESPONSES
-     */
-    this.SOCKET_CORE.on(
-      "getRoute_to_destinationSnapshot-response",
-      function (response) {
-        let previousSnapshots = globalObject.state.snapshotsToDestination;
-        previousSnapshots.push(response);
-        //Remove all zero distances
-        previousSnapshots = previousSnapshots.filter((snap) => {
-          return snap.distance !== 0 && snap.eta !== "0 sec away";
-        });
-        //...
-        globalObject.setState({
-          snapshotsToDestination: previousSnapshots,
-          isLoadingEta: false,
-        });
-      }
-    );
   }
 
   /**
@@ -302,23 +239,20 @@ class DeliveryNode extends React.Component {
   }
 
   processLocationSearchResults = (response) => {
-    // console.log(response);
     //...
     if (response !== false && response.result) {
-      if (this.state.search_querySearch.length !== 0) {
+      if (response.result.length > 0) {
         this.setState({
           searchResults: response.result,
           loaderStateSearch: false,
           shouldShowSearch: true,
           // search_querySearch: "",
         });
-      } //No queries to be processed
-      else {
+      } else {
         this.setState({
-          searchResults: [],
           loaderStateSearch: false,
-          shouldShowSearch: false,
-          // search_querySearch: "",
+          shouldShowSearch: true,
+          search_querySearch: "",
         });
       }
     } else {
@@ -433,7 +367,13 @@ class DeliveryNode extends React.Component {
                 //?---
                 this.setState({ dropOff_destination: oldState });
                 //?----
-                this._searchForThisQuery(event.target.value, 0);
+                if (this.searchDebounce) {
+                  clearTimeout(this.searchDebounce);
+                }
+
+                this.searchDebounce = setTimeout(() => {
+                  this._searchForThisQuery(event.target.value, 0);
+                }, 500);
               }}
             />
             {index > 0 ? (
@@ -997,7 +937,10 @@ class DeliveryNode extends React.Component {
   _searchForThisQuery = async (query, inputFieldIndex) => {
     try {
       this.search_time_requested = new Date();
-      this.state.search_querySearch = query.trim();
+      query = query.trim();
+      this.setState({
+        search_querySearch: query,
+      });
 
       //! Disable default pickup location - activate custom one
       if (inputFieldIndex === -1) {
@@ -1007,38 +950,32 @@ class DeliveryNode extends React.Component {
       }
       //! -----
       if (query.length > 0) {
-        if (this.state.search_querySearch.length !== 0) {
-          //Has some query
-          //Alright
-          let requestPackage = {};
-          requestPackage.user_fp = this.props.App.userData.loginData.company_fp;
-          requestPackage.query = this.state.search_querySearch;
-          requestPackage.city = "Windhoek"; //Default city to windhoek
-          requestPackage.country = "Namibia"; //Default country to Namibia
+        this.setState({ loaderStateSearch: true });
+        //Has some query
+        //Alright
+        let requestPackage = {};
+        requestPackage.user_fp = this.props.App.userData.loginData.company_fp;
+        requestPackage.query = query;
+        requestPackage.city = "Windhoek"; //Default city to windhoek
+        requestPackage.country = "Namibia"; //Default country to Namibia
 
-          const response = await axios.post(
-            `${process.env.REACT_APP_URL}/getSearchedLocations`,
-            {
-              city: "Windhoek",
-              country: "Namibia",
-              query: this.state.search_querySearch,
-              state: "Khomas",
-              user_fp: this.props.App.userData.loginData.company_fp,
+        const response = await axios.post(
+          `${process.env.REACT_APP_URL}/getSearchedLocations`,
+          {
+            city: "Windhoek",
+            country: "Namibia",
+            query: query,
+            state: "Khomas",
+            user_fp: this.props.App.userData.loginData.company_fp,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
             },
-            {
-              headers: {
-                Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
-              },
-            }
-          );
+          }
+        );
 
-          console.log(response.data);
-
-          this.processLocationSearchResults(response.data);
-        } //NO queries to process
-        else {
-          this.setState({ loaderStateSearch: false, searchResults: [] });
-        }
+        this.processLocationSearchResults(response.data);
       } //Empty search
       else {
         this.setState({ loaderStateSearch: false, searchResults: [] });
@@ -1127,92 +1064,7 @@ class DeliveryNode extends React.Component {
   /**
    * Responsible for determining of the map should be recentered or rezoomed to fit all the coords as bounds
    */
-  recenterMapEstimator() {
-    //! Take the current location if nothing was customized
-    let pickupPoint =
-      this.state.hasCustomPickupLocation === false
-        ? {
-            latitude: this.props.App.latitude,
-            longitude: this.props.App.longitude,
-          }
-        : this.state.pickup_destination !== null &&
-          this.state.pickup_destination.data !== undefined &&
-          this.state.pickup_destination.data.locationData !== null &&
-          this.state.pickup_destination.data.locationData.coordinates !==
-            undefined
-        ? {
-            latitude:
-              this.state.pickup_destination.data.locationData.coordinates[0],
-            longitude:
-              this.state.pickup_destination.data.locationData.coordinates[1],
-          }
-        : false;
-
-    let dropOffPoints = this.state.dropOff_destination.map((location) => {
-      return location.data !== undefined &&
-        location.data.locationData !== null &&
-        location.data.locationData.coordinates !== undefined
-        ? {
-            latitude: location.data.locationData.coordinates[0],
-            longitude: location.data.locationData.coordinates[1],
-          }
-        : false;
-    });
-    //...
-    let areValidForFitBounds =
-      dropOffPoints.filter((el) => el !== false).length ===
-        this.state.dropOff_destination.length && pickupPoint !== false;
-    //...
-    // console.log(pickupPoint);
-    // console.log(dropOffPoints);
-    // console.log(`Are valid for bounds: ${areValidForFitBounds}`);
-
-    // if (areValidForFitBounds) {
-    //   let pointsBundle = dropOffPoints;
-    //   pointsBundle.push(pickupPoint);
-    //   //..
-    //   this.setState({
-    //     customFitboundsCoords: getBoundsForPoints(
-    //       pointsBundle,
-    //       this.refs.mapPrimitiveContainer.getBoundingClientRect()
-    //     ),
-    //     snapshotsToDestination: [],
-    //     isLoadingEta: true,
-    //   });
-    //   this.forceUpdate();
-
-    //   //! Compute the route and ETA
-    //   dropOffPoints = dropOffPoints.filter((el) => el !== false);
-    //   //...
-    //   let parentPromises = dropOffPoints.map((dropOff) => {
-    //     return new Promise((resCompute) => {
-    //       let tmpBundleSnapShot = {
-    //         org_latitude: pickupPoint.latitude,
-    //         org_longitude: pickupPoint.longitude,
-    //         dest_latitude: dropOff.latitude,
-    //         dest_longitude: dropOff.longitude,
-    //         user_fingerprint: this.props.App.userData.loginData.company_fp,
-    //       };
-    //       //...
-    //       //   console.log(tmpBundleSnapShot);
-    //       this.SOCKET_CORE.emit(
-    //         "getRoute_to_destinationSnapshot",
-    //         tmpBundleSnapShot
-    //       );
-    //       //..
-    //       resCompute(true);
-    //     });
-    //   });
-    //   ///...
-    //   Promise.all(parentPromises)
-    //     .then((result) => {
-    //       // console.log(result);
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     });
-    // }
-  }
+  recenterMapEstimator() {}
 
   /**
    * Responsible for rendering the polyline if all the destinations have been set
@@ -1476,7 +1328,14 @@ class DeliveryNode extends React.Component {
                             //?---
                             this.setState({ pickup_destination: oldState });
                             //?----
-                            this._searchForThisQuery(event.target.value, 0);
+
+                            if (this.searchDebounce) {
+                              clearTimeout(this.searchDebounce);
+                            }
+
+                            this.searchDebounce = setTimeout(() => {
+                              this._searchForThisQuery(event.target.value, 0);
+                            }, 500);
                           }}
                           style={{
                             position: "relative",

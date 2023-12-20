@@ -21,7 +21,6 @@ import {
   MdWork,
 } from "react-icons/md";
 import classes from "../../styles/Delivery.module.css";
-import SOCKET_CORE from "../../Helper/managerNode";
 import DeliveryNode from "../DeliveryNode/DeliveryNode";
 import { geolocated } from "react-geolocated";
 import { AiTwotoneEnvironment, AiTwotoneSetting } from "react-icons/ai";
@@ -39,8 +38,6 @@ class Delivery extends React.Component {
   constructor(props) {
     super(props);
 
-    this.SOCKET_CORE = SOCKET_CORE;
-
     this.state = {
       geolocationState: "granted",
       didGetTHeCurrentLocation: false,
@@ -48,79 +45,9 @@ class Delivery extends React.Component {
   }
 
   componentDidMount() {
-    let globalObject = this;
-
     this.handlePermission();
 
     this.getCurrentLocationFrequently();
-
-    //HANDLE SOCKET EVENTS
-    /**
-     * GET GEOCODED USER LOCATION
-     * @event: geocode-this-point
-     * Get the location of the user, parameter of interest: street name
-     */
-    this.SOCKET_CORE.on("geocode-this-point-response", function (response) {
-      // console.log(response);
-      if (response !== undefined && response !== false) {
-        globalObject.props.UpdateCurrentLocationMetadat(response);
-        globalObject.setState({ didGetTHeCurrentLocation: true });
-      }
-    });
-
-    /**
-     * @socket trackdriverroute-response
-     * Get route tracker response
-     * Responsible for redirecting updates to map graphics data based on if the status of the request is: pending, in route to pickup, in route to drop off or completed
-     */
-    this.SOCKET_CORE.on("trackdriverroute-response", function (response) {
-      // console.log(response);
-      try {
-        if (
-          response !== null &&
-          response !== undefined &&
-          /no_rides/i.test(response.request_status) === false
-        ) {
-          globalObject.props.UpdateTripsData(response);
-          //1. Trip in progress: in route to pickup or in route to drop off
-          if (
-            response.response === undefined &&
-            response.routePoints !== undefined &&
-            /(inRouteToPickup|inRouteToDestination)/i.test(
-              response.request_status
-            )
-          ) {
-            //Update route to destination var - request status: inRouteToPickup, inRouteToDestination
-            if (/inRouteToPickup/i.test(response.request_status)) {
-              // console.log("In route to pickup");
-            } else if (response.request_status === "inRouteToDestination") {
-              // console.log("In route to destination");
-            }
-            //...
-          } else if (/pending/i.test(response.request_status)) {
-            // console.log("Pending");
-            globalObject.props.UpdateTripsData(response);
-          } else if (
-            response.request_status !== undefined &&
-            response.request_status !== null &&
-            /riderDropoffConfirmation_left/i.test(response.request_status)
-          ) {
-            // console.log("Confirm dropoff left");
-            globalObject.props.UpdateTripsData(response);
-          } else if (response.request_status === "no_rides") {
-            // console.log("No rides");
-            globalObject.props.UpdateTripsData([]);
-          }
-        } //No rides
-        else {
-          // console.log("No rides");
-          globalObject.props.UpdateTripsData([]);
-        }
-      } catch (error) {
-        console.error(error);
-        globalObject.props.UpdateTripsData([]);
-      }
-    });
   }
 
   componentWillMount() {

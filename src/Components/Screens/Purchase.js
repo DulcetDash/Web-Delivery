@@ -21,14 +21,11 @@ import divide from "../../Images/divide.png";
 import layer from "../../Images/layer.png";
 import CreditCardInput from "react-credit-card-input";
 import { TailSpin as Loader } from "react-loader-spinner";
-import SOCKET_CORE from "../../Helper/managerNode";
 import Pay from "./Payment/Payment";
 
 class Purchase extends React.PureComponent {
   constructor(props) {
     super(props);
-
-    this.SOCKET_CORE = SOCKET_CORE;
 
     if (
       this.props.App.temporaryPackagePurchaseVars.planName === null ||
@@ -60,43 +57,7 @@ class Purchase extends React.PureComponent {
     }
   }
 
-  componentDidMount() {
-    let globalObject = this;
-
-    /**
-     * SOCKET IO Handlers
-     */
-    /**
-     * Handle to topup event response
-     * event: topUp_wallet_io
-     */
-    this.SOCKET_CORE.on("topUp_wallet_io-response", function (dataReceived) {
-      if (dataReceived !== undefined) {
-        if (
-          /success/i.test(dataReceived.response) &&
-          dataReceived.response !== false
-        ) {
-          //Successful transation
-          globalObject.setState({
-            showResultOperations: true,
-            foundRequestError: false,
-          });
-        } //An error occured
-        else {
-          globalObject.setState({
-            showResultOperations: true,
-            foundRequestError: true,
-          });
-        }
-      } //Error
-      else {
-        globalObject.setState({
-          showResultOperations: true,
-          foundRequestError: true,
-        });
-      }
-    });
-  }
+  componentDidMount() {}
 
   renderAppropriateSidePlans(planSelected = "starter") {
     if (/starter/i.test(planSelected)) {
@@ -196,7 +157,6 @@ class Purchase extends React.PureComponent {
         plan_name: this.props.App.temporaryPackagePurchaseVars.planName,
       };
       //...
-      this.SOCKET_CORE.emit("topUp_wallet_io", dataBundle);
     } else {
       if (this.cardData !== null) {
         this.highlightErrors();

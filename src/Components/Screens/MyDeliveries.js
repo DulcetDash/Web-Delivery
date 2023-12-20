@@ -35,7 +35,6 @@ import Accordion from "@material-ui/core/Accordion";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import "react-phone-number-input/style.css";
-import SOCKET_CORE from "../../Helper/managerNode";
 // import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { TailSpin as Loader } from "react-loader-spinner";
 import "rc-steps/assets/index.css";
@@ -48,8 +47,6 @@ import { GRAY_1, PRIMARY, SECONDARY_STRONG } from "../../Helper/Colors";
 class MyDeliveries extends React.Component {
   constructor(props) {
     super(props);
-
-    this.SOCKET_CORE = SOCKET_CORE;
 
     this.state = {
       isLoadingCancellation: false, //Whether or not the cancellation is loading or not

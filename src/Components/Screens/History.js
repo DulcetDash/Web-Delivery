@@ -20,7 +20,6 @@ import {
   MdWork,
 } from "react-icons/md";
 import classes from "../../styles/History.module.css";
-import SOCKET_CORE from "../../Helper/managerNode";
 import { AiOutlineRight, AiTwotoneCalculator } from "react-icons/ai";
 import { TailSpin as Loader } from "react-loader-spinner";
 import GreetingImage from "../../Images/newDriverWelcome.jpg";
@@ -33,8 +32,6 @@ class History extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.SOCKET_CORE = SOCKET_CORE;
-
     this.state = {
       isLoading: true, //If something is loading or not
       historyData: [], //The ride history data
@@ -42,33 +39,7 @@ class History extends React.PureComponent {
   }
 
   componentDidMount() {
-    let globalObject = this;
-
     this.getHistoryFreshData();
-
-    //Handle socket io events
-    this.SOCKET_CORE.on(
-      "getRides_historyRiders_batchOrNot-response",
-      function (response) {
-        if (
-          response !== undefined &&
-          response.response !== undefined &&
-          response.data !== undefined &&
-          /success/i.test(response.response)
-        ) {
-          globalObject.setState({
-            isLoading: false,
-            historyData: response.data,
-          });
-        } //No data got
-        else {
-          globalObject.setState({
-            isLoading: false,
-            historyData: [],
-          });
-        }
-      }
-    );
   }
 
   componentWillMount() {}
