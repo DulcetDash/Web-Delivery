@@ -54,7 +54,7 @@ class PresentPlans extends React.PureComponent {
 
       if (
         subscription?.data?.status === "success" &&
-        subscription?.data?.clientSecret
+        typeof subscription?.data?.clientSecret === "string"
       ) {
         this.setState({
           clientSecret: subscription?.data?.clientSecret,
