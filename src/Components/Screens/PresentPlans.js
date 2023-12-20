@@ -49,7 +49,7 @@ class PresentPlans extends React.PureComponent {
           headers: {
             Authorization: `Bearer ${userData?.company_fp}`,
           },
-          withCredentials: false,
+          // withCredentials: true,
         }
       );
 
