@@ -58,6 +58,7 @@ class History extends React.PureComponent {
           headers: {
             Authorization: `Bearer ${this.props.App.userData?.loginData?.company_fp}`,
           },
+          withCredentials: true,
         }
       );
 

@@ -114,6 +114,7 @@ class Settings extends React.PureComponent {
           headers: {
             Authorization: `Bearer ${userData?.company_fp}`,
           },
+          withCredentials: true,
         }
       );
 

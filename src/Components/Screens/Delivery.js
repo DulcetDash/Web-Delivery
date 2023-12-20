@@ -131,6 +131,7 @@ class Delivery extends React.Component {
             headers: {
               Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
             },
+            withCredentials: true,
           }
         );
 

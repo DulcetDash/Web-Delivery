@@ -84,6 +84,7 @@ class MyDeliveries extends React.Component {
             headers: {
               Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
             },
+            withCredentials: true,
           }
         );
 
@@ -124,6 +125,7 @@ class MyDeliveries extends React.Component {
           headers: {
             Authorization: `Bearer ${this.props.App.userData.loginData.company_fp}`,
           },
+          withCredentials: true,
         }
       );
     } catch (error) {

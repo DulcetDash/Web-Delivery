@@ -68,6 +68,7 @@ class Sidebar extends React.PureComponent {
             headers: {
               Authorization: `Bearer ${globalObject.props.App.userData?.loginData?.company_fp}`,
             },
+            withCredentials: true,
           }
         );
 
