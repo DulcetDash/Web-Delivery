@@ -45,6 +45,7 @@
     "redux": "^4.1.1",
     "redux-persist": "^6.0.0",
     "sass": "^1.39.2",
+    "serve": "^14.2.1",
     "socket.io-client": "^4.7.2",
     "styled-components": "^5.3.1",
     "viewport-mercator-project": "^7.0.4",
@@ -57,7 +58,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prod": "npm run build && serve -s build -l 3000"
   },
   "eslintConfig": {
     "extends": [
