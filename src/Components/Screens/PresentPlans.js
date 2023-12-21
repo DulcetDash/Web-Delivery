@@ -18,6 +18,7 @@ import { MdCheckCircle, MdTrendingFlat } from "react-icons/md";
 import { Button, Result } from "antd";
 import { PRIMARY, SECONDARY } from "../../Helper/Colors";
 import Promotion from "../../Helper/Plans/Promotion";
+import toast from "react-hot-toast";
 
 class PresentPlans extends React.PureComponent {
   constructor(props) {
@@ -48,8 +49,9 @@ class PresentPlans extends React.PureComponent {
         {
           headers: {
             Authorization: `Bearer ${userData?.company_fp}`,
+            "Content-Type": "application/json",
           },
-          // withCredentials: true,
+          withCredentials: true,
         }
       );
 
@@ -62,10 +64,12 @@ class PresentPlans extends React.PureComponent {
           isLoadingPlanSelected: false,
         });
       } else {
+        toast.error("An unexpected error occured, please try again");
         this.setState({ isLoadingPlanSelected: false });
       }
     } catch (error) {
       console.error(error);
+      toast.error("An unexpected error occured, please try again");
       this.setState({ isLoadingPlanSelected: false });
     }
   };

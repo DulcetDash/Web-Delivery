@@ -21,6 +21,7 @@ import analysis from "../Images/analysis.png";
 import axios from "axios";
 import Promotion from "../Helper/Plans/Promotion";
 import { CORAL_RED } from "../Helper/Colors";
+import toast from "react-hot-toast";
 
 class Home extends React.PureComponent {
   constructor(props) {
@@ -153,7 +154,7 @@ class Home extends React.PureComponent {
           if (/alreadyExists/i.test(response.response)) {
             //A similar account already exists
             this.setState({
-              error_text_reported: `Sorry it appears to us that a similar account already exists, if it yours maybe try to login or if you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
+              error_text_reported: `Sorry it appears to us that a similar account already exists, make sure your email, phone number and company names are not already used with any DulcetDash accounts.`,
               hasErrorHappened: true,
             });
           } else if (/error_creating_account/i.test(response.response)) {
@@ -175,7 +176,7 @@ class Home extends React.PureComponent {
           ) {
             //Account not found
             this.setState({
-              error_text_reported: `Oups looks like you don't have yet an account with us? If that's the case, press on "Back", and "Log in" to create a fresh account for free. If you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
+              error_text_reported: `Oups looks like you don't have yet an account with us? If that's the case, press on "Back", and "Signup" to create a fresh account for free. If you think that this is a mistake, please scroll all the way down and click on "Support" to get help.`,
               hasErrorHappened: true,
             });
           }
@@ -321,6 +322,9 @@ class Home extends React.PureComponent {
                             response.data
                           );
                         } catch (error) {
+                          toast.error(
+                            "An unexpected error occured, please try again"
+                          );
                           console.log(error);
                         }
                       } //Not same passwords
@@ -406,6 +410,7 @@ class Home extends React.PureComponent {
       } //An error occured
       else {
         //Do nothing for now
+        toast.error("Unable to send the confirmation email");
       }
     }
   };
@@ -616,7 +621,6 @@ class Home extends React.PureComponent {
           }
         );
 
-        console.log(response.data);
         await this.resetConfirmationSMSDeliveryWeb_io(response.data);
       } //Invalid data found - go back to signup
       else {
@@ -698,6 +702,7 @@ class Home extends React.PureComponent {
       }
     } catch (error) {
       console.log(error);
+      toast.error("An unexpected error occured, please try again");
       this.swicthContextForms();
     }
   };
