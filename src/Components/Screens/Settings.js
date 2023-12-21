@@ -92,7 +92,7 @@ class Settings extends React.PureComponent {
   isAmountValid() {
     return (
       this.state.topUpAmount !== 0 &&
-      this.state.topUpAmount >= 100 &&
+      this.state.topUpAmount >= 10 &&
       this.state.topUpAmount
     );
   }
