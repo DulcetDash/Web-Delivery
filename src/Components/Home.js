@@ -68,6 +68,7 @@ class Home extends React.PureComponent {
   redirectBasedOnState() {
     if (this.props.App.userData?.loginData?.company_fp) {
       //stay
+      window.location.href = "/Delivery";
     } else if (
       this.props.App.userData?.loginData?.account?.confirmations
         ?.isPhoneConfirmed === false
@@ -325,6 +326,9 @@ class Home extends React.PureComponent {
                           toast.error(
                             "An unexpected error occured, please try again"
                           );
+                          this.setState({
+                            isLoading: false,
+                          });
                           console.log(error);
                         }
                       } //Not same passwords
@@ -391,6 +395,7 @@ class Home extends React.PureComponent {
       }
     } catch (error) {
       console.log(error);
+      this.setState({isLoading: false})
     }
   };
 
