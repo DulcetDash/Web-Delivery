@@ -18,6 +18,7 @@ import Pay from "./Payment/Payment";
 import axios from "axios";
 import Loader from "../../Helper/Loader/Loader";
 import { MdCheckCircle } from "react-icons/md";
+import { getAmountWithFees } from "../../Helper/Utils";
 
 class Settings extends React.PureComponent {
   constructor(props) {
@@ -229,7 +230,7 @@ class Settings extends React.PureComponent {
                   priceId={""}
                   selectedPlan={{
                     planName: "Top-up",
-                    amount: this.state.topUpAmount,
+                    amount: getAmountWithFees(this.state.topUpAmount),
                   }}
                   confirmSetupIntent={""}
                   parentState={this}

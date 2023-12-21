@@ -153,6 +153,7 @@ export const ellipseStringAt = (string, length) => {
 
 export const getCorrectPriceId = (planName = "nothingness") => {
   const isDevelopment = process.env.REACT_APP_ENVIRONMENT === "Development";
+  console.log(process.env.REACT_APP_ENVIRONMENT);
 
   planName = String(planName).toLowerCase().trim();
 
@@ -175,4 +176,12 @@ export const getCorrectPriceId = (planName = "nothingness") => {
     default:
       return "nothingness";
   }
+};
+
+export const getAmountWithFees = (amount) => {
+  let basePrice = amount;
+  let transactionFees = basePrice * 0.05;
+  basePrice += transactionFees;
+
+  return basePrice;
 };

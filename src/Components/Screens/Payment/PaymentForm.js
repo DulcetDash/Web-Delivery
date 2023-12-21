@@ -10,7 +10,7 @@ import {
 import { Button } from "antd";
 import Loader from "../../../Helper/Loader/Loader";
 import { CORAL_RED, GREEN } from "../../../Helper/Colors";
-import { MdError } from "react-icons/md";
+import { MdError, MdHttps } from "react-icons/md";
 
 const PaymentForm = ({
   // setStep,
@@ -119,6 +119,33 @@ const PaymentForm = ({
             {message}
           </div>
         )}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "flex-start",
+            marginTop: 20,
+            color: "#000",
+            fontSize: 13.5,
+          }}>
+          <MdHttps
+            style={{
+              width: 15,
+              height: 15,
+              marginRight: 7,
+              bottom: 1,
+              position: "relative",
+              color: "#09864A",
+            }}
+          />{" "}
+          <div>
+            All the information entered is secure.
+            <br />
+            <div style={{ fontWeight: "bold", marginTop: 5 }}>
+              + 5% service fee.
+            </div>
+          </div>
+        </div>
         <Button
           style={{
             backgroundColor: GREEN,

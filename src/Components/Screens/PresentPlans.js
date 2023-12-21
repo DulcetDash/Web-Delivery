@@ -19,7 +19,7 @@ import { Button, Result } from "antd";
 import { PRIMARY, SECONDARY } from "../../Helper/Colors";
 import Promotion from "../../Helper/Plans/Promotion";
 import toast from "react-hot-toast";
-import { getCorrectPriceId } from "../../Helper/Utils";
+import { getAmountWithFees, getCorrectPriceId } from "../../Helper/Utils";
 
 class PresentPlans extends React.PureComponent {
   constructor(props) {
@@ -185,19 +185,17 @@ class PresentPlans extends React.PureComponent {
                 ]}
                 actionGetStartedButton={async () => {
                   //! Update the redux corresponding vars - temporaryPackagePurchaseVars
-                  let basePrice = 100;
-                  let transactionFees = basePrice * 0.04;
-                  basePrice += transactionFees;
+                  const priceWithFees = getAmountWithFees(100);
 
                   this.props.UpdatePlanPurchaseData({
                     planName: "Starter",
-                    amount: basePrice,
+                    amount: priceWithFees,
                   });
 
                   this.setState({
                     plan: {
                       planName: "Starter",
-                      amount: basePrice,
+                      amount: priceWithFees,
                     },
                   });
                   //...
@@ -239,19 +237,17 @@ class PresentPlans extends React.PureComponent {
                 ]}
                 actionGetStartedButton={async () => {
                   //! Update the redux corresponding vars - temporaryPackagePurchaseVars
-                  let basePrice = 2500;
-                  let transactionFees = basePrice * 0.04;
-                  basePrice += transactionFees;
+                  const priceWithFees = getAmountWithFees(2500);
 
                   this.props.UpdatePlanPurchaseData({
                     planName: "Intermediate",
-                    amount: basePrice,
+                    amount: priceWithFees,
                   });
                   //...
                   this.setState({
                     plan: {
                       planName: "Intermediate",
-                      amount: basePrice,
+                      amount: priceWithFees,
                     },
                   });
                   //...
@@ -292,19 +288,17 @@ class PresentPlans extends React.PureComponent {
                 ]}
                 actionGetStartedButton={async () => {
                   //! Update the redux corresponding vars - temporaryPackagePurchaseVars
-                  let basePrice = 15000;
-                  let transactionFees = basePrice * 0.04;
-                  basePrice += transactionFees;
+                  const priceWithFees = getAmountWithFees(15000);
 
                   this.props.UpdatePlanPurchaseData({
                     planName: "Pro",
-                    amount: basePrice,
+                    amount: priceWithFees,
                   });
                   //...
                   this.setState({
                     plan: {
                       planName: "Pro",
-                      amount: basePrice,
+                      amount: priceWithFees,
                     },
                   });
                   //...
