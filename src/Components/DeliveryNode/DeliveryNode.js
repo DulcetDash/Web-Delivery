@@ -349,11 +349,7 @@ class DeliveryNode extends React.Component {
                 this.setState({ focusedInput: index });
               }}
               value={
-                this.state.dropOff_destination[index] !== undefined &&
-                this.state.dropOff_destination[index] !== null &&
-                this.state.dropOff_destination[index].data !== null &&
-                this.state.dropOff_destination[index].data !== undefined &&
-                this.state.dropOff_destination[index].data.locationData !== null
+                this.state.dropOff_destination[index]?.data?.locationData
                   ? this.state.dropOff_destination[index].data.locationData
                       .location_name
                   : ""
@@ -777,7 +773,9 @@ class DeliveryNode extends React.Component {
       });
       //..ask
       this.handlePricingForDeliveryResponse(
-        this.state.dropOff_destination.map((destination) => ({ base_fare: 50 }))
+        this.state.dropOff_destination.map((destination) => ({
+          base_fare: parseInt(process.env.REACT_APP_BASE_FARE, 10),
+        }))
       );
     }
   }
@@ -879,7 +877,7 @@ class DeliveryNode extends React.Component {
                 }${
                   location.suburb !== undefined &&
                   location.suburb !== false &&
-                  location.suburb !== null
+                  location.suburb !== "false"
                     ? `${location.suburb}, `
                     : ""
                 }${location.city}`}
@@ -1185,7 +1183,8 @@ class DeliveryNode extends React.Component {
         );
 
         const deliveryFee =
-          globalObject.state.fareETAEstimations.fareData.length * 50;
+          globalObject.state.fareETAEstimations.fareData.length *
+          parseInt(process.env.REACT_APP_BASE_FARE, 10);
 
         const bundleData = {
           user_identifier:
