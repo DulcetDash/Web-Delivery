@@ -123,7 +123,6 @@ class Settings extends React.PureComponent {
         subscription?.data?.status === "success" &&
         subscription?.data?.clientSecret
       ) {
-        console.log(subscription?.data);
         this.setState({
           clientSecret: subscription?.data?.clientSecret,
           isTopUpPaymentLoading: false,
