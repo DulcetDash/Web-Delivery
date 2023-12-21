@@ -309,7 +309,6 @@ class PresentPlans extends React.PureComponent {
                   });
                   //...
                   await this.createSubscriptionIntent(getCorrectPriceId("pro"));
-                  window.location.href = "/Purchase";
                 }}
               />
               <PlanNode

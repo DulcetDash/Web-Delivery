@@ -69,7 +69,6 @@ class Entry extends React.Component {
               <Route path="/plans" component={PresentPlans} />
               <Route path="/Delivery" component={Delivery} />
               <Route path="/MyDeliveries" component={MyDeliveries} />
-              <Route path="/Purchase" component={Purchase} />
               <Route path="/History" component={History} />
               <Route path="/Settings" component={Settings} />
             </Switch>

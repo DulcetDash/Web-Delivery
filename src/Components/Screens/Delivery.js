@@ -249,6 +249,7 @@ class Delivery extends React.Component {
                 navigator.geolocation.getCurrentPosition(
                   (position) => {
                     this.setState({ geolocationState: "granted" });
+                    window.location.reload();
                   },
                   (error) => {
                     // console.log(error);
