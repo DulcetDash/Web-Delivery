@@ -152,7 +152,7 @@ export const ellipseStringAt = (string, length) => {
 };
 
 export const getCorrectPriceId = (planName = "nothingness") => {
-  const isDevelopment = process.env.REACT_APP_ENVIRONMENT === "development";
+  const isDevelopment = process.env.REACT_APP_ENVIRONMENT === "Development";
 
   planName = String(planName).toLowerCase().trim();
 
