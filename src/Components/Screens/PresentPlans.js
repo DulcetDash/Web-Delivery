@@ -19,6 +19,7 @@ import { Button, Result } from "antd";
 import { PRIMARY, SECONDARY } from "../../Helper/Colors";
 import Promotion from "../../Helper/Plans/Promotion";
 import toast from "react-hot-toast";
+import { getCorrectPriceId } from "../../Helper/Utils";
 
 class PresentPlans extends React.PureComponent {
   constructor(props) {
@@ -201,9 +202,8 @@ class PresentPlans extends React.PureComponent {
                   });
                   //...
                   await this.createSubscriptionIntent(
-                    "price_1OO4OYJC0K1CI7I681txuXu0"
+                    getCorrectPriceId("starter")
                   );
-                  // window.location.href = "/Purchase";
                 }}
               />
               <PlanNode
@@ -256,7 +256,7 @@ class PresentPlans extends React.PureComponent {
                   });
                   //...
                   await this.createSubscriptionIntent(
-                    "price_1OO4POJC0K1CI7I6ASG1AGaq"
+                    getCorrectPriceId("intermediate")
                   );
                 }}
               />
@@ -308,9 +308,7 @@ class PresentPlans extends React.PureComponent {
                     },
                   });
                   //...
-                  await this.createSubscriptionIntent(
-                    "price_1OO4Q7JC0K1CI7I6SZqIAfTo"
-                  );
+                  await this.createSubscriptionIntent(getCorrectPriceId("pro"));
                   window.location.href = "/Purchase";
                 }}
               />

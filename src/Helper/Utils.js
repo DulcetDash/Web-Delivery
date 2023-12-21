@@ -150,3 +150,29 @@ export const ellipseStringAt = (string, length) => {
     return string;
   }
 };
+
+export const getCorrectPriceId = (planName = "nothingness") => {
+  const isDevelopment = process.env.REACT_APP_ENVIRONMENT === "development";
+
+  planName = String(planName).toLowerCase().trim();
+
+  switch (planName) {
+    case "starter":
+      return isDevelopment
+        ? "price_1OO4OYJC0K1CI7I681txuXu0"
+        : "price_1OPkubJC0K1CI7I6lk3Y3YTI";
+
+    case "intermediate":
+      return isDevelopment
+        ? "price_1OO4POJC0K1CI7I6ASG1AGaq"
+        : "price_1OPkvEJC0K1CI7I60wE0zwNp";
+
+    case "pro":
+      return isDevelopment
+        ? "price_1OO4Q7JC0K1CI7I6SZqIAfTo"
+        : "price_1OPkvOJC0K1CI7I6Guj3oyMM";
+
+    default:
+      return "nothingness";
+  }
+};
