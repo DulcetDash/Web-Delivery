@@ -382,7 +382,7 @@ class Home extends React.PureComponent {
               }
             );
 
-            console.log(response.data);
+            console.log(JSON.stringify(response.data));
             await this.opsOnCorpoDeliveryAccounts_io(response.data);
           } //Empty
           else {
@@ -395,7 +395,7 @@ class Home extends React.PureComponent {
       }
     } catch (error) {
       console.log(error);
-      this.setState({isLoading: false})
+      this.setState({ isLoading: false });
     }
   };
 

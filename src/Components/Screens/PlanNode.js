@@ -79,7 +79,9 @@ const PlanNode = ({
           <div className={classes.featuresTrueMother}>
             {featuresList.map((feature) => {
               return (
-                <div className={classes.featureNode}>
+                <div
+                  key={`${feature?.title}-${Date.now()}`}
+                  className={classes.featureNode}>
                   <AiFillCheckCircle className={classes.icoFeatureLeft} />
                   <div className={classes.featureName}>{feature.title}</div>
                 </div>
