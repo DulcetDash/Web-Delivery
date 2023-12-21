@@ -51,7 +51,7 @@ class PresentPlans extends React.PureComponent {
             Authorization: `Bearer ${userData?.company_fp}`,
             "Content-Type": "application/json",
           },
-          withCredentials: true,
+          // withCredentials: true,
         }
       );
 
